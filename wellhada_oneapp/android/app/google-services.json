@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "802325324626",
+    "project_id": "wellhadaoneapp",
+    "storage_bucket": "wellhadaoneapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:802325324626:android:2176055b04fe5ea1edd08b",
+        "android_client_info": {
+          "package_name": "com.example.wellhada_oneapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "802325324626-8kujbdt420i99b1n35a0sqb8s5vtjq46.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.wellhada_oneapp",
+            "certificate_hash": "3713442565717bd72f91d555f9631ef51ba113e0"
+          }
+        },
+        {
+          "client_id": "802325324626-p9nmml482mippe5uvq0r475l0p89s2bf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAwh2aj-6nZ6LtasIJNRaxkUCzHI0iwdM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "802325324626-p9nmml482mippe5uvq0r475l0p89s2bf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

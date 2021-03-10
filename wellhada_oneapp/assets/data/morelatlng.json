@@ -1,0 +1,59 @@
+[{
+    "sorting":"cafe",
+    "lat": "38.172249", 
+    "lng": "130.187372",
+    "id":"hndsolution",
+    "name":"hndsolution",
+    "img":"https://lh3.googleusercontent.com/tpBMFN5os8K-qXIHiAX5SZEmN5fCzIGrj9FdJtbZPUkC91ookSoY520NYn7fK5yqmh1L1m3F2SJA58v6Qps3JusdrxoFSwk6Ajv2K88", 
+    "phone":"01031469445",
+    "region":"seoul"
+},
+{
+    "sorting":"resta",
+    "lat": "42.172249", 
+    "lng": "120.187372",
+    "id":"sam",
+    "name":"naver",
+    "img":"https://lh3.googleusercontent.com/tpBMFN5os8K-qXIHiAX5SZEmN5fCzIGrj9FdJtbZPUkC91ookSoY520NYn7fK5yqmh1L1m3F2SJA58v6Qps3JusdrxoFSwk6Ajv2K88", 
+    "phone":"099",
+    "region":"seoul"
+},
+{
+    "sorting":"resta",
+    "lat": "47.172249", 
+    "lng": "120.187372",
+    "id":"sam",
+    "name":"naver",
+    "img":"https://lh3.googleusercontent.com/tpBMFN5os8K-qXIHiAX5SZEmN5fCzIGrj9FdJtbZPUkC91ookSoY520NYn7fK5yqmh1L1m3F2SJA58v6Qps3JusdrxoFSwk6Ajv2K88", 
+    "phone":"099",
+    "region":"seoul"
+},
+{
+    "sorting":"resta",
+    "lat": "42.172249", 
+    "lng": "99.187372",
+    "id":"sam",
+    "name":"naver",
+    "img":"https://lh3.googleusercontent.com/tpBMFN5os8K-qXIHiAX5SZEmN5fCzIGrj9FdJtbZPUkC91ookSoY520NYn7fK5yqmh1L1m3F2SJA58v6Qps3JusdrxoFSwk6Ajv2K88", 
+    "phone":"099",
+    "region":"seoul"
+},
+{
+    "id": "8D5D-4CD323560F59",
+    "lat": "40.7128",
+    "lng": "-74.0060",
+    "name":"hndsolution",
+    "phone":"01031469445",
+    "img":"https://lh3.googleusercontent.com/tpBMFN5os8K-qXIHiAX5SZEmN5fCzIGrj9FdJtbZPUkC91ookSoY520NYn7fK5yqmh1L1m3F2SJA58v6Qps3JusdrxoFSwk6Ajv2K88",
+    "region":"newyork"
+ },{
+    "id": "E3E0D2C5-CB82",
+    "lat": "41.7128",
+    "lng": "-75.0060",
+    "name":"nexon",
+    "phone":"01027611426",
+    "img":"",
+    "region":"newyork" 
+}
+
+]
