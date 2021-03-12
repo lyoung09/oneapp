@@ -9,6 +9,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:wellhada_oneapp/listitem/banner/mainTopBanner.dart'
+    as mainTopBanner;
+import 'package:wellhada_oneapp/listitem/shop/shopCategoryList.dart'
+    as shopCategoryList;
+import 'package:wellhada_oneapp/listitem/shop/shopInfoCategoryList.dart'
+    as shopInfoCategoryList;
+import 'package:wellhada_oneapp/listitem/shop/shopInfoKeywordList.dart'
+    as shopInfoKeywordList;
+import 'package:wellhada_oneapp/listitem/shop/shopInfoList.dart'
+    as shopInfoList;
 import 'package:wellhada_oneapp/model/map/map_model.dart';
 import 'package:wellhada_oneapp/model/map/my_location.dart';
 
@@ -49,7 +59,28 @@ class _GoogleMapUIState extends State<GoogleMapUI> {
   }
 
   Future<String> loadString() async {
+    shopList();
     return await rootBundle.loadString('assets/data/morelatlng.json');
+  }
+
+  Future<void> shopList() async {
+    final shopcategorylist = await shopCategoryList.getShopCategoryList();
+    final shopinfocategorylist =
+        await shopInfoCategoryList.getShopInfoCategoryList();
+    final shopinfokeywordlist =
+        await shopInfoKeywordList.getShopInfoKeywordList();
+    final shopinfolist = await shopInfoList.getShopInfoList();
+
+    final maintopbanner = await mainTopBanner.getMainTopBanner();
+
+    setState(() {
+      print(shopcategorylist.CNT);
+      print(shopinfocategorylist.CNT);
+      print(shopinfokeywordlist.CNT);
+      print(shopinfolist.CNT);
+      print(maintopbanner.CNT);
+    });
+    return shopcategorylist;
   }
 
   Widget _container() {
@@ -58,7 +89,13 @@ class _GoogleMapUIState extends State<GoogleMapUI> {
       child: Container(
         height: MediaQuery.of(context).size.height * 0.18,
         width: MediaQuery.of(context).size.width * 0.7,
-        decoration: BoxDecoration(border: Border.all(color: Colors.black)),
+        decoration: BoxDecoration(
+            border: Border.all(
+              color: Hexcolor('#ffffff'),
+            ),
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(15.0),
+                topRight: Radius.circular(15.0))),
         child: InkWell(
             onTap: () {
               setState(() {
@@ -70,25 +107,27 @@ class _GoogleMapUIState extends State<GoogleMapUI> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.6,
-                      width: MediaQuery.of(context).size.width * 0.5,
+                      height: MediaQuery.of(context).size.height * 0.8,
+                      width: MediaQuery.of(context).size.width * 0.35,
                       child: Image.asset(model.img)),
                 ),
                 Column(
                   children: [
                     Text(model.name,
+                        textAlign: TextAlign.left,
                         style: TextStyle(
                             fontFamily: 'Godo',
                             fontWeight: FontWeight.w900,
                             fontSize: 15.0,
                             color: Hexcolor('#333333'))),
-                    Text(model.phone,
-                        style: TextStyle(
-                            fontFamily: 'Godo',
-                            fontWeight: FontWeight.w900,
-                            fontSize: 10.0,
-                            color: Hexcolor('#333333'))),
+                    Row(
+                      children: <Widget>[
+                        Text("1"),
+                        Text("1"),
+                      ],
+                    ),
                     Text(model.distance.toStringAsFixed(2) + 'km',
+                        textAlign: TextAlign.left,
                         style: TextStyle(
                             fontFamily: 'Godo',
                             fontWeight: FontWeight.w900,

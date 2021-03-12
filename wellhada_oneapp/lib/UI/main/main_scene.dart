@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wellhada_oneapp/UI/mapUI/map.dart';
+import 'package:wellhada_oneapp/UI/mapUI/map1.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -28,7 +29,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ],
           ),
-          Expanded(child: GoogleMapUI()),
+          Expanded(child: GoogleMap1UI()),
         ],
       ),
     );
