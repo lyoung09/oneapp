@@ -35,7 +35,7 @@ class _GoogleMapUIState extends State<GoogleMapUI> {
   @override
   void initState() {
     // TODO: implement initState
-
+    print("pp");
     super.initState();
     //_location();
     _future = loadString();
