@@ -26,14 +26,9 @@ class _MainScreenState extends State<MainScreen> {
                 width: size.width * 0.5,
                 child: Text("1"),
               ),
-              Container(
-                height: MediaQuery.of(context).size.height * 0.1,
-                width: MediaQuery.of(context).size.width * 0.5,
-                child: Text("2"),
-              ),
             ],
           ),
-          GoogleMapUI()
+          Expanded(child: GoogleMapUI()),
         ],
       ),
     );

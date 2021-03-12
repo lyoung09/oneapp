@@ -15,6 +15,7 @@ import 'package:wellhada_oneapp/UI/main/main_scene.dart';
 
 import 'dart:io';
 import 'package:uuid/uuid.dart';
+import 'package:wellhada_oneapp/model/map/my_location.dart';
 import 'UI/login/email_login/email_complete.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -74,10 +75,11 @@ class _MyHomePageState extends State<MyHomePage> {
   SharedPreferences prefs;
   var userDevice;
   var appStatus;
-
+  MyMapModel myMapModel = new MyMapModel();
   @override
   void initState() {
     super.initState();
+    getPositon();
     startTime();
     // if (Platform.isIOS) {
     //   iosSubscription =
@@ -135,14 +137,23 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-  startTime() async {
-    return new Timer(Duration(milliseconds: 200), goMain);
+  Future<Position> getPositon() async {
+    Position geoPos;
+    try {
+      geoPos = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.bestForNavigation);
+    } catch (e, stackTrace) {
+      geoPos = await Geolocator.getLastKnownPosition();
+      print(e.toString());
+    }
+    print(geoPos.latitude);
+    print(geoPos.longitude);
+
+    return geoPos;
   }
 
-  Future<Position> getLocation() async {
-    Position position =
-        await getCurrentPosition(desiredAccuracy: LocationAccuracy.low);
-    return position;
+  startTime() async {
+    return new Timer(Duration(milliseconds: 200), goMain);
   }
 
   void goMain() {

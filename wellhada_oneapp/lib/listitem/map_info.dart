@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 
 class more {
-  String sort;
-  String lat;
-  String lng;
+  int sorting;
+  double lat;
+  double lng;
   String id;
   String name;
   String img;
@@ -13,7 +13,7 @@ class more {
   String region;
 
   more(
-      {this.sort,
+      {this.sorting,
       this.lat,
       this.lng,
       this.id,
@@ -23,7 +23,7 @@ class more {
       this.region});
 
   more.fromJson(Map<String, dynamic> json) {
-    sort = json['sort'];
+    sorting = json['sorting'];
     lat = json['lat'];
     lng = json['lng'];
     id = json['id'];
@@ -35,7 +35,7 @@ class more {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['sort'] = this.sort;
+    data['sorting'] = this.sorting;
     data['lat'] = this.lat;
     data['lng'] = this.lng;
     data['id'] = this.id;

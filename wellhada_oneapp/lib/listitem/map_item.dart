@@ -131,6 +131,7 @@ Future<Locations> getGoogleOffices() async {
   }
 }
 
+setMyLocation(double a, double b) async {}
 Future<Locations> getGoogleEx(String path) async {
   return Locations.fromJson(jsonDecode(await rootBundle.loadString(path)));
 }

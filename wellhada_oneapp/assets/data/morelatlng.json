@@ -1,59 +1,61 @@
 [{
-    "sorting":"cafe",
-    "lat": "38.172249", 
-    "lng": "130.187372",
+    "sorting":1,
+    "lat": 37.48345439475643, 
+    "lng":  126.89367757219927,
     "id":"hndsolution",
-    "name":"hndsolution",
-    "img":"https://lh3.googleusercontent.com/tpBMFN5os8K-qXIHiAX5SZEmN5fCzIGrj9FdJtbZPUkC91ookSoY520NYn7fK5yqmh1L1m3F2SJA58v6Qps3JusdrxoFSwk6Ajv2K88", 
+    "name":"coffeebean",
+    "img":"assets/img/cafe.png", 
     "phone":"01031469445",
     "region":"seoul"
 },
 {
-    "sorting":"resta",
-    "lat": "42.172249", 
-    "lng": "120.187372",
+    "sorting":1,
+    "lat": 37.48376088529319,  
+    "lng": 126.89178929721764
+    ,
     "id":"sam",
     "name":"naver",
-    "img":"https://lh3.googleusercontent.com/tpBMFN5os8K-qXIHiAX5SZEmN5fCzIGrj9FdJtbZPUkC91ookSoY520NYn7fK5yqmh1L1m3F2SJA58v6Qps3JusdrxoFSwk6Ajv2K88", 
+    "img":"assets/img/cafe.png", 
+    "phone":"099",
+    "region":"maylin"
+},
+{
+    "sorting":2,
+    "lat": 37.483451072973544, 
+    "lng": 126.87640291149755,
+    "id":"sams",
+    "name":"japanese",
+    "img":"assets/img/restaurant.png", 
     "phone":"099",
     "region":"seoul"
 },
 {
-    "sorting":"resta",
-    "lat": "47.172249", 
-    "lng": "120.187372",
-    "id":"sam",
-    "name":"naver",
-    "img":"https://lh3.googleusercontent.com/tpBMFN5os8K-qXIHiAX5SZEmN5fCzIGrj9FdJtbZPUkC91ookSoY520NYn7fK5yqmh1L1m3F2SJA58v6Qps3JusdrxoFSwk6Ajv2K88", 
+    "sorting":2,
+    "lat": 37.4839822387878, 
+    "lng": 126.89423547162568,
+    "id":"jae",
+    "name":"chineese",
+    "img":"assets/img/restaurant.png", 
     "phone":"099",
     "region":"seoul"
 },
 {
-    "sorting":"resta",
-    "lat": "42.172249", 
-    "lng": "99.187372",
-    "id":"sam",
-    "name":"naver",
-    "img":"https://lh3.googleusercontent.com/tpBMFN5os8K-qXIHiAX5SZEmN5fCzIGrj9FdJtbZPUkC91ookSoY520NYn7fK5yqmh1L1m3F2SJA58v6Qps3JusdrxoFSwk6Ajv2K88", 
-    "phone":"099",
-    "region":"seoul"
-},
-{
+    "sorting":1,
     "id": "8D5D-4CD323560F59",
-    "lat": "40.7128",
-    "lng": "-74.0060",
-    "name":"hndsolution",
+    "lat": 37.8835514,
+    "lng": 124.8931064,
+    "name":"starbucks",
     "phone":"01031469445",
-    "img":"https://lh3.googleusercontent.com/tpBMFN5os8K-qXIHiAX5SZEmN5fCzIGrj9FdJtbZPUkC91ookSoY520NYn7fK5yqmh1L1m3F2SJA58v6Qps3JusdrxoFSwk6Ajv2K88",
+    "img":"assets/img/cafe.png",
     "region":"newyork"
  },{
+    "sorting":3,
     "id": "E3E0D2C5-CB82",
-    "lat": "41.7128",
-    "lng": "-75.0060",
+    "lat": 37.48168353592619,
+    "lng": 126.89350591083732,
     "name":"nexon",
     "phone":"01027611426",
     "img":"",
     "region":"newyork" 
-}
-
+ }
 ]
