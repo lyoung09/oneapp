@@ -20,7 +20,6 @@ class GoogleMapUI extends StatefulWidget {
 class _GoogleMapUIState extends State<GoogleMapUI> {
   MapModel model = new MapModel();
   Future _future;
-
   List<Marker> allMarkers = [];
   List<Marker> cafeMarker = [];
   List<Marker> restaurantMarker, otherMarker = [];
@@ -32,10 +31,12 @@ class _GoogleMapUIState extends State<GoogleMapUI> {
   MyMapModel myMapModel = new MyMapModel();
   var currentlat = 37.4835727;
   var currentlng = 126.8931279;
+
   @override
   void initState() {
     // TODO: implement initState
 
+    print("hi");
     super.initState();
     //_location();
     _future = loadString();
