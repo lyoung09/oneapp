@@ -36,7 +36,6 @@ class _GoogleMapUIState extends State<GoogleMapUI> {
   void initState() {
     // TODO: implement initState
 
-    print("hi");
     super.initState();
     //_location();
     _future = loadString();
