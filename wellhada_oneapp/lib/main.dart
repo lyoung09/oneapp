@@ -79,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    getPositon();
+
     startTime();
     // if (Platform.isIOS) {
     //   iosSubscription =
@@ -137,20 +137,25 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-  Future<Position> getPositon() async {
-    Position geoPos;
-    try {
-      geoPos = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.bestForNavigation);
-    } catch (e, stackTrace) {
-      geoPos = await Geolocator.getLastKnownPosition();
-      print(e.toString());
-    }
-    print(geoPos.latitude);
-    print(geoPos.longitude);
+  // Future<Position> getPositon() async {
+  //   Position geoPos;
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   try {
+  //     Position positions = await Geolocator.getCurrentPosition(
+  //         desiredAccuracy: LocationAccuracy.high);
 
-    return geoPos;
-  }
+  //     geoPos = positions;
+
+  //     prefs.setDouble("lat", geoPos.latitude);
+  //     prefs.setDouble("lng", geoPos.longitude);
+  //   } catch (e) {
+  //     geoPos = await Geolocator.getLastKnownPosition();
+
+  //     print(e.toString());
+  //   }
+
+  //   return geoPos;
+  // }
 
   startTime() async {
     return new Timer(Duration(milliseconds: 200), goMain);

@@ -9,16 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:wellhada_oneapp/listitem/banner/mainTopBanner.dart'
-    as mainTopBanner;
-import 'package:wellhada_oneapp/listitem/shop/shopCategoryList.dart'
-    as shopCategoryList;
-import 'package:wellhada_oneapp/listitem/shop/shopInfoCategoryList.dart'
-    as shopInfoCategoryList;
-import 'package:wellhada_oneapp/listitem/shop/shopInfoKeywordList.dart'
-    as shopInfoKeywordList;
-import 'package:wellhada_oneapp/listitem/shop/shopInfoList.dart'
-    as shopInfoList;
+
 import 'package:wellhada_oneapp/model/map/map_model.dart';
 import 'package:wellhada_oneapp/model/map/my_location.dart';
 
@@ -46,10 +37,9 @@ class _GoogleMapUIState extends State<GoogleMapUI> {
   void initState() {
     // TODO: implement initState
 
-    print("hi");
     super.initState();
     //_location();
-    _future = loadString();
+    //_future = loadString();
     setCustomMarker();
   }
 
@@ -58,31 +48,7 @@ class _GoogleMapUIState extends State<GoogleMapUI> {
     //     ImageConfiguration(size: Size(4.0, 4.0)), 'assets/data/img/cafe.PNG');
   }
 
-  Future<String> loadString() async {
-    shopList();
-    return await rootBundle.loadString('assets/data/morelatlng.json');
-  }
-
-  Future<void> shopList() async {
-    final shopcategorylist = await shopCategoryList.getShopCategoryList();
-    final shopinfocategorylist =
-        await shopInfoCategoryList.getShopInfoCategoryList();
-    final shopinfokeywordlist =
-        await shopInfoKeywordList.getShopInfoKeywordList();
-    final shopinfolist = await shopInfoList.getShopInfoList();
-
-    final maintopbanner = await mainTopBanner.getMainTopBanner();
-
-    setState(() {
-      print(shopcategorylist.CNT);
-      print(shopinfocategorylist.CNT);
-      print(shopinfokeywordlist.CNT);
-      print(shopinfolist.CNT);
-      print(maintopbanner.CNT);
-    });
-    return shopcategorylist;
-  }
-
+  //부가정보
   Widget _container() {
     //print(model.id);
     return Material(

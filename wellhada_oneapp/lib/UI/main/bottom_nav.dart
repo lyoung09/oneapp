@@ -27,25 +27,6 @@ class _BottomNavState extends State<BottomNav> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Center(
-          child: Padding(
-            padding: const EdgeInsets.only(right: 50.0),
-            child: Text(
-              "#스토리",
-              style: TextStyle(
-                  fontFamily: 'Godo',
-                  fontWeight: FontWeight.w900,
-                  fontSize: 20.0,
-                  color: Hexcolor(appFontColor)),
-            ),
-          ),
-        ),
-        elevation: 0.0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(color: Hexcolor(menuColor)),
-        ),
-      ),
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,

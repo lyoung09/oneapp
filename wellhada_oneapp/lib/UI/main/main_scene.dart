@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wellhada_oneapp/UI/banner/top_banner.dart';
 import 'package:wellhada_oneapp/UI/mapUI/map.dart';
 import 'package:wellhada_oneapp/UI/mapUI/map1.dart';
 
@@ -20,16 +21,18 @@ class _MainScreenState extends State<MainScreen> {
     return Center(
       child: Column(
         children: <Widget>[
-          Row(
-            children: <Widget>[
-              Container(
-                height: size.height * 0.1,
-                width: size.width * 0.5,
-                child: Text("1"),
-              ),
-            ],
+          Padding(
+            padding: EdgeInsets.only(top: 20.0, bottom: 10.0),
           ),
-          Expanded(child: GoogleMap1UI()),
+          Container(
+            height: size.height * 0.15,
+            width: size.width,
+            child: TopBanner(),
+          ),
+          Padding(
+            padding: EdgeInsets.only(bottom: 10.0),
+          ),
+          Expanded(child: Google1MapUI()),
         ],
       ),
     );
