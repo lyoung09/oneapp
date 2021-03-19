@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:wellhada_oneapp/UI/login/login.dart';
+import 'package:wellhada_oneapp/UI/main/main_screen.dart';
+import 'package:wellhada_oneapp/UI/main/map_scene.dart';
 import 'package:wellhada_oneapp/model/menu/drawer_detail/qr_34.dart';
 
-import '../main_scene.dart';
+import '../map_scene.dart';
 
 class PriavateInfo extends StatefulWidget {
   @override
@@ -26,6 +28,11 @@ class _PriavateInfoState extends State<PriavateInfo> {
   moveHome() {
     Navigator.of(context).pushReplacement(
         (PageRouteBuilder(pageBuilder: (_, __, ___) => MainScreen())));
+  }
+
+  moveMap() {
+    Navigator.of(context).pushReplacement(
+        (PageRouteBuilder(pageBuilder: (_, __, ___) => MapScreen())));
   }
 
   moveQr() {

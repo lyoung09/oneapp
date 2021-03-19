@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:geolocator/geolocator.dart';
 
 class more {
   int sorting;

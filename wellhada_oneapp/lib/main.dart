@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:async/async.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:kakao_flutter_sdk/all.dart';
@@ -11,10 +12,11 @@ import 'package:overlay_support/overlay_support.dart';
 import 'package:wellhada_oneapp/UI/login/login.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_detail/private_info.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_nav.dart';
-import 'package:wellhada_oneapp/UI/main/main_scene.dart';
 
 import 'dart:io';
 import 'package:uuid/uuid.dart';
+import 'package:wellhada_oneapp/UI/main/main_screen.dart';
+import 'package:wellhada_oneapp/UI/main/map_scene.dart';
 import 'package:wellhada_oneapp/model/map/my_location.dart';
 import 'UI/login/email_login/email_complete.dart';
 import 'package:geolocator/geolocator.dart';
@@ -25,6 +27,7 @@ import 'notification/custom_notification.dart';
 
 void main() {
   KakaoContext.clientId = "be0c4a7d667d7766083ba8dcdf6048df";
+
   runApp(MyApp());
 }
 
@@ -45,6 +48,7 @@ class MyApp extends StatelessWidget {
         home: MyHomePage(title: 'wellhada Client'),
         routes: {
           '/main': (context) => MainScreen(),
+          '/map': (context) => MapScreen(),
           '/Email_complete': (context) => Email_complete(),
           '/certification': (context) => Certification(),
           '/certification-result': (context) => CertificationResult(),
@@ -137,25 +141,20 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-  // Future<Position> getPositon() async {
-  //   Position geoPos;
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   try {
-  //     Position positions = await Geolocator.getCurrentPosition(
-  //         desiredAccuracy: LocationAccuracy.high);
+  Future<Position> getPositon() async {
+    Position geoPos;
+    try {
+      geoPos = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.bestForNavigation);
+    } catch (e, stackTrace) {
+      geoPos = await Geolocator.getLastKnownPosition();
+      print(e.toString());
+    }
+    print(geoPos.latitude);
+    print(geoPos.longitude);
 
-  //     geoPos = positions;
-
-  //     prefs.setDouble("lat", geoPos.latitude);
-  //     prefs.setDouble("lng", geoPos.longitude);
-  //   } catch (e) {
-  //     geoPos = await Geolocator.getLastKnownPosition();
-
-  //     print(e.toString());
-  //   }
-
-  //   return geoPos;
-  // }
+    return geoPos;
+  }
 
   startTime() async {
     return new Timer(Duration(milliseconds: 200), goMain);

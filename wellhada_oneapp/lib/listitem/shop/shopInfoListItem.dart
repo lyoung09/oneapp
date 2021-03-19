@@ -10,6 +10,7 @@ class ShopInfo {
   ShopInfoList inFolist;
   final List<ShopInfoList> list;
 
+
   ShopInfo({this.status, this.cnt, this.list, this.inFolist});
 
   factory ShopInfo.fromJson(Map<String, dynamic> json) => ShopInfo(
@@ -126,23 +127,46 @@ Map<String, dynamic> _$ShopInfoListToJsonMap(ShopInfoList instance) =>
 class ShopInfokeyword {
   String status;
   int cnt;
-  ShopInfokeywordList list;
+  ShopInfokeywordList infolist;
+final List<ShopInfokeywordList> list;
 
-  ShopInfokeyword({this.status, this.cnt, this.list});
+  ShopInfokeyword({this.status, this.cnt, this.list,this.infolist});
 
   factory ShopInfokeyword.fromJson(Map<String, dynamic> json) =>
       ShopInfokeyword(
         status: json["STATUS"],
-        list: ShopInfokeywordList.fromJson(json["LIST"]),
+        infolist: ShopInfokeywordList.fromJson(json["LIST"]),
         cnt: json["CNT"],
       );
 
   Map<String, dynamic> toJson() => {
         "status": status,
         "cnt": cnt,
-        "list": list.toJson(),
+        "list": infolist.toJson(),
       };
+
+        factory ShopInfokeyword.fromJsonMap(Map<String, dynamic> json) =>
+      _$ShopInfokeywordFromJsonMap(json);
+
+  Map<String, dynamic> toJsonMap() => _$ShopInfokeywordToJsonMap(this);
 }
+
+ShopInfokeyword _$ShopInfokeywordFromJsonMap(Map<String, dynamic> json) {
+  return ShopInfokeyword(
+    list: (json['LIST'] as List)
+        ?.map((e) => e == null
+            ? null
+            : ShopInfokeywordList.fromJsonMap(e as Map<String, dynamic>))
+        ?.toList(),
+//      meta: (json['meta'] as List)
+//          ?.map((e) =>
+//      e == null ? null : Meta.fromJson(e as Map<String, dynamic>))
+//          ?.toList()
+  );
+}
+
+Map<String, dynamic> _$ShopInfokeywordToJsonMap(ShopInfokeyword instance) =>
+    <String, dynamic>{'documents': instance.list};
 
 class ShopInfokeywordList {
   String placeUrl;
@@ -207,39 +231,96 @@ class ShopInfokeywordList {
     data['wellhada_shop'] = this.wellhadaShop;
     return data;
   }
+
+  factory ShopInfokeywordList.fromJsonMap(Map<String, dynamic> json) =>
+      _$ShopInfokeywordListFromJsonMap(json);
+  Map<String, dynamic> toJsonMap() => _$ShopInfokeywordListToJsonMap(this);
+}
+ShopInfokeywordList _$ShopInfokeywordListFromJsonMap(Map<String, dynamic> json) {
+  return ShopInfokeywordList(
+    placeUrl:json['place_url'] as String,
+    wellhadaShop:json['wellhada_shop'] as String,
+    roadAddressName:json['road_address_name'] as String,
+    categoryName:json['category_name'] as String,
+    addressName:json['address_name'] as String,
+    placeName: json['place_name'] as String,
+    categoryGroupName: json['category_group_name'] as String,
+    distance: json['distance'] as String,
+    phone: json['phone'] as String,
+    categoryGroupCode: json['category_group_code'] as String,
+    x: json['x'] as String,
+    y: json['y'] as String,
+    id: json['id'] as String,
+  );
 }
 
-List<ShopInfoCategory> ShopInfoCategoryFromJson(String str) =>
-    List<ShopInfoCategory>.from(
-        json.decode(str).map((x) => ShopInfoCategory.fromJson(x)));
+Map<String, dynamic> _$ShopInfokeywordListToJsonMap(ShopInfokeywordList instance) =>
+    <String, dynamic>{
+'place_url':instance.placeUrl,
+'road_address_name':instance.roadAddressName,
+'category_name':instance.categoryGroupName,
+'address_name':instance.addressName,
+      'place_name': instance.placeName,
+      'wellhada_shop': instance.wellhadaShop,
+      'category_group_name': instance.categoryGroupName,
+      'distance': instance.distance,
+      'phone': instance.phone,
+      'category_group_code': instance.categoryGroupCode,
+      'x': instance.x,
+      'y': instance.y,
+      'id': instance.id,
+    };
 
-String ShopInfoCategoryToJson(List<ShopInfoCategory> data) =>
-    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+
+
 
 class ShopInfoCategory {
   String status;
-  ShopInfoCategoryList list;
+  ShopInfoCategoryList infolist;
   String cnt;
+  final List<ShopInfoCategoryList> list;
 
   ShopInfoCategory({
     this.status,
     this.list,
     this.cnt,
+    this.infolist
   });
 
   factory ShopInfoCategory.fromJson(Map<String, dynamic> json) =>
       ShopInfoCategory(
         status: json["STATUS"],
-        list: ShopInfoCategoryList.fromJson(json["LIST"]),
+        infolist: ShopInfoCategoryList.fromJson(json["LIST"]),
         cnt: json["CNT"],
       );
 
   Map<String, dynamic> toJson() => {
         "status": status,
         "cnt": cnt,
-        "list": list.toJson(),
+        "list": infolist.toJson(),
       };
+ factory ShopInfoCategory.fromJsonMap(Map<String, dynamic> json) =>
+      _$ShopInfoCategoryFromJsonMap(json);
+
+  Map<String, dynamic> toJsonMap() => _$ShopInfoCategoryToJsonMap(this);
+      
 }
+ShopInfoCategory _$ShopInfoCategoryFromJsonMap(Map<String, dynamic> json) {
+  return ShopInfoCategory(
+    list: (json['LIST'] as List)
+        ?.map((e) => e == null
+            ? null
+            : ShopInfoCategoryList.fromJsonMap(e as Map<String, dynamic>))
+        ?.toList(),
+//      meta: (json['meta'] as List)
+//          ?.map((e) =>
+//      e == null ? null : Meta.fromJson(e as Map<String, dynamic>))
+//          ?.toList()
+  );
+}
+
+Map<String, dynamic> _$ShopInfoCategoryToJsonMap(ShopInfoCategory instance) =>
+    <String, dynamic>{'documents': instance.list};
 
 class ShopInfoCategoryList {
   String placeUrl;
@@ -304,33 +385,88 @@ class ShopInfoCategoryList {
         "id": id,
         "wellhada_shop": wellhadaShop,
       };
+
+      factory ShopInfoCategoryList.fromJsonMap(Map<String, dynamic> json) =>
+      _$ShopInfoCategoryListFromJsonMap(json);
+  Map<String, dynamic> toJsonMap() => _$ShopInfoCategoryListToJsonMap(this);
+}
+ShopInfoCategoryList _$ShopInfoCategoryListFromJsonMap(Map<String, dynamic> json) {
+  return ShopInfoCategoryList(
+    placeName: json['place_name'] as String,
+    wellhadaShop: json['wellhada_shop'] as String,
+    categoryGroupName: json['category_group_name'] as String,
+    distance: json['distance'] as String,
+    phone: json['phone'] as String,
+    categoryGroupCode: json['category_group_code'] as String,
+    x: json['x'] as String,
+    y: json['y'] as String,
+    id: json['id'] as String,
+    placeUrl:json['place_url'] as String,
+    addressName:json['address_name'] as String,
+    roadAddressName:json['road_address_name'] as String,
+    categoryName:json['category_name'] as String,
+  );
 }
 
-List<ShopCategory> ShopCategoryFromJson(String str) => List<ShopCategory>.from(
-    json.decode(str).map((x) => ShopCategory.fromJson(x)));
+Map<String, dynamic> _$ShopInfoCategoryListToJsonMap(ShopInfoCategoryList instance) =>
+    <String, dynamic>{
+      'place_name': instance.placeName,
+      'wellhada_shop': instance.wellhadaShop,
+      'category_group_name': instance.categoryGroupName,
+      'distance': instance.distance,
+      'phone': instance.phone,
+      'category_group_code': instance.categoryGroupCode,
+      'x': instance.x,
+      'y': instance.y,
+      'id': instance.id,
+'place_url':instance.placeUrl,
+'address_name':instance.addressName,
+'road_address_name':instance.roadAddressName,
+'category_name':instance.categoryName
+       
+    };
 
-String ShopCategoryToJson(List<ShopCategory> data) =>
-    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class ShopCategory {
   String status;
   int cnt;
-  ShopCategoryList list;
-
-  ShopCategory({this.status, this.cnt, this.list});
+  ShopCategoryList infolist;
+  final List<ShopCategoryList> list;
+  ShopCategory({this.status, this.cnt, this.list,this.infolist});
 
   factory ShopCategory.fromJson(Map<String, dynamic> json) => ShopCategory(
         status: json["STATUS"],
-        list: ShopCategoryList.fromJson(json["LIST"]),
+        infolist: ShopCategoryList.fromJson(json["LIST"]),
         cnt: json["CNT"],
       );
 
   Map<String, dynamic> toJson() => {
         "status": status,
         "cnt": cnt,
-        "list": list.toJson(),
+        "list": infolist.toJson(),
       };
+      factory ShopCategory.fromJsonMap(Map<String, dynamic> json) =>
+      _$ShopCategoryFromJsonMap(json);
+
+  Map<String, dynamic> toJsonMap() => _$SShopCategoryToJsonMap(this);
 }
+
+ShopCategory _$ShopCategoryFromJsonMap(Map<String, dynamic> json) {
+  return ShopCategory(
+    list: (json['LIST'] as List)
+        ?.map((e) => e == null
+            ? null
+            : ShopCategoryList.fromJsonMap(e as Map<String, dynamic>))
+        ?.toList(),
+//      meta: (json['meta'] as List)
+//          ?.map((e) =>
+//      e == null ? null : Meta.fromJson(e as Map<String, dynamic>))
+//          ?.toList()
+  );
+}
+
+Map<String, dynamic> _$SShopCategoryToJsonMap(ShopCategory instance) =>
+    <String, dynamic>{'documents': instance.list};
 
 class ShopCategoryList {
   String categorycdnm;
@@ -351,8 +487,27 @@ class ShopCategoryList {
         "CATEGORY_CD": categorycd,
         "FILE_URL": fileurl,
       };
+
+       factory ShopCategoryList.fromJsonMap(Map<String, dynamic> json) =>
+      _$ShopCategoryListFromJsonMap(json);
+  Map<String, dynamic> toJsonMap() => _$ShopCategoryListToJsonMap(this);
+}
+ShopCategoryList _$ShopCategoryListFromJsonMap(Map<String, dynamic> json) {
+  return ShopCategoryList(
+    categorycdnm: json['CATEGORY_CDNM'] as String,
+    categorycd: json['CATEGORY_CD'] as String,
+    fileurl: json['FILE_URL'] as String,
+ 
+  );
 }
 
+Map<String, dynamic> _$ShopCategoryListToJsonMap(ShopCategoryList instance) =>
+    <String, dynamic>{
+      'CATEGORY_CDNM': instance.categorycdnm,
+      'CATEGORY_CD': instance.categorycd,
+      'FILE_URL': instance.fileurl,
+    
+    };
 Future<Map<String, dynamic>> getShopCategoryList() async {
   final response = await http
       .get('https://run.mocky.io/v3/1024fe77-a133-4303-a5be-6f6cb30be711');
@@ -384,7 +539,10 @@ Future<Map<String, dynamic>> getShopDetailCategoryList(String category) async {
 
 Future<Map<String, dynamic>> getShopInfoCategoryList() async {
   final response = await http
-      .get('https://run.mocky.io/v3/c5cb3e9e-b58d-4d1d-95b3-daa77d5c0617');
+      //    .get('https://run.mocky.io/v3/c5cb3e9e-b58d-4d1d-95b3-daa77d5c0617');
+      //.get('https://run.mocky.io/v3/cdd16867-7a32-4335-a02e-b0f0fba54a3e');
+      .get('https://run.mocky.io/v3/26deeae0-46b1-49de-8ca4-c3ef28bbf906');
+
   //.get('192.168.0.35:8080/getShopInfoCategoryList?lat=126.89300592139&lon=37.4835140850512&radius=1000&appId=com.hndsolution.wellhada&category_code=MT1');
   if (200 == response.statusCode) {
     var datauser = json.decode(response.body);
@@ -397,6 +555,7 @@ Future<Map<String, dynamic>> getShopInfoCategoryList() async {
 Future<Map<String, dynamic>> getShopInfokeywordList() async {
   final response = await http
       .get('https://run.mocky.io/v3/6b662698-5c0b-4db8-8784-9d92813d34f5');
+
   //.get('192.168.0.35:8080/getShopInfokeywordList?lat=126.89300592139&lon=37.4835140850512&radius=1000&appId=com.hndsolution.wellhada&category_code=MT1&query=이마트');
   if (200 == response.statusCode) {
     var datauser = json.decode(response.body);

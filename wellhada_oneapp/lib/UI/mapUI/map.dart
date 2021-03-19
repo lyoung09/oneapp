@@ -37,9 +37,10 @@ class _GoogleMapUIState extends State<GoogleMapUI> {
   void initState() {
     // TODO: implement initState
 
+    print("hi");
     super.initState();
     //_location();
-    //_future = loadString();
+
     setCustomMarker();
   }
 
@@ -48,7 +49,6 @@ class _GoogleMapUIState extends State<GoogleMapUI> {
     //     ImageConfiguration(size: Size(4.0, 4.0)), 'assets/data/img/cafe.PNG');
   }
 
-  //부가정보
   Widget _container() {
     //print(model.id);
     return Material(

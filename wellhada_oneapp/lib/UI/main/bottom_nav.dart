@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_detail/private_info.dart';
-import 'package:wellhada_oneapp/UI/main/main_scene.dart';
+
+import 'package:wellhada_oneapp/UI/main/map_scene.dart';
 import 'package:wellhada_oneapp/UI/mapUI/map.dart';
 import 'package:wellhada_oneapp/model/menu/drawer_detail/qr_34.dart';
+
+import 'main_screen.dart';
 
 class BottomNav extends StatefulWidget {
   @override
@@ -20,6 +23,7 @@ class _BottomNavState extends State<BottomNav> {
 
   List<Widget> _widgetOptions = <Widget>[
     MainScreen(),
+    MapScreen(),
     QR_34(1),
     PriavateInfo(),
   ];
@@ -28,21 +32,32 @@ class _BottomNavState extends State<BottomNav> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _widgetOptions.elementAt(_selectedIndex),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "home"),
-          BottomNavigationBarItem(icon: Icon(Icons.ac_unit), label: "dk"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.star_purple500_sharp), label: "plus"),
-        ],
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
+      bottomNavigationBar: Theme(
+        data: Theme.of(context).copyWith(
+            // sets the background color of the `BottomNavigationBar`
+            canvasColor: Colors.green,
+            // sets the active color of the `BottomNavigationBar` if `Brightness` is light
+            primaryColor: Colors.red,
+            textTheme: Theme.of(context)
+                .textTheme
+                .copyWith(caption: new TextStyle(color: Colors.yellow))),
+        child: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
+          items: [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: "home"),
+            BottomNavigationBarItem(icon: Icon(Icons.map), label: "aa"),
+            BottomNavigationBarItem(icon: Icon(Icons.ac_unit), label: "dk"),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.star_purple500_sharp), label: "plus"),
+          ],
+          onTap: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+        ),
       ),
     );
   }

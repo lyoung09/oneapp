@@ -1,16 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:wellhada_oneapp/listitem/banner/topBannerItem.dart'
-    as topbanner;
-import 'package:wellhada_oneapp/listitem/banner/topBannerItem.dart';
+import 'package:wellhada_oneapp/listitem/banner/TopBannerItem.dart'
+    as TopBanner;
+import 'package:wellhada_oneapp/listitem/banner/TopBannerItem.dart';
 
-class TopBanner extends StatefulWidget {
+class MainBanner extends StatefulWidget {
   @override
-  _TopBannerState createState() => _TopBannerState();
+  _MainBannerState createState() => _MainBannerState();
 }
 
-class _TopBannerState extends State<TopBanner> {
+class _MainBannerState extends State<MainBanner> {
   List banner;
   int _currentPage = 0;
   PageController _pageController = PageController(
@@ -36,7 +36,7 @@ class _TopBannerState extends State<TopBanner> {
   }
 
   Future<void> getShowAppBar() async {
-    final bannerList = await topbanner.getAppbarList();
+    final bannerList = await TopBanner.getAppbarList();
     setState(() {
       banner = bannerList.list;
       print(banner);
