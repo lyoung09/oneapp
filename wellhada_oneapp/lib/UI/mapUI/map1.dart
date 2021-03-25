@@ -1,23 +1,19 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'dart:ui' as ui;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'dart:io' as Io;
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:wellhada_oneapp/listitem/shop/shopInfoListItem.dart'
     as shopInfoListItem;
 
 import 'package:wellhada_oneapp/model/map/map1_model.dart';
-import 'package:wellhada_oneapp/model/map/map_model.dart';
 
 class Google1MapUI extends StatefulWidget {
   @override
@@ -27,42 +23,74 @@ class Google1MapUI extends StatefulWidget {
 class _Google1MapUIState extends State<Google1MapUI> {
   Map1_model model = new Map1_model();
   List<MarkerId> allMarkerId = [];
-  List<Marker> allMarkers, martMarkers = [];
-  List<Marker> kindergarden, academy, convenience = [];
-  List<Marker> parking, gasStation = [];
+
+  //default Marker
+  List<Marker> allMarkers,
+      martMarkers,
+      kindergarden,
+      academy,
+      convenience,
+      parking,
+      gasStation = [];
   List<Marker> lodgement,
       restaurant,
       cafe,
       wellhada,
       martWellHadaMarkers,
       all = [];
-  List<Marker> kindergardenWellHada, academyWellHada, convenienceWellHada = [];
-  List<Marker> parkingWellHada, gasStationWellHada = [];
-  List<Marker> lodgementWellHada, restaurantWellHada, cafeWellHada = [];
+  //wellhada Marker
+  List<Marker> kindergardenWellHada,
+      academyWellHada,
+      convenienceWellHada,
+      parkingWellHada = [];
+  List<Marker> gasStationWellHada,
+      lodgementWellHada,
+      restaurantWellHada,
+      cafeWellHada = [];
+  List<Uint8List> assa = [];
+
+  Uint8List everyIcon, wellhadaIcon;
+  Map<String, Uint8List> iconSet = new Map();
+  Map<String, Uint8List> wellhadaIconSet = new Map();
+  var iss;
+  // button click
   String category;
+
+  // contanier boolean
   bool itemSelected = false;
+
   Future _future;
   Future _categoryFuture;
+
   var lat, lng;
   GoogleMapController _controller;
   Completer<GoogleMapController> _controllerGoogleMap = Completer();
   Position postion;
   var geoLocator = Geolocator();
-  List shops;
+  List shops, entireList;
   CameraPosition _cameraPosition;
   bool wellHadaCheck, check;
-  var icons;
-  Uint8List unitmarkers;
-  BitmapDescriptor defaultMarker, pinLocationIcon, a, b, c, d, e, p;
+
+  //googlemap marker icon
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => executeAfterBuildComplete(context));
+  }
+
+  executeAfterBuildComplete([BuildContext context]) {
+    print("Build Process Complete");
+  }
 
   @override
   void initState() {
-    category = "all";
-
+    category = "wellhada";
+    //getShowAppBar();
     super.initState();
-    check = false;
+    check = true;
+    print("check");
     _future = getShop();
-
     _getCurrentLocation();
     _categoryFuture = getShopCategory();
   }
@@ -109,85 +137,6 @@ class _Google1MapUIState extends State<Google1MapUI> {
     return 12742 * asin(sqrt(a));
   }
 
-  Future<ui.Image> getImage(String path) async {
-    Completer<ImageInfo> completer = Completer();
-    var img = new NetworkImage(path);
-    img.resolve(ImageConfiguration()).addListener(
-      ImageStreamListener(
-        (ImageInfo info, bool _) {
-          completer.complete(info);
-        },
-      ),
-    );
-    ImageInfo imageInfo = await completer.future;
-    return imageInfo.image;
-  }
-
-  Future<BitmapDescriptor> getMarkerIcon(String imagePath, Size size) async {
-    final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(pictureRecorder);
-
-    final Radius radius = Radius.circular(size.width / 2);
-
-    final Paint tagPaint = Paint()..color = Colors.blue;
-    final double tagWidth = 40.0;
-
-    final Paint shadowPaint = Paint()..color = Colors.blue.withAlpha(100);
-    final double shadowWidth = 15.0;
-
-    final Paint borderPaint = Paint()..color = Colors.white;
-    final double borderWidth = 3.0;
-
-    final double imageOffset = shadowWidth + borderWidth;
-
-    // Add border circle
-    canvas.drawRRect(
-        RRect.fromRectAndCorners(
-          Rect.fromLTWH(shadowWidth, shadowWidth,
-              size.width - (shadowWidth * 2), size.height - (shadowWidth * 2)),
-          topLeft: radius,
-          topRight: radius,
-          bottomLeft: radius,
-          bottomRight: radius,
-        ),
-        borderPaint);
-
-    // Add tag circle
-    canvas.drawRRect(
-        RRect.fromRectAndCorners(
-          Rect.fromLTWH(size.width - tagWidth, 0.0, tagWidth, tagWidth),
-          topLeft: radius,
-          topRight: radius,
-          bottomLeft: radius,
-          bottomRight: radius,
-        ),
-        tagPaint);
-
-    // Oval for the image
-    Rect oval = Rect.fromLTWH(imageOffset, imageOffset,
-        size.width - (imageOffset * 2), size.height - (imageOffset * 2));
-
-    // Add path for oval image
-    canvas.clipPath(Path()..addOval(oval));
-
-    // Add image
-    ui.Image image = await getImage(
-        imagePath); // Alternatively use your own method to get the image
-    paintImage(canvas: canvas, image: image, rect: oval, fit: BoxFit.fitWidth);
-
-    // Convert canvas to image
-    final ui.Image markerAsImage = await pictureRecorder
-        .endRecording()
-        .toImage(size.width.toInt(), size.height.toInt());
-
-    // Convert image to bytes
-    final ByteData byteData =
-        await markerAsImage.toByteData(format: ui.ImageByteFormat.png);
-    final Uint8List uint8List = byteData.buffer.asUint8List();
-
-    return BitmapDescriptor.fromBytes(uint8List);
-  }
-
   void distance(lat1, lat2, lon1, lon2) {
     double totalDistance = 0;
     // for (var i = 0; i < data.length - 1; i++) {
@@ -202,9 +151,85 @@ class _Google1MapUIState extends State<Google1MapUI> {
   }
 
   Future<Map<String, dynamic>> getShop() async {
-    //shopInfoListItem.getShopInfoList().then((e)=>{})
+    final entireShopList =
+        await shopInfoListItem.getShopInfoCategoryListEntire();
+
+    setState(() {
+      entireList = entireShopList.list;
+    });
+
+    List<shopInfoListItem.ShopInfoCategoryList> shopInfo = entireList;
+
+    for (int i = 0; i < shopInfo.length; i++) {
+      wellhadaIcon = await getBytesFromCanvas(200, 100, shopInfo[i].placeName);
+      wellhadaIconSet[shopInfo[i].id] = wellhadaIcon;
+    }
 
     return shopInfoListItem.getShopInfoCategoryList();
+  }
+
+  Future<Uint8List> getBytesFromCanvas(
+      int width, int height, String title) async {
+    final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(pictureRecorder);
+    final Paint paint = Paint()..color = Colors.white;
+    final Radius radius = Radius.circular(20.0);
+    final radiusPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4.0
+      ..color = Colors.indigo;
+    canvas.drawRRect(
+        RRect.fromRectAndCorners(
+          Rect.fromLTWH(0.0, 0.0, width.toDouble(), height.toDouble()),
+          topLeft: radius,
+          topRight: radius,
+          bottomLeft: radius,
+          bottomRight: radius,
+        ),
+        paint);
+
+    // canvas.drawRRect(
+    //     RRect.fromRectAndCorners(
+    //       Rect.fromLTWH(15, 10, width.toDouble() - 10, height.toDouble() - 10),
+    //       topLeft: radius,
+    //       topRight: radius,
+    //       bottomLeft: radius,
+    //       bottomRight: radius,
+    //     ),
+    //     radiusPaint);
+    // // Add image
+
+    TextPainter painter = TextPainter(
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.left,
+    );
+
+    painter.text = TextSpan(
+      text: title.length > 6 ? "${title.substring(0, 6)}..." : "title",
+      style: TextStyle(fontSize: 25.0, color: Colors.black),
+    );
+    painter.layout();
+    painter.paint(
+        canvas,
+        Offset((width * 0.5) - painter.width * 0.5,
+            (height * 0.5) - painter.height * 0.5));
+    final img = await pictureRecorder.endRecording().toImage(width, height);
+    final data = await img.toByteData(format: ui.ImageByteFormat.png);
+    return data.buffer.asUint8List();
+  }
+
+  Future<ui.Image> getImage(String path) async {
+    Completer<ImageInfo> completer = Completer();
+    var img = new NetworkImage(path);
+    img.resolve(ImageConfiguration()).addListener(
+      ImageStreamListener(
+        (ImageInfo info, bool _) {
+          completer.complete(info);
+        },
+      ),
+    );
+    ImageInfo imageInfo = await completer.future;
+    return imageInfo.image;
   }
 
   Widget _listview(List<dynamic> shopCategoryList) {
@@ -694,27 +719,6 @@ class _Google1MapUIState extends State<Google1MapUI> {
     );
   }
 
-  void bz() async {
-    defaultMarker =
-        await getBitmapDescriptorFromAssetBytes("assets/img/cafeicon.png", 80);
-  }
-
-  Future<Uint8List> getBytesFromAsset(String path, int width) async {
-    ByteData data = await rootBundle.load(path);
-    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
-        targetWidth: width);
-    ui.FrameInfo fi = await codec.getNextFrame();
-    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))
-        .buffer
-        .asUint8List();
-  }
-
-  Future<BitmapDescriptor> getBitmapDescriptorFromAssetBytes(
-      String path, int width) async {
-    final Uint8List imageData = await getBytesFromAsset(path, width);
-    return BitmapDescriptor.fromBytes(imageData);
-  }
-
   List<Marker> selectMarker(List<dynamic> shopInfoList) {
     switch (category) {
       case "mart":
@@ -736,25 +740,22 @@ class _Google1MapUIState extends State<Google1MapUI> {
       case "cafe":
         return cafe;
     }
-    print("default");
-    print(category);
 
     martMarkers = shopInfoList
         .where((element) => element['category_group_code'] == "MT1")
         .map((element) {
-      void icon() async {
-        pinLocationIcon = await getMarkerIcon(
-            'https://img.icons8.com/android/24/000000/restaurant.png',
-            Size(70, 70));
+      //martBitmap = await getMarkerIcon(element['place_url'], Size(95, 95));
+      void martIconSet() async {
+        everyIcon = await getBytesFromCanvas(200, 100, element['place_name']);
+        iconSet[element['id']] = everyIcon;
       }
 
-      print("!11111");
-      icon();
+      martIconSet();
       return Marker(
           markerId: MarkerId(element['id']),
           position:
               LatLng(double.parse(element['y']), double.parse(element['x'])),
-          icon: pinLocationIcon,
+          icon: BitmapDescriptor.fromBytes(iconSet[element['id']]),
           onTap: () {
             setState(() {
               itemSelected = true;
@@ -769,22 +770,21 @@ class _Google1MapUIState extends State<Google1MapUI> {
     convenience = shopInfoList
         .where((element) => element['category_group_code'] == "CS2")
         .map((element) {
-      void z() async {
-        a = await getMarkerIcon(
-            'https://img.icons8.com/ios/452/cafe.png', Size(70, 70));
+      void convenIconSet() async {
+        everyIcon = await getBytesFromCanvas(200, 100, element['place_name']);
+        iconSet[element['id']] = everyIcon;
       }
 
-      print("2222222222222");
-      z();
+      convenIconSet();
       return Marker(
           markerId: MarkerId(element['id']),
           position:
               LatLng(double.parse(element['y']), double.parse(element['x'])),
-          icon: a,
+          icon: BitmapDescriptor.fromBytes(iconSet[element['id']]),
           onTap: () {
             setState(() {
               itemSelected = true;
-              model.category = element['category_group_code'];
+
               model.id = element['id'];
               model.distance = element['distance'];
               model.placeName = element['place_name'];
@@ -796,22 +796,22 @@ class _Google1MapUIState extends State<Google1MapUI> {
     kindergarden = shopInfoList
         .where((element) => element['category_group_code'] == "PS3")
         .map((element) {
-      void bicon() async {
-        b = await getMarkerIcon(
-            'https://img.icons8.com/ios/452/cafe.png', Size(30, 30));
+      void kinderIconSet() async {
+        everyIcon = await getBytesFromCanvas(200, 100, element['place_name']);
+        iconSet[element['id']] = everyIcon;
       }
 
-      bicon();
+      kinderIconSet();
       return Marker(
           markerId: MarkerId(element['id']),
           position:
               LatLng(double.parse(element['y']), double.parse(element['x'])),
-          icon: b,
+          icon: BitmapDescriptor.fromBytes(iconSet[element['id']]),
           onTap: () {
             setState(() {
               itemSelected = true;
+
               model.id = element['id'];
-              model.category = element['category_group_code'];
               model.distance = element['distance'];
               model.placeName = element['place_name'];
               model.phone = element['phone'];
@@ -822,12 +822,19 @@ class _Google1MapUIState extends State<Google1MapUI> {
     academy = shopInfoList
         .where((element) => element['category_group_code'] == "AC5")
         .map((element) {
+      void academyIconSet() async {
+        everyIcon = await getBytesFromCanvas(200, 100, element['place_name']);
+        iconSet[element['id']] = everyIcon;
+      }
+
+      academyIconSet();
       return Marker(
           markerId: MarkerId(element['id']),
           position:
               LatLng(double.parse(element['y']), double.parse(element['x'])),
-          icon: pinLocationIcon,
+          icon: BitmapDescriptor.fromBytes(iconSet[element['id']]),
           //icon: BitmapDescriptor.fromBytes(unitmarkers),
+
           onTap: () {
             setState(() {
               itemSelected = true;
@@ -843,11 +850,17 @@ class _Google1MapUIState extends State<Google1MapUI> {
     parking = shopInfoList
         .where((element) => element['category_group_code'] == "pk6")
         .map((element) {
+      void parkingIconSet() async {
+        everyIcon = await getBytesFromCanvas(200, 100, element['place_name']);
+        iconSet[element['id']] = everyIcon;
+      }
+
+      parkingIconSet();
       return Marker(
           markerId: MarkerId(element['id']),
           position:
               LatLng(double.parse(element['y']), double.parse(element['x'])),
-          //icon: BitmapDescriptor.fromBytes(unitmarkers),
+          icon: BitmapDescriptor.fromBytes(iconSet[element['id']]),
           onTap: () {
             setState(() {
               model.id = element['id'];
@@ -863,11 +876,17 @@ class _Google1MapUIState extends State<Google1MapUI> {
     lodgement = shopInfoList
         .where((element) => element['category_group_code'] == "AD5")
         .map((element) {
+      void lodgementIconSet() async {
+        everyIcon = await getBytesFromCanvas(200, 100, element['place_name']);
+        iconSet[element['id']] = everyIcon;
+      }
+
+      lodgementIconSet();
       return Marker(
           markerId: MarkerId(element['id']),
           position:
               LatLng(double.parse(element['y']), double.parse(element['x'])),
-          //icon: BitmapDescriptor.fromBytes(unitmarkers),
+          icon: BitmapDescriptor.fromBytes(iconSet[element['id']]),
           onTap: () {
             setState(() {
               itemSelected = true;
@@ -879,14 +898,21 @@ class _Google1MapUIState extends State<Google1MapUI> {
             });
           });
     }).toList();
+
     restaurant = shopInfoList
         .where((element) => element['category_group_code'] == "FD6")
         .map((element) {
+      void restauIconSet() async {
+        everyIcon = await getBytesFromCanvas(200, 100, element['place_name']);
+        iconSet[element['id']] = everyIcon;
+      }
+
+      restauIconSet();
       return Marker(
           markerId: MarkerId(element['id']),
           position:
               LatLng(double.parse(element['y']), double.parse(element['x'])),
-          //icon: BitmapDescriptor.fromBytes(unitmarkers),
+          icon: BitmapDescriptor.fromBytes(iconSet[element['id']]),
           onTap: () {
             setState(() {
               itemSelected = true;
@@ -898,14 +924,21 @@ class _Google1MapUIState extends State<Google1MapUI> {
             });
           });
     }).toList();
+
     cafe = shopInfoList
         .where((element) => element['category_group_code'] == "CE7")
         .map((element) {
+      void cafeIconSet() async {
+        everyIcon = await getBytesFromCanvas(200, 100, element['place_name']);
+        iconSet[element['id']] = everyIcon;
+      }
+
+      cafeIconSet();
       return Marker(
           markerId: MarkerId(element['id']),
           position:
               LatLng(double.parse(element['y']), double.parse(element['x'])),
-          //icon: BitmapDescriptor.fromBytes(unitmarkers),
+          icon: BitmapDescriptor.fromBytes(iconSet[element['id']]),
           onTap: () {
             setState(() {
               itemSelected = true;
@@ -921,11 +954,17 @@ class _Google1MapUIState extends State<Google1MapUI> {
     gasStation = shopInfoList
         .where((element) => element['category_group_code'] == "OL7")
         .map((element) {
+      void gasStaIconSet() async {
+        everyIcon = await getBytesFromCanvas(200, 100, element['place_name']);
+        iconSet[element['id']] = everyIcon;
+      }
+
+      gasStaIconSet();
       return Marker(
           markerId: MarkerId(element['id']),
           position:
               LatLng(double.parse(element['y']), double.parse(element['x'])),
-          //icon: BitmapDescriptor.fromBytes(unitmarkers),
+          icon: BitmapDescriptor.fromBytes(iconSet[element['id']]),
           onTap: () {
             setState(() {
               itemSelected = true;
@@ -967,19 +1006,11 @@ class _Google1MapUIState extends State<Google1MapUI> {
             element['category_group_code'] == "MT1" &&
             element['wellhada_shop'] == "Y")
         .map((element) {
-      void icons() async {
-        c = await getMarkerIcon(
-            'https://img.icons8.com/android/24/000000/restaurant.png',
-            Size(30, 30));
-      }
-
-      icons();
-      print("aaaaaaaaaaa");
       return Marker(
           markerId: MarkerId(element['id']),
           position:
               LatLng(double.parse(element['y']), double.parse(element['x'])),
-          icon: c,
+          icon: BitmapDescriptor.fromBytes(wellhadaIconSet[element['id']]),
           onTap: () {
             setState(() {
               itemSelected = true;
@@ -996,18 +1027,11 @@ class _Google1MapUIState extends State<Google1MapUI> {
             element['category_group_code'] == "CS2" &&
             element['wellhada_shop'] == "Y")
         .map((element) {
-      void zs() async {
-        d = await getMarkerIcon(
-            'https://img.icons8.com/ios/452/cafe.png', Size(70, 70));
-      }
-
-      print("2222222222222");
-      zs();
       return Marker(
           markerId: MarkerId(element['id']),
           position:
               LatLng(double.parse(element['y']), double.parse(element['x'])),
-          icon: d,
+          icon: BitmapDescriptor.fromBytes(wellhadaIconSet[element['id']]),
           onTap: () {
             setState(() {
               itemSelected = true;
@@ -1019,27 +1043,22 @@ class _Google1MapUIState extends State<Google1MapUI> {
             });
           });
     }).toList();
+
     kindergardenWellHada = shopInfoList
         .where((element) =>
             element['category_group_code'] == "PS3" &&
             element['wellhada_shop'] == "Y")
         .map((element) {
-      void bicon() async {
-        e = await getMarkerIcon(
-            'https://img.icons8.com/ios/452/cafe.png', Size(30, 30));
-      }
-
-      bicon();
       return Marker(
           markerId: MarkerId(element['id']),
           position:
               LatLng(double.parse(element['y']), double.parse(element['x'])),
-          icon: e,
+          icon: BitmapDescriptor.fromBytes(wellhadaIconSet[element['id']]),
           onTap: () {
             setState(() {
               itemSelected = true;
-              model.id = element['id'];
               model.category = element['category_group_code'];
+              model.id = element['id'];
               model.distance = element['distance'];
               model.placeName = element['place_name'];
               model.phone = element['phone'];
@@ -1056,8 +1075,7 @@ class _Google1MapUIState extends State<Google1MapUI> {
           markerId: MarkerId(element['id']),
           position:
               LatLng(double.parse(element['y']), double.parse(element['x'])),
-
-          //icon: BitmapDescriptor.fromBytes(unitmarkers),
+          icon: BitmapDescriptor.fromBytes(wellhadaIconSet[element['id']]),
           onTap: () {
             setState(() {
               itemSelected = true;
@@ -1079,7 +1097,7 @@ class _Google1MapUIState extends State<Google1MapUI> {
           markerId: MarkerId(element['id']),
           position:
               LatLng(double.parse(element['y']), double.parse(element['x'])),
-          //icon: BitmapDescriptor.fromBytes(unitmarkers),
+          icon: BitmapDescriptor.fromBytes(wellhadaIconSet[element['id']]),
           onTap: () {
             setState(() {
               model.id = element['id'];
@@ -1101,7 +1119,7 @@ class _Google1MapUIState extends State<Google1MapUI> {
           markerId: MarkerId(element['id']),
           position:
               LatLng(double.parse(element['y']), double.parse(element['x'])),
-          //icon: BitmapDescriptor.fromBytes(unitmarkers),
+          icon: BitmapDescriptor.fromBytes(wellhadaIconSet[element['id']]),
           onTap: () {
             setState(() {
               itemSelected = true;
@@ -1113,6 +1131,7 @@ class _Google1MapUIState extends State<Google1MapUI> {
             });
           });
     }).toList();
+
     restaurantWellHada = shopInfoList
         .where((element) =>
             element['category_group_code'] == "FD6" &&
@@ -1122,7 +1141,7 @@ class _Google1MapUIState extends State<Google1MapUI> {
           markerId: MarkerId(element['id']),
           position:
               LatLng(double.parse(element['y']), double.parse(element['x'])),
-          //icon: BitmapDescriptor.fromBytes(unitmarkers),
+          icon: BitmapDescriptor.fromBytes(wellhadaIconSet[element['id']]),
           onTap: () {
             setState(() {
               itemSelected = true;
@@ -1134,6 +1153,7 @@ class _Google1MapUIState extends State<Google1MapUI> {
             });
           });
     }).toList();
+
     cafeWellHada = shopInfoList
         .where((element) =>
             element['category_group_code'] == "CE7" &&
@@ -1143,7 +1163,7 @@ class _Google1MapUIState extends State<Google1MapUI> {
           markerId: MarkerId(element['id']),
           position:
               LatLng(double.parse(element['y']), double.parse(element['x'])),
-          //icon: BitmapDescriptor.fromBytes(unitmarkers),
+          icon: BitmapDescriptor.fromBytes(wellhadaIconSet[element['id']]),
           onTap: () {
             setState(() {
               itemSelected = true;
@@ -1165,8 +1185,7 @@ class _Google1MapUIState extends State<Google1MapUI> {
           markerId: MarkerId(element['id']),
           position:
               LatLng(double.parse(element['y']), double.parse(element['x'])),
-          //icon: BitmapDescriptor.fromBytes(unitmarkers),
-          //icon : marker
+          icon: BitmapDescriptor.fromBytes(wellhadaIconSet[element['id']]),
           onTap: () {
             setState(() {
               itemSelected = true;
@@ -1198,13 +1217,6 @@ class _Google1MapUIState extends State<Google1MapUI> {
             List<dynamic> shopInfoList = shopInfo["LIST"];
             Map<String, dynamic> shopCategory = snapshot.data[1];
             List<dynamic> shopCategoryList = shopCategory["LIST"];
-            print(category);
-            category = "all";
-
-            List<Marker> changeWellhadaMark =
-                selectWellhadaMarker(shopInfoList);
-
-            List<Marker> changeMark = selectMarker(shopInfoList);
 
             // void z() {
             //   category = "mart";
@@ -1226,62 +1238,83 @@ class _Google1MapUIState extends State<Google1MapUI> {
             //   category = "all";
             // }
 
-            allMarkers = shopInfoList.map((element) {
-              Future<BitmapDescriptor> allIcons() async {
-              p = await getMarkerIcon(element['place_url'], Size(30, 30));
-                return p;
-              }
+            // allMarkers = shopInfoList.map((element) {
+            //   return Marker(
+            //       markerId: MarkerId(element['id']),
+            //       position: LatLng(
+            //           double.parse(element['y']), double.parse(element['x'])),
+            //       icon: defaultMarker,
+            //       infoWindow: InfoWindow(title: element['place_name']),
+            //       onTap: () {
+            //         setState(() {
+            //           itemSelected = true;
+            //           model.id = element['id'];
+            //           model.distance = element['distance'];
+            //           model.roadAddressName = element['road_address_name'];
+            //           model.placeName = element['place_name'];
+            //           model.phone = element['phone'];
+            //         });
+            //       });
+            // }).toList();
 
+            // wellhada = shopInfoList
+            //     .where((element) => element['wellhada_shop'] == "Y")
+            //     .map((element) {
+            //   void wellhadaIcons() async {
+            //     defaultMarker =
+            //         await getMarkerIcon(element['place_url'], Size(95, 95));
+            //   }
 
-              print(element['place_url']);
+            //   wellhadaIcons();
 
-              return Marker(
-                  markerId: MarkerId(element['id']),
-                  position: LatLng(
-                      double.parse(element['y']), double.parse(element['x'])),
-                  icon: p,
-                  //infoWindow: InfoWindow(title: element['place_name']),
-                  onTap: () {
-                    setState(() {
-                      itemSelected = true;
-                      model.id = element['id'];
-                      model.distance = element['distance'];
-                      model.addressName = element['address_name'];
-                      model.placeName = element['place_name'];
-                      model.phone = element['phone'];
-                    });
-                  });
-            }).toList();
+            //   print("wellhada");
+            //   print(element['wellhada_shop']);
 
-            wellhada = shopInfoList
-                .where((element) => element['wellhada_shop'] == "Y")
-                .map((element) {
-              void wellhadaIcons() async {
-                defaultMarker =
-                    await getMarkerIcon(element['place_url'], Size(30, 30));
-              }
+            //   return Marker(
+            //       markerId: MarkerId(element['id']),
+            //       position: LatLng(
+            //           double.parse(element['y']), double.parse(element['x'])),
+            //       icon: defaultMarker,
+            //       onTap: () {
+            //         setState(() {
+            //           itemSelected = true;
 
-              wellhadaIcons();
-              print(element['place_url']);
-              return Marker(
-                  markerId: MarkerId(element['id']),
-                  position: LatLng(
-                      double.parse(element['y']), double.parse(element['x'])),
-                  icon: defaultMarker,
-                  onTap: () {
-                    setState(() {
-                      itemSelected = true;
+            //           model.id = element['id'];
+            //           model.roadAddressName = element['road_address_name'];
+            //           model.distance = element['distance'];
+            //           model.placeName = element['place_name'];
+            //           model.phone = element['phone'];
+            //         });
+            //       });
+            // }).toList();
 
-                      model.id = element['id'];
-                      model.placeName = element['place_name'];
-                      model.distance = element['distance'];
-                      model.addressName = element['address_name'];
-                      model.phone = element['phone'];
-                    });
-                  });
-            }).toList();
+            List<Marker> changeWellhadaMark =
+                selectWellhadaMarker(shopInfoList);
 
+            List<Marker> changeMark = selectMarker(shopInfoList);
             //print(values.runtimeType);
+
+            allMarkers = martMarkers +
+                convenience +
+                kindergarden +
+                academy +
+                parking +
+                gasStation +
+                lodgement +
+                restaurant +
+                cafe;
+
+            wellhada = martWellHadaMarkers +
+                    convenienceWellHada +
+                    kindergardenWellHada
+                // +
+                // academyWellHada +
+                // parkingWellHada +
+                // gasStationWellHada +
+                // lodgementWellHada +
+                // restaurantWellHada +
+                // cafeWellHada
+                ;
 
             return Column(
               children: [
@@ -1332,9 +1365,10 @@ class _Google1MapUIState extends State<Google1MapUI> {
                                 ),
                                 onTap: () {
                                   setState(() {
-                                    check == true
-                                        ? check = false
-                                        : check = true;
+                                    check == false
+                                        ? check = true
+                                        : check = false;
+
                                     category != "all" &&
                                             category != "wellhada" &&
                                             check == false
@@ -1342,8 +1376,6 @@ class _Google1MapUIState extends State<Google1MapUI> {
                                         : category == "wellhada"
                                             ? category = "all"
                                             : category = "wellhada";
-                                    print(check);
-                                    print(category);
                                   });
                                 }),
                           ),
@@ -1365,23 +1397,23 @@ class _Google1MapUIState extends State<Google1MapUI> {
                       height: MediaQuery.of(context).size.height * 0.6,
                       child: GoogleMap(
                         initialCameraPosition: _cameraPosition,
-                        // markers: check == false && category == "all"
-                        //     ? Set.from(allMarkers)
-                        //     : check == true && category != "wellhada"
-                        //         ? Set.from(changeWellhadaMark)
-                        //         : check == true && category == "wellhada"
-                        //             ? Set.from(wellhada)
-                        //             : Set.from(changeMark),
-                        markers: Set.from(allMarkers),
+                        rotateGesturesEnabled: false,
+                        tiltGesturesEnabled: false,
+                        markers: check == false && category == "all"
+                            ? Set.from(allMarkers)
+                            : check == false && category != "all"
+                                ? Set.from(changeMark)
+                                : check == true && category == "wellhada"
+                                    ? Set.from(wellhada)
+                                    : Set.from(changeWellhadaMark),
+                        // markers: Set.from(allMarkers),
                         myLocationEnabled: true,
                         onMapCreated: (GoogleMapController controller) {
                           setState(() {
-                            category = "all";
+                            category = "wellhada";
                           });
-                          _controllerGoogleMap.complete(controller);
+
                           _controller = controller;
-                          print(check);
-                          print(category);
                         },
                       ),
                     ),

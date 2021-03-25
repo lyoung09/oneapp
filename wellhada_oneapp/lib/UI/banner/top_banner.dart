@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:wellhada_oneapp/listitem/banner/topBannerItem.dart'
     as topbanner;
 import 'package:wellhada_oneapp/listitem/banner/topBannerItem.dart';
@@ -16,17 +17,29 @@ class _TopBannerState extends State<TopBanner> {
   PageController _pageController = PageController(
     initialPage: 0,
   );
+
+  Timer _tim;
   void initState() {
     getShowAppBar();
     //data = a();
     super.initState();
-    Timer.periodic(Duration(seconds: 5), (Timer timer) {
+    animation();
+  }
+
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  animation() {
+    _tim = Timer.periodic(Duration(seconds: 5), (Timer timer) {
       if (_currentPage < banner.length) {
         _currentPage++;
       } else {
         _currentPage = 0;
       }
-
       _pageController.animateToPage(
         _currentPage,
         duration: Duration(milliseconds: 350),
@@ -35,11 +48,17 @@ class _TopBannerState extends State<TopBanner> {
     });
   }
 
+  @override
+  void dispose() {
+    _tim?.cancel();
+    super.dispose();
+    getShowAppBar();
+  }
+
   Future<void> getShowAppBar() async {
     final bannerList = await topbanner.getAppbarList();
     setState(() {
       banner = bannerList.list;
-      print(banner);
     });
   }
 

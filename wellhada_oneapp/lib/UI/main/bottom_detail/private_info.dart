@@ -106,14 +106,7 @@ class _PriavateInfoState extends State<PriavateInfo> {
                       )
                     : InkWell(
                         onTap: () {
-                          //   moveLogin();
-
-                          // Navigator.of(context)
-                          //     .push(MaterialPageRoute(
-                          //         builder: (BuildContext context) {
-                          //           return new LOGIN();
-                          //         },
-                          //         fullscreenDialog: true));
+                          moveLogin();
                         },
                         child: Container(
                           width: size.width / 2,
@@ -139,24 +132,24 @@ class _PriavateInfoState extends State<PriavateInfo> {
         Container(
           padding: const EdgeInsets.only(top: 40.0, bottom: 10.0),
         ),
-        ListTile(
-          leading: SvgPicture.network(
-              "https://wellhada.com" + "/images/icon_image/house-door-fill.svg",
-              height: 25.0,
-              width: 25.0,
-              color: Hexcolor('#333333')),
-          title: Text(
-            '홈',
-            style: TextStyle(
-              fontFamily: 'Godo',
-              fontSize: 17.0,
-              color: Hexcolor('#000000'),
-            ),
-          ),
-          onTap: () {
-            moveHome();
-          },
-        ),
+        // ListTile(
+        //   leading: SvgPicture.network(
+        //       "https://wellhada.com" + "/images/icon_image/house-door-fill.svg",
+        //       height: 25.0,
+        //       width: 25.0,
+        //       color: Hexcolor('#333333')),
+        //   title: Text(
+        //     '홈',
+        //     style: TextStyle(
+        //       fontFamily: 'Godo',
+        //       fontSize: 17.0,
+        //       color: Hexcolor('#000000'),
+        //     ),
+        //   ),
+        //   onTap: () {
+        //     moveHome();
+        //   },
+        // ),
       ],
     );
   }
