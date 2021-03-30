@@ -304,36 +304,32 @@ class _MainScreenState extends State<MainScreen>
               ),
               Container(
                 height: 20,
-                child: SizedBox(
-                  width: 50,
-                  height: 50,
-                  child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      shrinkWrap: true,
-                      itemCount:
-                          shopInfoList == null ? null : shopInfoList.length,
-                      itemBuilder: (context, position) {
-                        return Padding(
-                          padding: EdgeInsets.only(left: 4),
-                          child: DefaultTabController(
-                            length: shopInfoList.length,
-                            child: TabBar(
-                              labelColor: Colors.black,
-                              unselectedLabelColor: Colors.grey.shade400,
-                              labelStyle: TextStyle(
-                                  fontSize: 11, fontWeight: FontWeight.w500),
-                              unselectedLabelStyle: TextStyle(
-                                  fontSize: 10, fontWeight: FontWeight.w500),
-                              tabs: tabs,
-                              controller: _tabController,
-                              // isScrollable: true,
-                              indicatorWeight: 3,
-                              indicatorColor: Colors.black,
-                            ),
+                child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    shrinkWrap: true,
+                    itemCount:
+                        shopInfoList == null ? null : shopInfoList.length,
+                    itemBuilder: (context, position) {
+                      return Padding(
+                        padding: EdgeInsets.only(left: 4),
+                        child: DefaultTabController(
+                          length: shopInfoList.length,
+                          child: TabBar(
+                            labelColor: Colors.black,
+                            unselectedLabelColor: Colors.grey.shade400,
+                            labelStyle: TextStyle(
+                                fontSize: 11, fontWeight: FontWeight.w500),
+                            unselectedLabelStyle: TextStyle(
+                                fontSize: 10, fontWeight: FontWeight.w500),
+                            tabs: tabs,
+                            controller: _tabController,
+                            isScrollable: true,
+                            indicatorWeight: 3,
+                            indicatorColor: Colors.black,
                           ),
-                        );
-                      }),
-                ),
+                        ),
+                      );
+                    }),
               ),
               Expanded(
                 child: TabBarView(controller: _tabController, children: menuList
