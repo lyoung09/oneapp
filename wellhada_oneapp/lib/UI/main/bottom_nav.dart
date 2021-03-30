@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_detail/private_info.dart';
+import 'package:wellhada_oneapp/UI/main/home_screen.dart';
 
 import 'package:wellhada_oneapp/UI/main/map_scene.dart';
 import 'package:wellhada_oneapp/UI/mapUI/map.dart';
 import 'package:wellhada_oneapp/model/menu/drawer_detail/qr_34.dart';
-
-import 'main_screen.dart';
 
 class BottomNav extends StatefulWidget {
   @override
@@ -22,7 +21,7 @@ class _BottomNavState extends State<BottomNav> {
   int _selectedIndex = 0;
 
   List<Widget> _widgetOptions = <Widget>[
-    MainScreen(),
+    HomeScreen(),
     MapScreen(),
     QR_34(1),
     PriavateInfo(),

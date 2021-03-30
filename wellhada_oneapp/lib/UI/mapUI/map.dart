@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hexcolor/hexcolor.dart';
@@ -238,6 +240,11 @@ class _GoogleMapUIState extends State<GoogleMapUI> {
                 Container(
                   height: MediaQuery.of(context).size.height * 0.8,
                   child: GoogleMap(
+                    gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+                      new Factory<OneSequenceGestureRecognizer>(
+                        () => new EagerGestureRecognizer(),
+                      ),
+                    ].toSet(),
                     initialCameraPosition: CameraPosition(
                         target: LatLng(currentlat, currentlng), zoom: 15.4746),
                     myLocationEnabled: true,

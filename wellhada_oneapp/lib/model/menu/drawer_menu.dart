@@ -9,7 +9,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wellhada_oneapp/UI/login/login.dart';
-import 'package:wellhada_oneapp/UI/main/main_screen.dart';
+import 'package:wellhada_oneapp/UI/main/home_detail/main_screen.dart';
+import 'package:wellhada_oneapp/UI/main/home_screen.dart';
 import 'package:wellhada_oneapp/UI/main/map_scene.dart';
 import 'package:wellhada_oneapp/model/menu/drawer_detail/account_user_info.dart';
 
@@ -100,7 +101,7 @@ class _DRAWER_MENUState extends State<DRAWER_MENU> {
 
   moveHome() {
     Navigator.of(context).pushReplacement(
-        (PageRouteBuilder(pageBuilder: (_, __, ___) => MainScreen())));
+        (PageRouteBuilder(pageBuilder: (_, __, ___) => HomeScreen())));
   }
 
   moveMap() {

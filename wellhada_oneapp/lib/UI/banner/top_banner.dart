@@ -6,6 +6,8 @@ import 'package:wellhada_oneapp/listitem/banner/topBannerItem.dart'
     as topbanner;
 import 'package:wellhada_oneapp/listitem/banner/topBannerItem.dart';
 
+import 'package:cached_network_image/cached_network_image.dart';
+
 class TopBanner extends StatefulWidget {
   @override
   _TopBannerState createState() => _TopBannerState();
@@ -83,14 +85,23 @@ class _TopBannerState extends State<TopBanner> {
                     width: MediaQuery.of(context).size.width * 0.8,
                     child: Stack(
                       children: [
-                        Image.asset("assets/img/cafe.png",
-                            //${banner[index].fileUrl}
-                            fit: BoxFit.cover,
-                            height: double.infinity,
-                            width: double.infinity,
-                            alignment: Alignment.center),
+                        // Image.asset("${banner[index].fileUrl}",
+                        //     fit: BoxFit.cover,
+                        //     height: double.infinity,
+                        //     width: double.infinity,
+                        //     alignment: Alignment.center),
+                        new CachedNetworkImage(
+                          fit: BoxFit.fill,
+                          height: double.infinity,
+                          width: double.infinity,
+                          //alignment: Alignment.,
+                          imageUrl: banner[index].fileUrl,
+
+                          errorWidget: (context, url, error) =>
+                              new Icon(Icons.error),
+                        ),
                         Align(
-                          alignment: Alignment.topCenter,
+                          alignment: Alignment.bottomRight,
                           child: Text(
                             "${banner[index].bannerTitle}",
                             style: TextStyle(
@@ -100,17 +111,6 @@ class _TopBannerState extends State<TopBanner> {
                             ),
                           ),
                         ),
-                        Align(
-                          alignment: Alignment.topRight,
-                          child: Text(
-                            "${banner[index].bannerType}",
-                            style: TextStyle(
-                              fontFamily: "Sans",
-                              fontSize: 10.0,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        )
                       ],
                     ),
                   )),

@@ -15,7 +15,7 @@ import 'package:wellhada_oneapp/UI/main/bottom_nav.dart';
 
 import 'dart:io';
 import 'package:uuid/uuid.dart';
-import 'package:wellhada_oneapp/UI/main/main_screen.dart';
+import 'package:wellhada_oneapp/UI/main/home_screen.dart';
 import 'package:wellhada_oneapp/UI/main/map_scene.dart';
 import 'package:wellhada_oneapp/model/map/my_location.dart';
 import 'UI/login/email_login/email_complete.dart';
@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
         ),
         home: MyHomePage(title: 'wellhada Client'),
         routes: {
-          '/main': (context) => MainScreen(),
+          '/main': (context) => HomeScreen(),
           '/map': (context) => MapScreen(),
           '/Email_complete': (context) => Email_complete(),
           '/certification': (context) => Certification(),

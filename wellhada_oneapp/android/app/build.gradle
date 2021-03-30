@@ -42,6 +42,7 @@ android {
         applicationId "com.example.wellhada_oneapp"
         minSdkVersion 19
         targetSdkVersion 29
+        multiDexEnabled true
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
          Properties properties = new Properties()

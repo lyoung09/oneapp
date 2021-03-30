@@ -20,9 +20,13 @@ class Google1MapUI extends StatefulWidget {
   _Google1MapUIState createState() => _Google1MapUIState();
 }
 
-class _Google1MapUIState extends State<Google1MapUI> {
+class _Google1MapUIState extends State<Google1MapUI>
+    with AutomaticKeepAliveClientMixin<Google1MapUI> {
   Map1_model model = new Map1_model();
   List<MarkerId> allMarkerId = [];
+
+  @override
+  bool get wantKeepAlive => true;
 
   //default Marker
   List<Marker> allMarkers,
@@ -65,7 +69,7 @@ class _Google1MapUIState extends State<Google1MapUI> {
   var lat, lng;
   GoogleMapController _controller;
   Completer<GoogleMapController> _controllerGoogleMap = Completer();
-  Position postion;
+  Position _currentLocation;
   var geoLocator = Geolocator();
   List shops, entireList;
   CameraPosition _cameraPosition;
@@ -81,6 +85,13 @@ class _Google1MapUIState extends State<Google1MapUI> {
 
   executeAfterBuildComplete([BuildContext context]) {
     print("Build Process Complete");
+  }
+
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
   }
 
   @override
@@ -100,11 +111,6 @@ class _Google1MapUIState extends State<Google1MapUI> {
     //_getCurrentLocation();
   }
 
-  void initCurrentLocation() async {
-    LatLng latlng = LatLng(37.4835706, 126.8931126);
-    _cameraPosition = new CameraPosition(target: latlng, zoom: 15.4746);
-  }
-
   _getCurrentLocation() async {
     Position geoPos;
 
@@ -121,14 +127,18 @@ class _Google1MapUIState extends State<Google1MapUI> {
       ));
       LatLng latlng = LatLng(geoPos.latitude, geoPos.longitude);
       //distance(geoPos.latitude, geoPos.longitude);
-      _cameraPosition = new CameraPosition(target: latlng, zoom: 15.4746);
-    } catch (e) {
-      initCurrentLocation();
-      print(e);
+      _cameraPosition = new CameraPosition(target: latlng, zoom: 14.5);
+    } catch (e, stackTrace) {
+      geoPos = await Geolocator.getLastKnownPosition();
+
+      LatLng latlng = LatLng(geoPos.latitude, geoPos.longitude);
+      _cameraPosition = new CameraPosition(target: latlng, zoom: 14.5);
+
+      print(stackTrace);
     }
   }
 
-  double calculateDistance(lat1, lat2, lon1, lon2) {
+  double _coordinateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
     var c = cos;
     var a = 0.5 -
@@ -230,6 +240,62 @@ class _Google1MapUIState extends State<Google1MapUI> {
     );
     ImageInfo imageInfo = await completer.future;
     return imageInfo.image;
+  }
+
+  Widget _list(List<dynamic> shopCategoryList) {
+    return ListView.builder(
+        scrollDirection: Axis.horizontal,
+        shrinkWrap: true,
+        itemCount: shopCategoryList == null ? 0 : shopCategoryList.length,
+        itemBuilder: (context, position) {
+          return Container(
+            alignment: Alignment.topCenter,
+            child: ClipOval(
+              child: Material(
+                color: Colors.white, // button color
+                child: Container(
+                  decoration: new BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: new Border.all(
+                      color: Colors.indigo,
+                      width: 1.0,
+                    ),
+                  ),
+                  child: InkWell(
+                      child: SizedBox(
+                        width: 65,
+                        height: 55,
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(top: 4.0, bottom: 1.0),
+                            ),
+                            Image(
+                              image: AssetImage('assets/img/cafe.png'),
+                              width: 25,
+                              height: 25,
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(bottom: 1.0),
+                            ),
+                            Text(
+                              shopCategoryList[position]['CATEGORY_CDNM'],
+                              style: TextStyle(fontSize: 13),
+                            )
+                          ],
+                        ),
+                      ),
+                      onTap: () {
+                        setState(() {
+                          category =
+                              shopCategoryList[position]['CATEGORY_CDNM'];
+                        });
+                      }),
+                ),
+              ),
+            ),
+          );
+        });
   }
 
   Widget _listview(List<dynamic> shopCategoryList) {
@@ -1218,76 +1284,6 @@ class _Google1MapUIState extends State<Google1MapUI> {
             Map<String, dynamic> shopCategory = snapshot.data[1];
             List<dynamic> shopCategoryList = shopCategory["LIST"];
 
-            // void z() {
-            //   category = "mart";
-            //   changeMark = selectMarker(shopInfoList);
-            //   changeWellhadaMark = selectWellhadaMarker(shopInfoList);
-
-            //   category = "convenience";
-            //   changeMark = selectMarker(shopInfoList);
-            //   changeWellhadaMark = selectWellhadaMarker(shopInfoList);
-
-            //   category = "kindergarden";
-            //   changeMark = selectMarker(shopInfoList);
-            //   changeWellhadaMark = selectWellhadaMarker(shopInfoList);
-
-            //   allMarkers = martMarkers + convenience + kindergarden;
-            //   wellhada = martWellHadaMarkers +
-            //       convenienceWellHada +
-            //       kindergardenWellHada;
-            //   category = "all";
-            // }
-
-            // allMarkers = shopInfoList.map((element) {
-            //   return Marker(
-            //       markerId: MarkerId(element['id']),
-            //       position: LatLng(
-            //           double.parse(element['y']), double.parse(element['x'])),
-            //       icon: defaultMarker,
-            //       infoWindow: InfoWindow(title: element['place_name']),
-            //       onTap: () {
-            //         setState(() {
-            //           itemSelected = true;
-            //           model.id = element['id'];
-            //           model.distance = element['distance'];
-            //           model.roadAddressName = element['road_address_name'];
-            //           model.placeName = element['place_name'];
-            //           model.phone = element['phone'];
-            //         });
-            //       });
-            // }).toList();
-
-            // wellhada = shopInfoList
-            //     .where((element) => element['wellhada_shop'] == "Y")
-            //     .map((element) {
-            //   void wellhadaIcons() async {
-            //     defaultMarker =
-            //         await getMarkerIcon(element['place_url'], Size(95, 95));
-            //   }
-
-            //   wellhadaIcons();
-
-            //   print("wellhada");
-            //   print(element['wellhada_shop']);
-
-            //   return Marker(
-            //       markerId: MarkerId(element['id']),
-            //       position: LatLng(
-            //           double.parse(element['y']), double.parse(element['x'])),
-            //       icon: defaultMarker,
-            //       onTap: () {
-            //         setState(() {
-            //           itemSelected = true;
-
-            //           model.id = element['id'];
-            //           model.roadAddressName = element['road_address_name'];
-            //           model.distance = element['distance'];
-            //           model.placeName = element['place_name'];
-            //           model.phone = element['phone'];
-            //         });
-            //       });
-            // }).toList();
-
             List<Marker> changeWellhadaMark =
                 selectWellhadaMarker(shopInfoList);
 
@@ -1305,16 +1301,14 @@ class _Google1MapUIState extends State<Google1MapUI> {
                 cafe;
 
             wellhada = martWellHadaMarkers +
-                    convenienceWellHada +
-                    kindergardenWellHada
-                // +
-                // academyWellHada +
-                // parkingWellHada +
-                // gasStationWellHada +
-                // lodgementWellHada +
-                // restaurantWellHada +
-                // cafeWellHada
-                ;
+                convenienceWellHada +
+                kindergardenWellHada +
+                academyWellHada +
+                parkingWellHada +
+                gasStationWellHada +
+                lodgementWellHada +
+                restaurantWellHada +
+                cafeWellHada;
 
             return Column(
               children: [
@@ -1394,9 +1388,13 @@ class _Google1MapUIState extends State<Google1MapUI> {
                 Stack(
                   children: [
                     Container(
-                      height: MediaQuery.of(context).size.height * 0.6,
+                      height: MediaQuery.of(context).size.height * 0.5,
                       child: GoogleMap(
-                        initialCameraPosition: _cameraPosition,
+                        initialCameraPosition: _cameraPosition == null
+                            ? CameraPosition(
+                                target: LatLng(37.4835706, 126.8931126),
+                                zoom: 14.5)
+                            : _cameraPosition,
                         rotateGesturesEnabled: false,
                         tiltGesturesEnabled: false,
                         markers: check == false && category == "all"

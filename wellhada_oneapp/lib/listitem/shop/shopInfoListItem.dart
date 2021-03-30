@@ -4,6 +4,14 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+//////////////////////////shopinfo//////////////////////////////
+//////
+///
+///
+///
+///
+///
+//////////////////////////////////////////////////////////////////////////////
 class ShopInfo {
   String status;
   int cnt;
@@ -123,6 +131,49 @@ Map<String, dynamic> _$ShopInfoListToJsonMap(ShopInfoList instance) =>
       'id': instance.id,
     };
 
+Future<Map<String, dynamic>> getShopInfoList() async {
+  final response = await http
+      .get('https://run.mocky.io/v3/188eca15-e4af-4b1f-bad8-a9f3c6060966');
+  //.get('192.168.0.35:8080/getShopInfoList?lat=126.89300592139&lon=37.4835140850512&radius=1000&appId=com.hndsolution.wellhada');
+
+  if (200 == response.statusCode) {
+    var datauser = json.decode(response.body);
+    return datauser;
+  } else {
+    return json.decode(response.body);
+  }
+}
+
+Future<ShopInfo> getShopInfoListEntire() async {
+  // http.Response response = await http.post(
+  //   Uri.encodeFull('https://wellhada.com/getAppNoticeList'),
+  //   headers: {"Accept": "application/json"},
+  //   body: {'period': 'ALL'},
+  // );
+  final response = await http
+      //.get('https://run.mocky.io/v3/26deeae0-46b1-49de-8ca4-c3ef28bbf906');
+      //.get('https://run.mocky.io/v3/4215498a-dd9f-4473-9ebf-fc6981b5002b');
+      .get('https://run.mocky.io/v3/188eca15-e4af-4b1f-bad8-a9f3c6060966');
+
+  //.get('192.168.0.35:8080/getShopInfoList?lat=126.89300592139&lon=37.4835140850512&radius=1000&appId=com.hndsolution.wellhada');
+  if (response.statusCode == 200) {
+    return ShopInfo.fromJsonMap(json.decode(response.body));
+  } else {
+    throw HttpException(
+      'Unexpected status code ${response.statusCode}:'
+      ' ${response.reasonPhrase}',
+      //uri: Uri.parse(query)
+    );
+  }
+}
+
+//////////////////////////shopinfokeyword//////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+//////
+//////
+//////
+//////
+//////
 class ShopInfokeyword {
   String status;
   int cnt;
@@ -273,6 +324,51 @@ Map<String, dynamic> _$ShopInfokeywordListToJsonMap(
       'id': instance.id,
     };
 
+Future<Map<String, dynamic>> getShopInfokeywordList() async {
+  final response = await http
+      .get('https://run.mocky.io/v3/6b662698-5c0b-4db8-8784-9d92813d34f5');
+
+  //.get('192.168.0.35:8080/getShopInfokeywordList?lat=126.89300592139&lon=37.4835140850512&radius=1000&appId=com.hndsolution.wellhada&category_code=MT1&query=이마트');
+  if (200 == response.statusCode) {
+    var datauser = json.decode(response.body);
+
+    return datauser;
+  } else {
+    return json.decode(response.body);
+  }
+}
+
+Future<ShopInfokeyword> getShopInfoKeywordEntire() async {
+  // http.Response response = await http.post(
+  //   Uri.encodeFull('https://wellhada.com/getAppNoticeList'),
+  //   headers: {"Accept": "application/json"},
+  //   body: {'period': 'ALL'},
+  // );
+  final response = await http
+      //.get('https://run.mocky.io/v3/26deeae0-46b1-49de-8ca4-c3ef28bbf906');
+      //.get('https://run.mocky.io/v3/4215498a-dd9f-4473-9ebf-fc6981b5002b');
+      .get('https://run.mocky.io/v3/6b662698-5c0b-4db8-8784-9d92813d34f5');
+
+  //.get('192.168.0.35:8080/getShopInfoList?lat=126.89300592139&lon=37.4835140850512&radius=1000&appId=com.hndsolution.wellhada');
+  if (response.statusCode == 200) {
+    return ShopInfokeyword.fromJsonMap(json.decode(response.body));
+  } else {
+    throw HttpException(
+      'Unexpected status code ${response.statusCode}:'
+      ' ${response.reasonPhrase}',
+      //uri: Uri.parse(query)
+    );
+  }
+}
+
+//////////////////////////////////////shopinfocategory//////////////////////
+///
+///
+///
+///
+///
+///
+//////////////////////////////////////////////////////////////////////////////
 class ShopInfoCategory {
   String status;
   ShopInfoCategoryList infolist;
@@ -422,6 +518,53 @@ Map<String, dynamic> _$ShopInfoCategoryListToJsonMap(
       'category_name': instance.categoryName
     };
 
+Future<Map<String, dynamic>> getShopInfoCategoryList() async {
+  final response = await http
+      //    .get('https://run.mocky.io/v3/c5cb3e9e-b58d-4d1d-95b3-daa77d5c0617');
+      //.get('https://run.mocky.io/v3/cdd16867-7a32-4335-a02e-b0f0fba54a3e');
+      .get('https://run.mocky.io/v3/4215498a-dd9f-4473-9ebf-fc6981b5002b');
+
+  //.get('192.168.0.35:8080/getShopInfoCategoryList?lat=126.89300592139&lon=37.4835140850512&radius=1000&appId=com.hndsolution.wellhada&category_code=MT1');
+  if (200 == response.statusCode) {
+    var datauser = json.decode(response.body);
+
+    return datauser;
+  } else {
+    return json.decode(response.body);
+  }
+}
+
+Future<ShopInfoCategory> getShopInfoCategoryListEntire() async {
+  // http.Response response = await http.post(
+  //   Uri.encodeFull('https://wellhada.com/getAppNoticeList'),
+  //   headers: {"Accept": "application/json"},
+  //   body: {'period': 'ALL'},
+  // );
+  final response = await http
+      //.get('https://run.mocky.io/v3/26deeae0-46b1-49de-8ca4-c3ef28bbf906');
+      //.get('https://run.mocky.io/v3/4215498a-dd9f-4473-9ebf-fc6981b5002b');
+      .get('https://run.mocky.io/v3/4215498a-dd9f-4473-9ebf-fc6981b5002b');
+
+  //.get('192.168.0.35:8080/getShopInfoList?lat=126.89300592139&lon=37.4835140850512&radius=1000&appId=com.hndsolution.wellhada');
+  if (response.statusCode == 200) {
+    return ShopInfoCategory.fromJsonMap(json.decode(response.body));
+  } else {
+    throw HttpException(
+      'Unexpected status code ${response.statusCode}:'
+      ' ${response.reasonPhrase}',
+      //uri: Uri.parse(query)
+    );
+  }
+}
+
+///////////////////////////////////////////////shopcategory//////////////////////////////////////
+//////
+///
+///
+///
+///
+///
+//////////////////////////////////////////////////////////////////////////////
 class ShopCategory {
   String status;
   int cnt;
@@ -502,6 +645,7 @@ Map<String, dynamic> _$ShopCategoryListToJsonMap(ShopCategoryList instance) =>
       'CATEGORY_CD': instance.categorycd,
       'FILE_URL': instance.fileurl,
     };
+
 Future<Map<String, dynamic>> getShopCategoryList() async {
   final response = await http
       .get('https://run.mocky.io/v3/1024fe77-a133-4303-a5be-6f6cb30be711');
@@ -512,6 +656,29 @@ Future<Map<String, dynamic>> getShopCategoryList() async {
     return datauser;
   } else {
     return json.decode(response.body);
+  }
+}
+
+Future<ShopCategory> getShopCategoryEntire() async {
+  // http.Response response = await http.post(
+  //   Uri.encodeFull('https://wellhada.com/getAppNoticeList'),
+  //   headers: {"Accept": "application/json"},
+  //   body: {'period': 'ALL'},
+  // );
+  final response = await http
+      //.get('https://run.mocky.io/v3/26deeae0-46b1-49de-8ca4-c3ef28bbf906');
+      //.get('https://run.mocky.io/v3/4215498a-dd9f-4473-9ebf-fc6981b5002b');
+      .get('https://run.mocky.io/v3/1024fe77-a133-4303-a5be-6f6cb30be711');
+
+  //.get('https://192.168.0.35:8080/getShopInfoList?lat=126.89300592139&lon=37.4835140850512&radius=1000&appId=com.hndsolution.wellhada');
+  if (response.statusCode == 200) {
+    return ShopCategory.fromJsonMap(json.decode(response.body));
+  } else {
+    throw HttpException(
+      'Unexpected status code ${response.statusCode}:'
+      ' ${response.reasonPhrase}',
+      //uri: Uri.parse(query)
+    );
   }
 }
 
@@ -531,88 +698,22 @@ Future<Map<String, dynamic>> getShopDetailCategoryList(String category) async {
   }
 }
 
-Future<Map<String, dynamic>> getShopInfoCategoryList() async {
-  final response = await http
-      //    .get('https://run.mocky.io/v3/c5cb3e9e-b58d-4d1d-95b3-daa77d5c0617');
-      //.get('https://run.mocky.io/v3/cdd16867-7a32-4335-a02e-b0f0fba54a3e');
-      .get('https://run.mocky.io/v3/4215498a-dd9f-4473-9ebf-fc6981b5002b');
-
-  //.get('192.168.0.35:8080/getShopInfoCategoryList?lat=126.89300592139&lon=37.4835140850512&radius=1000&appId=com.hndsolution.wellhada&category_code=MT1');
-  if (200 == response.statusCode) {
-    var datauser = json.decode(response.body);
-
-    return datauser;
-  } else {
-    return json.decode(response.body);
-  }
-}
-
-Future<Map<String, dynamic>> getShopInfokeywordList() async {
-  final response = await http
-      .get('https://run.mocky.io/v3/6b662698-5c0b-4db8-8784-9d92813d34f5');
-
-  //.get('192.168.0.35:8080/getShopInfokeywordList?lat=126.89300592139&lon=37.4835140850512&radius=1000&appId=com.hndsolution.wellhada&category_code=MT1&query=이마트');
-  if (200 == response.statusCode) {
-    var datauser = json.decode(response.body);
-
-    return datauser;
-  } else {
-    return json.decode(response.body);
-  }
-}
-
-Future<ShopInfoCategory> getShopInfoCategoryListEntire() async {
-  // http.Response response = await http.post(
-  //   Uri.encodeFull('https://wellhada.com/getAppNoticeList'),
-  //   headers: {"Accept": "application/json"},
-  //   body: {'period': 'ALL'},
-  // );
-  final response = await http
-      //.get('https://run.mocky.io/v3/26deeae0-46b1-49de-8ca4-c3ef28bbf906');
-      //.get('https://run.mocky.io/v3/4215498a-dd9f-4473-9ebf-fc6981b5002b');
-      .get('https://run.mocky.io/v3/4215498a-dd9f-4473-9ebf-fc6981b5002b');
-
-  //.get('192.168.0.35:8080/getShopInfoList?lat=126.89300592139&lon=37.4835140850512&radius=1000&appId=com.hndsolution.wellhada');
-  if (response.statusCode == 200) {
-    return ShopInfoCategory.fromJsonMap(json.decode(response.body));
-  } else {
-    throw HttpException(
-      'Unexpected status code ${response.statusCode}:'
-      ' ${response.reasonPhrase}',
-      //uri: Uri.parse(query)
-    );
-  }
-}
-
-Future<Map<String, dynamic>> getShopInfoList() async {
-  final response = await http
-      .get('https://run.mocky.io/v3/188eca15-e4af-4b1f-bad8-a9f3c6060966');
-  //.get('192.168.0.35:8080/getShopInfoList?lat=126.89300592139&lon=37.4835140850512&radius=1000&appId=com.hndsolution.wellhada');
-
-  if (200 == response.statusCode) {
-    var datauser = json.decode(response.body);
-    return datauser;
-  } else {
-    return json.decode(response.body);
-  }
-}
-
-Future<ShopInfo> getAppbarList() async {
-  // http.Response response = await http.post(
-  //   Uri.encodeFull('https://wellhada.com/getAppNoticeList'),
-  //   headers: {"Accept": "application/json"},
-  //   body: {'period': 'ALL'},
-  // );
-  final response = await http
-      .get('https://run.mocky.io/v3/188eca15-e4af-4b1f-bad8-a9f3c6060966');
-  //.get('192.168.0.35:8080/getShopInfoList?lat=126.89300592139&lon=37.4835140850512&radius=1000&appId=com.hndsolution.wellhada');
-  if (response.statusCode == 200) {
-    return ShopInfo.fromJsonMap(json.decode(response.body));
-  } else {
-    throw HttpException(
-      'Unexpected status code ${response.statusCode}:'
-      ' ${response.reasonPhrase}',
-      //uri: Uri.parse(query)
-    );
-  }
-}
+// Future<ShopInfo> getAppbarList() async {
+//   // http.Response response = await http.post(
+//   //   Uri.encodeFull('https://wellhada.com/getAppNoticeList'),
+//   //   headers: {"Accept": "application/json"},
+//   //   body: {'period': 'ALL'},
+//   // );
+//   final response = await http
+//       .get('https://run.mocky.io/v3/188eca15-e4af-4b1f-bad8-a9f3c6060966');
+//   //.get('192.168.0.35:8080/getShopInfoList?lat=126.89300592139&lon=37.4835140850512&radius=1000&appId=com.hndsolution.wellhada');
+//   if (response.statusCode == 200) {
+//     return ShopInfo.fromJsonMap(json.decode(response.body));
+//   } else {
+//     throw HttpException(
+//       'Unexpected status code ${response.statusCode}:'
+//       ' ${response.reasonPhrase}',
+//       //uri: Uri.parse(query)
+//     );
+//   }
+// }
