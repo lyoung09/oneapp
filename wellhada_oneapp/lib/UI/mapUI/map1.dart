@@ -96,14 +96,13 @@ class _Google1MapUIState extends State<Google1MapUI>
 
   @override
   void initState() {
-    category = "wellhada";
     //getShowAppBar();
-    super.initState();
+    category = "MT1";
     check = true;
-    print("check");
     _future = getShop();
     _getCurrentLocation();
     _categoryFuture = getShopCategory();
+    super.initState();
   }
 
   void dispose() {
@@ -118,13 +117,7 @@ class _Google1MapUIState extends State<Google1MapUI>
       Position pos = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
       geoPos = pos;
-      _controller.animateCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(
-          bearing: 0,
-          target: LatLng(geoPos.latitude, geoPos.longitude),
-          zoom: 15.4746,
-        ),
-      ));
+
       LatLng latlng = LatLng(geoPos.latitude, geoPos.longitude);
       //distance(geoPos.latitude, geoPos.longitude);
       _cameraPosition = new CameraPosition(target: latlng, zoom: 14.5);
@@ -287,8 +280,7 @@ class _Google1MapUIState extends State<Google1MapUI>
                       ),
                       onTap: () {
                         setState(() {
-                          category =
-                              shopCategoryList[position]['CATEGORY_CDNM'];
+                          category = shopCategoryList[position]['CATEGORY_CD'];
                         });
                       }),
                 ),
@@ -783,6 +775,64 @@ class _Google1MapUIState extends State<Google1MapUI>
             )),
       ),
     );
+  }
+
+  List<Marker> selectMarker1(List<dynamic> shopInfoList) {
+    return shopInfoList
+        .where((element) => element['category_group_code'] == category)
+        .map((element) {
+      //martBitmap = await getMarkerIcon(element['place_url'], Size(95, 95));
+
+      void martIconSet() async {
+        everyIcon = await getBytesFromCanvas(200, 100, element['place_name']);
+        iconSet[element['id']] = everyIcon;
+      }
+
+      martIconSet();
+
+      return Marker(
+          markerId: MarkerId(element['id']),
+          position:
+              LatLng(double.parse(element['y']), double.parse(element['x'])),
+          icon: BitmapDescriptor.fromBytes(iconSet[element['id']]),
+          onTap: () {
+            setState(() {
+              itemSelected = true;
+              model.id = element['id'];
+              model.distance = element['distance'];
+              model.placeName = element['place_name'];
+              model.phone = element['phone'];
+            });
+          });
+    }).toList();
+  }
+
+  List<Marker> selectWellhadaMarker1(List<dynamic> shopInfoList) {
+    return shopInfoList
+        .where((element) =>
+            element['category_group_code'] == category &&
+            element['wellhada_shop'] == "Y")
+        .map((element) {
+      //martBitmap = await getMarkerIcon(element['place_url'], Size(95, 95));
+
+      //print(element['place_name'] + ',');
+
+      return Marker(
+          markerId: MarkerId(element['id']),
+          position:
+              LatLng(double.parse(element['y']), double.parse(element['x'])),
+          icon: BitmapDescriptor.fromBytes(wellhadaIconSet[element['id']]),
+          // wellhadaIconSet[element['id']
+          onTap: () {
+            setState(() {
+              itemSelected = true;
+              model.id = element['id'];
+              model.distance = element['distance'];
+              model.placeName = element['place_name'];
+              model.phone = element['phone'];
+            });
+          });
+    }).toList();
   }
 
   List<Marker> selectMarker(List<dynamic> shopInfoList) {
@@ -1285,30 +1335,31 @@ class _Google1MapUIState extends State<Google1MapUI>
             List<dynamic> shopCategoryList = shopCategory["LIST"];
 
             List<Marker> changeWellhadaMark =
-                selectWellhadaMarker(shopInfoList);
+                selectWellhadaMarker1(shopInfoList);
 
-            List<Marker> changeMark = selectMarker(shopInfoList);
+            List<Marker> changeMark = selectMarker1(shopInfoList);
+
             //print(values.runtimeType);
 
-            allMarkers = martMarkers +
-                convenience +
-                kindergarden +
-                academy +
-                parking +
-                gasStation +
-                lodgement +
-                restaurant +
-                cafe;
+            // allMarkers = martMarkers +
+            //     convenience +
+            //     kindergarden +
+            //     academy +
+            //     parking +
+            //     gasStation +
+            //     lodgement +
+            //     restaurant +
+            //     cafe;
 
-            wellhada = martWellHadaMarkers +
-                convenienceWellHada +
-                kindergardenWellHada +
-                academyWellHada +
-                parkingWellHada +
-                gasStationWellHada +
-                lodgementWellHada +
-                restaurantWellHada +
-                cafeWellHada;
+            // wellhada = martWellHadaMarkers +
+            //     convenienceWellHada +
+            //     kindergardenWellHada +
+            //     academyWellHada +
+            //     parkingWellHada +
+            //     gasStationWellHada +
+            //     lodgementWellHada +
+            //     restaurantWellHada +
+            //     cafeWellHada;
 
             return Column(
               children: [
@@ -1359,17 +1410,20 @@ class _Google1MapUIState extends State<Google1MapUI>
                                 ),
                                 onTap: () {
                                   setState(() {
-                                    check == false
-                                        ? check = true
-                                        : check = false;
+                                    check == true
+                                        ? check = false
+                                        : check = true;
 
-                                    category != "all" &&
-                                            category != "wellhada" &&
-                                            check == false
-                                        ? category = "all"
-                                        : category == "wellhada"
-                                            ? category = "all"
-                                            : category = "wellhada";
+                                    // category != "all" &&
+                                    //         category != "wellhada" &&
+                                    //         check == false
+                                    //     ? category = "all"
+                                    //     : category == "wellhada"
+                                    //         ? category = "all"
+                                    //         : category = "wellhada";
+                                    // category == null
+                                    //     ? category = "MT1"
+                                    //     : print(category);
                                   });
                                 }),
                           ),
@@ -1377,7 +1431,8 @@ class _Google1MapUIState extends State<Google1MapUI>
                       )),
                       Expanded(
                         // wrap in Expanded
-                        child: _listview(shopCategoryList),
+                        //child: _listview(shopCategoryList),
+                        child: _list(shopCategoryList),
                       ),
                     ],
                   ),
@@ -1397,19 +1452,20 @@ class _Google1MapUIState extends State<Google1MapUI>
                             : _cameraPosition,
                         rotateGesturesEnabled: false,
                         tiltGesturesEnabled: false,
-                        markers: check == false && category == "all"
-                            ? Set.from(allMarkers)
-                            : check == false && category != "all"
+                        markers:
+                            // check == false && category == "all"
+                            //     ? Set.from(allMarkers)
+                            //     : check == false && category != "all"
+                            //         ? Set.from(changeMark)
+                            //         : check == true && category == "wellhada"
+                            //             ? Set.from(wellhada)
+                            //             : Set.from(changeWellhadaMark),
+                            check == false
                                 ? Set.from(changeMark)
-                                : check == true && category == "wellhada"
-                                    ? Set.from(wellhada)
-                                    : Set.from(changeWellhadaMark),
-                        // markers: Set.from(allMarkers),
+                                : Set.from(changeWellhadaMark),
                         myLocationEnabled: true,
                         onMapCreated: (GoogleMapController controller) {
-                          setState(() {
-                            category = "wellhada";
-                          });
+                          setState(() {});
 
                           _controller = controller;
                         },

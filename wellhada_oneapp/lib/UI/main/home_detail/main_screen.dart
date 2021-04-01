@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:ffi';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -26,22 +27,25 @@ class _MainScreenState extends State<MainScreen>
   var category;
   List shop, shopCategory;
   TabController _tabController;
-  int _tabindex = 0;
+  bool wellhada;
   Map<int, String> menuView = new Map();
+  Map<int, String> wellhadaView = new Map();
 
   LatLng _currentLocation;
   Map<int, String> distance = new Map();
-  Map<int, int> quickSortDistance = new Map();
-  List<int> nearBy;
+
   // For storing the current position
 
   @override
   void initState() {
+    wellhada = false;
     _getCurrentLocation();
     getShop();
     getShopCategory();
     _tabController = new TabController(length: 9, vsync: this)
-      ..addListener(() {});
+      ..addListener(() {
+        distance = new Map();
+      });
     super.initState();
   }
 
@@ -58,6 +62,12 @@ class _MainScreenState extends State<MainScreen>
     var a = 0.5 -
         c((lat2 - lat1) * p) / 2 +
         c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
+
+    // if ((12742 * asin(sqrt(a)) * 1000) > 1000) {
+    //   print(12742 * asin(sqrt(a)) * 1000);
+    //   return (12742 * asin(sqrt(a)) * 1000 * 1000).toStringAsFixed(0);
+    // }
+
     return (12742 * asin(sqrt(a)) * 1000).toStringAsFixed(0);
   }
 
@@ -91,6 +101,7 @@ class _MainScreenState extends State<MainScreen>
     setState(() {
       shopCategory = shopCategoryList.list;
     });
+    print(shopCategory.length);
   }
 
   bool isLastPage() {
@@ -153,112 +164,329 @@ class _MainScreenState extends State<MainScreen>
   }
 
   Widget _menuList(String code) {
-    List menuCode =
-        shopCategory.where((el) => el.categoryGroupCode == code).toList();
+    List menuCode;
+    List<int> sortedKeys;
+    LinkedHashMap sortedMap;
+    List fromUserToMarket;
+    Map<int, int> newPosition;
+    try {
+      menuCode =
+          shopCategory.where((el) => el.categoryGroupCode == code).toList();
+    } catch (e) {
+      print(e);
+      menuCode = null;
+    }
 
-    return ListView.builder(
-      scrollDirection: Axis.vertical,
-      shrinkWrap: true,
-      controller: _controller,
-      physics: ClampingScrollPhysics(),
-      itemCount: menuCode.length == null ? 0 : menuCode.length,
-      itemBuilder: (context, position) {
-        var sortedKeys;
-        LinkedHashMap sortedMap;
-        for (int i = 0; i < menuCode.length; i++) {
-          distance[i] = _coordinateDistance(
-              _currentLocation.latitude,
-              _currentLocation.longitude,
-              double.parse(menuCode[i].y),
-              double.parse(menuCode[i].x));
+    return Stack(children: [
+      ListView.builder(
+        scrollDirection: Axis.vertical,
+        shrinkWrap: true,
+        controller: _controller,
+        physics: ClampingScrollPhysics(),
+        itemCount: menuCode == null ? 0 : menuCode.length,
+        itemBuilder: (context, position) {
+          var size = MediaQuery.of(context).size;
 
-          sortedKeys = distance.keys.toList(growable: false)
-            ..sort((k1, k2) => distance[k1].compareTo(distance[k2]));
-          sortedMap = new LinkedHashMap.fromIterable(sortedKeys,
-              key: (k) => k, value: (k) => distance[k]);
-        }
+          newPosition = new Map();
 
-        var size = MediaQuery.of(context).size;
-        return InkWell(
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(right: 10),
-                    ),
-                    Container(
-                      child: Image.network(
-                        menuCode[position].placeUrl,
-                        fit: BoxFit.fill,
-                        width: 40.0,
-                        height: 40.0,
+          var alone;
+          if (menuCode.length == 1) {
+            alone = _coordinateDistance(
+                _currentLocation.latitude,
+                _currentLocation.longitude,
+                double.parse(menuCode[0].y),
+                double.parse(menuCode[0].x));
+
+            newPosition[0] = 0;
+          } else {
+            for (int i = 0; i < menuCode.length; i++) {
+              distance[i] = _coordinateDistance(
+                  _currentLocation.latitude,
+                  _currentLocation.longitude,
+                  double.parse(menuCode[i].y),
+                  double.parse(menuCode[i].x));
+              //  distance.removeWhere((key, value) => int.parse(value) > 2000);
+
+              sortedKeys = distance.keys.toList(growable: false)
+                ..sort((k1, k2) =>
+                    int.parse(distance[k1]).compareTo(int.parse(distance[k2])));
+
+              sortedMap = new LinkedHashMap.fromIterable(sortedKeys,
+                  key: (k) => k, value: (k) => distance[k]);
+            }
+
+            sortedKeys.sort();
+            List changePosition = sortedMap.keys.toList();
+
+            fromUserToMarket = sortedMap.values.toList();
+            if (int.parse(fromUserToMarket[position]) > 2000) {
+              print("hello");
+            }
+            for (int i = 0; i < changePosition.length; i++) {
+              newPosition[i] = changePosition[i];
+            }
+          }
+
+          return InkWell(
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(right: 10),
                       ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(right: 20),
-                    ),
-                    Container(
-                      width: MediaQuery.of(context).size.width - 110,
-                      child: Column(
-                        //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            menuCode[position].placeName,
-                            style: TextStyle(fontSize: 18.0),
-                          ),
-                          Row(
-                            verticalDirection: VerticalDirection.down,
-                            children: [
-                              Text(
-                                menuCode[position].addressName,
-                                style: TextStyle(fontSize: 10.0),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(left: 5, right: 5),
-                              ),
-                              ClipOval(
-                                child: Material(
-                                  color: Colors.green,
-                                  child: InkWell(
-                                    onTap: () {},
-                                    child: Icon(
-                                      Icons.add,
-                                      color: Colors.white,
-                                      size: 15,
+                      Container(
+                        child: Image.network(
+                          menuCode[newPosition[position]].placeUrl,
+                          fit: BoxFit.fill,
+                          width: 40.0,
+                          height: 40.0,
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(right: 20),
+                      ),
+                      Container(
+                        width: MediaQuery.of(context).size.width - 110,
+                        child: Column(
+                          //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              menuCode[newPosition[position]].placeName,
+                              style: TextStyle(fontSize: 18.0),
+                            ),
+                            Row(
+                              verticalDirection: VerticalDirection.down,
+                              children: [
+                                Text(
+                                  menuCode[newPosition[position]].addressName,
+                                  style: TextStyle(fontSize: 10.0),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(left: 5, right: 5),
+                                ),
+                                ClipOval(
+                                  child: Material(
+                                    color: Colors.green,
+                                    child: InkWell(
+                                      onTap: () {},
+                                      child: Icon(
+                                        Icons.add,
+                                        color: Colors.white,
+                                        size: 15,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              Spacer(),
-                              Image.asset(
-                                'assets/img/location.png',
-                                width: 20.0,
-                                height: 20.0,
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(right: 3.0),
-                              ),
-                              Text('${sortedMap[position]}m'),
-                            ],
-                          ),
-                        ],
+                                Spacer(),
+                                Image.asset(
+                                  'assets/img/location.png',
+                                  width: 20.0,
+                                  height: 20.0,
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(right: 3.0),
+                                ),
+                                Text(fromUserToMarket == null
+                                    ? '${alone}m'
+                                    : '${fromUserToMarket[position]}m'),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            onTap: () {
-              setState(() {
-                category = menuCode[position].placeName;
-                print(category);
+              onTap: () {
+                setState(() {
+                  category = menuCode[position].placeName;
+                  print(category);
+                });
               });
-            });
-      },
-    );
+        },
+      ),
+      Align(
+        alignment: Alignment.topRight,
+        child: FloatingActionButton(
+            mini: true,
+            onPressed: () {
+              setState(() {
+                wellhada == true ? wellhada = false : wellhada = true;
+              });
+            },
+            child: Icon(
+              Icons.done_sharp,
+              color: Colors.black,
+            ),
+            backgroundColor: wellhada == true ? Colors.yellow : Colors.white),
+      ),
+    ]);
+  }
+
+  Widget _wellhadaView(String code) {
+    List menuCode;
+    try {
+      menuCode = shopCategory
+          .where((el) => el.categoryGroupCode == code && el.wellhadaShop == "Y")
+          .toList();
+    } catch (e) {
+      print(e);
+      menuCode = null;
+    }
+
+    return Stack(children: [
+      ListView.builder(
+        scrollDirection: Axis.vertical,
+        shrinkWrap: true,
+        controller: _controller,
+        physics: ClampingScrollPhysics(),
+        itemCount: menuCode == null ? 0 : menuCode.length,
+        itemBuilder: (context, position) {
+          var size = MediaQuery.of(context).size;
+          List<int> sortedKeys;
+          LinkedHashMap sortedMap;
+          List fromUserToMarket;
+          Map<int, int> newPosition = new Map();
+
+          var alone;
+          if (menuCode.length < 2) {
+            alone = _coordinateDistance(
+                _currentLocation.latitude,
+                _currentLocation.longitude,
+                double.parse(menuCode[0].y),
+                double.parse(menuCode[0].x));
+
+            newPosition[0] = 0;
+          } else {
+            for (int i = 0; i < menuCode.length; i++) {
+              distance[i] = _coordinateDistance(
+                  _currentLocation.latitude,
+                  _currentLocation.longitude,
+                  double.parse(menuCode[i].y),
+                  double.parse(menuCode[i].x));
+
+              // distance.removeWhere((key, value) => int.parse(value) > 2000);
+
+              sortedKeys = distance.keys.toList(growable: false)
+                ..sort((k1, k2) =>
+                    int.parse(distance[k1]).compareTo(int.parse(distance[k2])));
+
+              sortedMap = new LinkedHashMap.fromIterable(sortedKeys,
+                  key: (k) => k, value: (k) => distance[k]);
+            }
+
+            sortedKeys.sort();
+            List changePosition = sortedMap.keys.toList();
+
+            fromUserToMarket = sortedMap.values.toList();
+
+            for (int i = 0; i < changePosition.length; i++) {
+              newPosition[i] = changePosition[i];
+            }
+          }
+
+          return InkWell(
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(right: 10),
+                      ),
+                      Container(
+                        child: Image.network(
+                          menuCode[newPosition[position]].placeUrl,
+                          fit: BoxFit.fill,
+                          width: 40.0,
+                          height: 40.0,
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(right: 20),
+                      ),
+                      Container(
+                        width: MediaQuery.of(context).size.width - 110,
+                        child: Column(
+                          //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              menuCode[newPosition[position]].placeName,
+                              style: TextStyle(fontSize: 18.0),
+                            ),
+                            Row(
+                              verticalDirection: VerticalDirection.down,
+                              children: [
+                                Text(
+                                  menuCode[newPosition[position]].addressName,
+                                  style: TextStyle(fontSize: 10.0),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(left: 5, right: 5),
+                                ),
+                                ClipOval(
+                                  child: Material(
+                                    color: Colors.green,
+                                    child: InkWell(
+                                      onTap: () {},
+                                      child: Icon(
+                                        Icons.add,
+                                        color: Colors.white,
+                                        size: 15,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Spacer(),
+                                Image.asset(
+                                  'assets/img/location.png',
+                                  width: 20.0,
+                                  height: 20.0,
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(right: 3.0),
+                                ),
+                                Text(fromUserToMarket == null
+                                    ? '${alone}m'
+                                    : '${fromUserToMarket[position]}m'),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              onTap: () {
+                setState(() {
+                  category = menuCode[position].placeName;
+                  print(category);
+                });
+              });
+        },
+      ),
+      Align(
+        alignment: Alignment.topRight,
+        child: FloatingActionButton(
+            mini: true,
+            onPressed: () {
+              setState(() {
+                wellhada == true ? wellhada = false : wellhada = true;
+              });
+            },
+            child: Icon(
+              Icons.done_sharp,
+              color: Colors.black,
+            ),
+            backgroundColor: wellhada == true ? Colors.yellow : Colors.white),
+      ),
+    ]);
   }
 
   ScrollController _controller = new ScrollController();
@@ -271,29 +499,37 @@ class _MainScreenState extends State<MainScreen>
           if (!snapshot.hasData) {
             return Text("");
           }
+
+          //load empty data/null data UI
+          if (snapshot.connectionState == ConnectionState.done &&
+              (!snapshot.hasData ||
+                  snapshot.data == null ||
+                  snapshot.data.isEmpty)) return Container();
+
           Map<String, dynamic> shopInfo = snapshot.data;
 
           List<dynamic> shopInfoList = shopInfo["LIST"];
 
           List<Tab> tabs = new List<Tab>();
+
           List<Widget> menuList = List<Widget>();
+          List<Widget> wellhadaList = List<Widget>();
 
           for (int i = 0; i < shopInfoList.length; i++) {
-            tabs.add(Tab(
-              child: Text(
-                shopInfoList[i]['CATEGORY_CDNM'],
-                style: TextStyle(color: Colors.black),
+            tabs.add(
+              Tab(
+                child: Text(
+                  shopInfoList[i]['CATEGORY_CDNM'],
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
-            ));
+            );
             menuView[i] = shopInfoList[i]["CATEGORY_CD"];
             menuList.add(_menuList(menuView[i]));
-          }
 
-          void setstates() async {
-            _menuList("MT1");
+            wellhadaView[i] = shopInfoList[i]["CATEGORY_CD"];
+            wellhadaList.add(_wellhadaView(wellhadaView[i]));
           }
-
-          setstates();
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -332,7 +568,9 @@ class _MainScreenState extends State<MainScreen>
                     }),
               ),
               Expanded(
-                child: TabBarView(controller: _tabController, children: menuList
+                child: TabBarView(
+                    controller: _tabController,
+                    children: wellhada == true ? wellhadaList : menuList
                     //  [
                     //   _menuList(menuView[_tabController.index]),
                     //   _menuList(menuView[_tabController.index]),
