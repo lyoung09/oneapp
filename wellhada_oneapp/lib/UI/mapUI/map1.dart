@@ -74,6 +74,7 @@ class _Google1MapUIState extends State<Google1MapUI>
   List shops, entireList;
   CameraPosition _cameraPosition;
   bool wellHadaCheck, check;
+  bool wellhadaDefault;
 
   //googlemap marker icon
   @override
@@ -99,9 +100,9 @@ class _Google1MapUIState extends State<Google1MapUI>
     //getShowAppBar();
     category = "MT1";
     check = true;
-    _future = getShop();
     _getCurrentLocation();
     _categoryFuture = getShopCategory();
+    _future = getShop();
     super.initState();
   }
 
@@ -140,15 +141,6 @@ class _Google1MapUIState extends State<Google1MapUI>
     return 12742 * asin(sqrt(a));
   }
 
-  void distance(lat1, lat2, lon1, lon2) {
-    double totalDistance = 0;
-    // for (var i = 0; i < data.length - 1; i++) {
-    //   totalDistance += calculateDistance(data[i]["lat"], data[i]["lng"],
-    //       data[i + 1]["lat"], data[i + 1]["lng"]);
-    // }
-    print(totalDistance);
-  }
-
   Future<Map<String, dynamic>> getShopCategory() async {
     return shopInfoListItem.getShopCategoryList();
   }
@@ -157,15 +149,12 @@ class _Google1MapUIState extends State<Google1MapUI>
     final entireShopList =
         await shopInfoListItem.getShopInfoCategoryListEntire();
 
-    setState(() {
-      entireList = entireShopList.list;
-    });
+    List<shopInfoListItem.ShopInfoCategoryList> shopInfo = entireShopList.list;
 
-    List<shopInfoListItem.ShopInfoCategoryList> shopInfo = entireList;
-
-    for (int i = 0; i < shopInfo.length; i++) {
-      wellhadaIcon = await getBytesFromCanvas(200, 100, shopInfo[i].placeName);
-      wellhadaIconSet[shopInfo[i].id] = wellhadaIcon;
+    for (int i = 0; i < entireShopList.list.length; i++) {
+      everyIcon =
+          await getBytesFromCanvas(200, 100, entireShopList.list[i].placeName);
+      iconSet[shopInfo[i].id] = everyIcon;
     }
 
     return shopInfoListItem.getShopInfoCategoryList();
@@ -190,17 +179,6 @@ class _Google1MapUIState extends State<Google1MapUI>
           bottomRight: radius,
         ),
         paint);
-
-    // canvas.drawRRect(
-    //     RRect.fromRectAndCorners(
-    //       Rect.fromLTWH(15, 10, width.toDouble() - 10, height.toDouble() - 10),
-    //       topLeft: radius,
-    //       topRight: radius,
-    //       bottomLeft: radius,
-    //       bottomRight: radius,
-    //     ),
-    //     radiusPaint);
-    // // Add image
 
     TextPainter painter = TextPainter(
       textDirection: TextDirection.ltr,
@@ -816,12 +794,20 @@ class _Google1MapUIState extends State<Google1MapUI>
       //martBitmap = await getMarkerIcon(element['place_url'], Size(95, 95));
 
       //print(element['place_name'] + ',');
+      void martIconSet() async {
+        wellhadaIcon =
+            await getBytesFromCanvas(200, 100, element['place_name']);
+        wellhadaIconSet[element['id']] = wellhadaIcon;
+      }
 
+      martIconSet();
       return Marker(
           markerId: MarkerId(element['id']),
           position:
               LatLng(double.parse(element['y']), double.parse(element['x'])),
-          icon: BitmapDescriptor.fromBytes(wellhadaIconSet[element['id']]),
+          // icon: wellhadaIcon == null
+          //     ? null
+          //     : BitmapDescriptor.fromBytes(wellhadaIconSet[element['id']]),
           // wellhadaIconSet[element['id']
           onTap: () {
             setState(() {
@@ -1338,7 +1324,6 @@ class _Google1MapUIState extends State<Google1MapUI>
                 selectWellhadaMarker1(shopInfoList);
 
             List<Marker> changeMark = selectMarker1(shopInfoList);
-
             //print(values.runtimeType);
 
             // allMarkers = martMarkers +

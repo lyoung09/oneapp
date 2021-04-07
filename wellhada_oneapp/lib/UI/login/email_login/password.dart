@@ -66,7 +66,7 @@ class _Email_passwordState extends State<Email_password> {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
     return Scaffold(
-      resizeToAvoidBottomPadding: false,
+      //   resizeToAvoidBottomPadding: false,
       body: Container(
         child: Column(
           children: [

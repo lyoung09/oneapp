@@ -41,7 +41,7 @@ class _Email_passwordCheckState extends State<Email_passwordCheck> {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
     return Scaffold(
-      resizeToAvoidBottomPadding: false,
+      //resizeToAvoidBottomPadding: false,
       body: Container(
         child: Column(
           children: [
