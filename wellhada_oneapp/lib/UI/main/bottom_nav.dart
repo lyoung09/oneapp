@@ -3,9 +3,9 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_detail/private_info.dart';
 import 'package:wellhada_oneapp/UI/main/home_screen.dart';
 
-import 'package:wellhada_oneapp/UI/main/map_scene.dart';
-import 'package:wellhada_oneapp/UI/mapUI/map.dart';
 import 'package:wellhada_oneapp/model/menu/drawer_detail/qr_34.dart';
+
+import 'home_detail/map_scene.dart';
 
 class BottomNav extends StatefulWidget {
   @override

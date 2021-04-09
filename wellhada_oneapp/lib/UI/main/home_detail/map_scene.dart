@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wellhada_oneapp/UI/banner/top_banner.dart';
 import 'package:wellhada_oneapp/UI/mapUI/map.dart';
-import 'package:wellhada_oneapp/UI/mapUI/map1.dart';
 
 class MapScreen extends StatefulWidget {
   @override
@@ -35,7 +34,6 @@ class _MapScreenState extends State<MapScreen> {
               height: MediaQuery.of(context).size.height * 0.2,
               width: MediaQuery.of(context).size.width,
               child: TopBanner()),
-          Expanded(child: Google1MapUI()),
         ],
       ),
     );

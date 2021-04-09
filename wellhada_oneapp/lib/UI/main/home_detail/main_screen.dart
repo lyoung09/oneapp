@@ -1,19 +1,22 @@
 import 'dart:collection';
 import 'dart:ffi';
-
+import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/UI/banner/main_banner.dart';
+import 'package:wellhada_oneapp/UI/main/home_screen.dart';
 import 'package:wellhada_oneapp/listitem/shop/shopInfoListItem.dart'
     as shopInfoListItem;
 import 'package:hexcolor/hexcolor.dart';
 import 'dart:math' show cos, sqrt, asin;
 
 import 'package:wellhada_oneapp/listitem/shop/shopInfoListItem.dart';
+import 'package:wellhada_oneapp/model/map/map_model.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -37,9 +40,9 @@ class _MainScreenState extends State<MainScreen>
   LatLng _currentLocation;
   Map<int, String> initDistance = new Map();
   Map<int, String> distance = new Map();
+  var lat, lng;
 
   // For storing the current position
-
   @override
   void initState() {
     _getCurrentLocation();
@@ -49,6 +52,7 @@ class _MainScreenState extends State<MainScreen>
       ..addListener(() {
         distance = new Map();
       });
+
     super.initState();
   }
 
@@ -58,6 +62,13 @@ class _MainScreenState extends State<MainScreen>
       super.setState(fn);
     }
   }
+
+  // @override
+  // void didChangeDependencies() {
+  //   _currentLocation = Provider.of<LatLng>(context);
+
+  //   super.didChangeDependencies();
+  // }
 
   String _coordinateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
@@ -69,21 +80,17 @@ class _MainScreenState extends State<MainScreen>
     return ((12742 * asin(sqrt(a)) * 1000)).toStringAsFixed(0);
   }
 
-  _getCurrentLocation() async {
-    Position geoPos;
-    try {
-      _currentLocation = LatLng(37.4835706, 126.8931126);
+  void _getCurrentLocation() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
 
-      geoPos = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.bestForNavigation);
+    setState(() {
+      lat = prefs.getDouble("lat");
+      lng = prefs.getDouble("lng");
 
-      _currentLocation = LatLng(geoPos.latitude, geoPos.longitude);
-    } catch (e, stackTrace) {
-      geoPos = await Geolocator.getLastKnownPosition();
-      _currentLocation = LatLng(geoPos.latitude, geoPos.longitude);
-      print(stackTrace);
-    }
-    return _currentLocation;
+      _currentLocation = LatLng(lat, lng);
+    });
+
+    //return _currentLocation;
   }
 
   void getShop() async {
@@ -454,13 +461,8 @@ class _MainScreenState extends State<MainScreen>
         future: getShops(),
         builder: (context, AsyncSnapshot snapshot) {
           if (!snapshot.hasData) {
-            return Text("");
+            return Center(child: CupertinoActivityIndicator());
           }
-
-          //load empty data/null data UI
-          if (!snapshot.hasData ||
-              snapshot.data == null ||
-              snapshot.data.isEmpty) return Center(child: Text(""));
 
           Map<String, dynamic> shopInfo = snapshot.data;
 
@@ -496,34 +498,23 @@ class _MainScreenState extends State<MainScreen>
                 // child: Text(widget.text,style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold),),
               ),
               Container(
-                height: 20,
-                child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    shrinkWrap: true,
-                    itemCount:
-                        shopInfoList == null ? null : shopInfoList.length,
-                    itemBuilder: (context, position) {
-                      return Padding(
-                        padding: EdgeInsets.only(left: 4),
-                        child: DefaultTabController(
-                          length: shopInfoList.length,
-                          child: TabBar(
-                            labelColor: Colors.black,
-                            unselectedLabelColor: Colors.grey.shade400,
-                            labelStyle: TextStyle(
-                                fontSize: 11, fontWeight: FontWeight.w500),
-                            unselectedLabelStyle: TextStyle(
-                                fontSize: 10, fontWeight: FontWeight.w500),
-                            tabs: tabs,
-                            controller: _tabController,
-                            isScrollable: true,
-                            indicatorWeight: 3,
-                            indicatorColor: Colors.black,
-                          ),
-                        ),
-                      );
-                    }),
-              ),
+                  height: 20,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 4),
+                    child: TabBar(
+                      labelColor: Colors.black,
+                      unselectedLabelColor: Colors.grey.shade400,
+                      labelStyle:
+                          TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                      unselectedLabelStyle:
+                          TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
+                      tabs: tabs,
+                      controller: _tabController,
+                      isScrollable: true,
+                      indicatorWeight: 3,
+                      indicatorColor: Colors.black,
+                    ),
+                  )),
               Expanded(
                 child: TabBarView(
                     controller: _tabController,

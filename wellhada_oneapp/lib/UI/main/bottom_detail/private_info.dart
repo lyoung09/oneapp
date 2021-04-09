@@ -3,12 +3,11 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:wellhada_oneapp/UI/login/login.dart';
 import 'package:wellhada_oneapp/UI/main/home_detail/main_screen.dart';
+import 'package:wellhada_oneapp/UI/main/home_detail/map_scene.dart';
 
-import 'package:wellhada_oneapp/UI/main/map_scene.dart';
 import 'package:wellhada_oneapp/model/menu/drawer_detail/qr_34.dart';
 
 import '../home_screen.dart';
-import '../map_scene.dart';
 
 class PriavateInfo extends StatefulWidget {
   @override

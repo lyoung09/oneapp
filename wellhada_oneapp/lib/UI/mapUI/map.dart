@@ -1,69 +1,307 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
+import 'dart:typed_data';
+import 'dart:ui';
+import 'dart:ui' as ui;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wellhada_oneapp/model/map/map_model.dart' as aa;
+import 'package:wellhada_oneapp/listitem/shop/shopInfoListItem.dart'
+    as shopInfoListItem;
 
 import 'package:wellhada_oneapp/model/map/map_model.dart';
-import 'package:wellhada_oneapp/model/map/my_location.dart';
 
 class GoogleMapUI extends StatefulWidget {
   @override
-  _GoogleMapUIState createState() => _GoogleMapUIState();
+  _Google1MapUIState createState() => _Google1MapUIState();
 }
 
-class _GoogleMapUIState extends State<GoogleMapUI> {
-  MapModel model = new MapModel();
-  Future _future;
-  List<Marker> allMarkers = [];
-  List<Marker> cafeMarker = [];
-  List<Marker> restaurantMarker, otherMarker = [];
+class _Google1MapUIState extends State<GoogleMapUI>
+    with AutomaticKeepAliveClientMixin<GoogleMapUI> {
+  var lat;
+  var lng;
+  _Google1MapUIState();
 
-  GoogleMapController _controller;
-  int a = 0;
+  Map_model model = new Map_model();
+
+  @override
+  bool get wantKeepAlive {
+    return true;
+  }
+
+  Uint8List everyIcon, wellhadaIcon;
+  Map<String, Uint8List> iconSet = new Map();
+  Map<String, Uint8List> wellhadaIconSet = new Map();
+  // button click
+  String category;
+
+  // contanier boolean
   bool itemSelected;
-  BitmapDescriptor mapMarker;
-  MyMapModel myMapModel = new MyMapModel();
-  var currentlat = 37.4835727;
-  var currentlng = 126.8931279;
+  Future _categoryFuture;
+  GoogleMapController _controller;
+  Completer<GoogleMapController> _controllerGoogleMap = Completer();
+  LatLng _currentLocation;
+  var geoLocator = Geolocator();
+  CameraPosition _cameraPosition;
+
+  List<dynamic> shopInfoList = [];
+
+  //googlemap marker icon
 
   @override
   void initState() {
-    // TODO: implement initState
-
-    print("hi");
     super.initState();
-    //_location();
-
-    setCustomMarker();
+    //getShowAppBar();
+    _sendLocation();
+    category = "MT1";
+    itemSelected = false;
+    getShop();
+    _categoryFuture = getShopCategory();
   }
 
-  void setCustomMarker() async {
-    // mapMarker = await BitmapDescriptor.fromAssetImage(
-    //     ImageConfiguration(size: Size(4.0, 4.0)), 'assets/data/img/cafe.PNG');
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
+  void dispose() {
+    getShopCategory();
+    _sendLocation();
+    getShop();
+    super.dispose();
+  }
+
+  // @override
+  // void didChangeDependencies() {
+  //   setState(() {});
+  //   _currentLocation = Provider.of<LatLng>(context);
+  //   // -
+  //   super.didChangeDependencies();
+  // }
+
+  MyMapModel ma = MyMapModel();
+  MyClass mc = new MyClass();
+  void _sendLocation() async {
+    print("method : ${ma.methodLat()}");
+    print("method : ${mc.aProperty}");
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      lat = prefs.getDouble("lat");
+      lng = prefs.getDouble("lng");
+    });
+
+    _currentLocation = LatLng(lat, lng);
+    _cameraPosition = new CameraPosition(target: _currentLocation, zoom: 14.5);
+
+    //distance(geoPos.latitude, geoPos.longitude);
+  }
+
+  _getCurrentLocation() async {
+    Position geoPos;
+    try {
+      Position pos = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      geoPos = pos;
+
+      _currentLocation = LatLng(geoPos.latitude, geoPos.longitude);
+      //distance(geoPos.latitude, geoPos.longitude);
+      _controller.animateCamera(CameraUpdate.newCameraPosition(
+        CameraPosition(target: _currentLocation, zoom: 14.4746),
+      ));
+    } catch (e, stackTrace) {
+      geoPos = await Geolocator.getLastKnownPosition();
+      _currentLocation = LatLng(geoPos.latitude, geoPos.longitude);
+      _controller.animateCamera(CameraUpdate.newCameraPosition(
+        CameraPosition(target: _currentLocation, zoom: 14.4746),
+      ));
+      print(stackTrace);
+    }
+  }
+
+  _determinePosition() async {
+    bool serviceEnabled;
+
+    bool isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
+    Position geoPos;
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    print(isLocationServiceEnabled);
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+    geoPos = await Geolocator.getLastKnownPosition();
+    _currentLocation = LatLng(geoPos.latitude, geoPos.longitude);
+
+    _controller.animateCamera(CameraUpdate.newCameraPosition(
+      CameraPosition(target: _currentLocation, zoom: 14.4746),
+    ));
+  }
+
+  double _coordinateDistance(lat1, lon1, lat2, lon2) {
+    var p = 0.017453292519943295;
+    var c = cos;
+    var a = 0.5 -
+        c((lat2 - lat1) * p) / 2 +
+        c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
+    return 12742 * asin(sqrt(a));
+  }
+
+  Future<Map<String, dynamic>> getShopCategory() async {
+    return shopInfoListItem.getShopCategoryList();
+  }
+
+  void getShop() async {
+    final entireShopList =
+        await shopInfoListItem.getShopInfoCategoryListEntire();
+
+    for (int i = 0; i < entireShopList.list.length; i++) {
+      wellhadaIcon =
+          await getBytesFromCanvas(200, 100, entireShopList.list[i].placeName);
+      wellhadaIconSet[entireShopList.list[i].id] = wellhadaIcon;
+    }
+
+    setState(() {
+      shopInfoList = entireShopList.list;
+    });
+  }
+
+  Future<Uint8List> getBytesFromCanvas(
+      int width, int height, String title) async {
+    final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(pictureRecorder);
+    final Paint paint = Paint()..color = Colors.white;
+    final Radius radius = Radius.circular(20.0);
+    final radiusPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4.0
+      ..color = Colors.indigo;
+    canvas.drawRRect(
+        RRect.fromRectAndCorners(
+          Rect.fromLTWH(0.0, 0.0, width.toDouble(), height.toDouble()),
+          topLeft: radius,
+          topRight: radius,
+          bottomLeft: radius,
+          bottomRight: radius,
+        ),
+        paint);
+
+    TextPainter painter = TextPainter(
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.left,
+    );
+
+    painter.text = TextSpan(
+      text: title.length > 6 ? "${title.substring(0, 6)}..." : "${title}",
+      style: TextStyle(fontSize: 25.0, color: Colors.black),
+    );
+    painter.layout();
+    painter.paint(
+        canvas,
+        Offset((width * 0.5) - painter.width * 0.5,
+            (height * 0.5) - painter.height * 0.5));
+    final img = await pictureRecorder.endRecording().toImage(width, height);
+    final data = await img.toByteData(format: ui.ImageByteFormat.png);
+    return data.buffer.asUint8List();
+  }
+
+  void moveCamera(GoogleMapController _controller) async {
+    setState(() {
+      _controller.moveCamera(CameraUpdate.newLatLng(LatLng(lat, lng)));
+      print('lat ${lat} , lng ${lng}');
+    });
+    //setState((){markers[id]=markers[id].copyWith(positionParam:LatLng(yournewlat,your new long));});
+  }
+
+  Future<ui.Image> getImage(String path) async {
+    Completer<ImageInfo> completer = Completer();
+    var img = new NetworkImage(path);
+    img.resolve(ImageConfiguration()).addListener(
+      ImageStreamListener(
+        (ImageInfo info, bool _) {
+          completer.complete(info);
+        },
+      ),
+    );
+    ImageInfo imageInfo = await completer.future;
+    return imageInfo.image;
+  }
+
+  Widget _list(List<dynamic> shopCategoryList) {
+    return ListView.builder(
+        scrollDirection: Axis.horizontal,
+        shrinkWrap: true,
+        itemCount: shopCategoryList == null ? 0 : shopCategoryList.length,
+        itemBuilder: (context, position) {
+          return Container(
+            alignment: Alignment.topCenter,
+            child: ClipOval(
+              child: Material(
+                color: Colors.white, // button color
+                child: Container(
+                  decoration: new BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: new Border.all(
+                      color: Colors.indigo,
+                      width: 1.0,
+                    ),
+                  ),
+                  child: InkWell(
+                      child: SizedBox(
+                        width: 65,
+                        height: 55,
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(top: 4.0, bottom: 1.0),
+                            ),
+                            Image(
+                              image: AssetImage('assets/img/cafe.png'),
+                              width: 25,
+                              height: 25,
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(bottom: 1.0),
+                            ),
+                            Text(
+                              shopCategoryList[position]['CATEGORY_CDNM'],
+                              style: TextStyle(fontSize: 13),
+                            )
+                          ],
+                        ),
+                      ),
+                      onTap: () {
+                        setState(() {
+                          category = shopCategoryList[position]['CATEGORY_CD'];
+                        });
+                      }),
+                ),
+              ),
+            ),
+          );
+        });
   }
 
   Widget _container() {
-    //print(model.id);
     return Material(
       child: Container(
-        height: MediaQuery.of(context).size.height * 0.18,
+        height: MediaQuery.of(context).size.height * 0.1,
         width: MediaQuery.of(context).size.width * 0.7,
         decoration: BoxDecoration(
-            border: Border.all(
-              color: Hexcolor('#ffffff'),
-            ),
-            borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(15.0),
-                topRight: Radius.circular(15.0))),
+          border: Border.all(color: Colors.black),
+          borderRadius: BorderRadius.all(Radius.circular(25.0)),
+        ),
         child: InkWell(
             onTap: () {
               setState(() {
@@ -72,34 +310,29 @@ class _GoogleMapUIState extends State<GoogleMapUI> {
             },
             child: Row(
               children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.8,
-                      width: MediaQuery.of(context).size.width * 0.35,
-                      child: Image.asset(model.img)),
+                Padding(
+                  padding: EdgeInsets.only(left: 13.0),
                 ),
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(model.name,
-                        textAlign: TextAlign.left,
+                    Text(model.placeName,
                         style: TextStyle(
                             fontFamily: 'Godo',
                             fontWeight: FontWeight.w900,
-                            fontSize: 15.0,
+                            fontSize: 17.0,
                             color: Hexcolor('#333333'))),
-                    Row(
-                      children: <Widget>[
-                        Text("1"),
-                        Text("1"),
-                      ],
-                    ),
-                    Text(model.distance.toStringAsFixed(2) + 'km',
-                        textAlign: TextAlign.left,
+                    Text(model.phone,
                         style: TextStyle(
                             fontFamily: 'Godo',
-                            fontWeight: FontWeight.w900,
-                            fontSize: 10.0,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 12.0,
+                            color: Hexcolor('#333333'))),
+                    Text(model.distance + 'm',
+                        style: TextStyle(
+                            fontFamily: 'Godo',
+                            fontWeight: FontWeight.w500,
+                            fontSize: 12.0,
                             color: Hexcolor('#333333')))
                   ],
                 ),
@@ -109,256 +342,181 @@ class _GoogleMapUIState extends State<GoogleMapUI> {
     );
   }
 
+  // List<Marker> selectMarker(List<dynamic> shopInfoList) {
+  //   return shopInfoList
+  //       .where((element) => element.categoryGroupCode == category)
+  //       .map((element) {
+  //     return Marker(
+  //         markerId: MarkerId(element.id),
+  //         position: LatLng(double.parse(element.y), double.parse(element.x)),
+  //         icon: BitmapDescriptor.fromBytes(iconSet[element.id]),
+  //         onTap: () {
+  //           setState(() {
+  //             itemSelected = true;
+  //             model.id = element.id;
+  //             model.distance = element.distance;
+  //             model.placeName = element.placeName;
+  //             model.phone = element.phone;
+  //           });
+  //         });
+  //   }).toList();
+  // }
+
+  List<Marker> selectWellhadaMarker(List<dynamic> shopInfoList) {
+    return shopInfoList
+        .where((element) =>
+            element.categoryGroupCode == category &&
+            element.wellhadaShop == "Y")
+        .map((element) {
+      return Marker(
+          markerId: MarkerId(element.id),
+          position: LatLng(double.parse(element.y), double.parse(element.x)),
+          icon: BitmapDescriptor.fromBytes(wellhadaIconSet[element.id]),
+          //wellhadaIconSet[element['id']
+          onTap: () {
+            setState(() {
+              itemSelected = true;
+              model.id = element.id;
+              model.distance = element.distance;
+              model.placeName = element.placeName;
+              model.phone = element.phone;
+            });
+          });
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(children: [
       Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
         child: FutureBuilder(
-          future: _future,
+          future: _categoryFuture,
           builder: (context, AsyncSnapshot snapshot) {
             if (!snapshot.hasData) {
-              return CircularProgressIndicator();
+              return Text("");
             }
-            List<dynamic> parsedJson = jsonDecode(snapshot.data);
-            allMarkers = parsedJson.map((element) {
-              return Marker(
-                  markerId: MarkerId(element['id']),
-                  position: LatLng(element['lat'], element['lng']),
-                  icon: mapMarker,
-                  // infoWindow: InfoWindow(
-                  //   title: 'title :' + element['title'],
-                  //   snippet: 'tel : ' + element['appPhoneNum'],
 
-                  //   //onTap: _launchURL,
-                  // ),
-                  onTap: () {
-                    setState(() {
-                      itemSelected = true;
-                      model.id = element['id'];
-                      model.name = element['name'];
-                      model.img = element['img'];
-                      model.phone = element['phone'];
-                      model.sorting = element['sorting'];
-                      model.sorting = element['sorting'];
-                      model.distance = Geolocator.distanceBetween(currentlat,
-                              currentlng, element['lat'], element['lng']) *
-                          0.001;
-                    });
-                  });
-            }).toList();
+            Map<String, dynamic> shopCategory = snapshot.data;
+            List<dynamic> shopCategoryList = shopCategory["LIST"];
 
-            cafeMarker =
-                parsedJson.where((map) => map['sorting'] == 1).map((element) {
-              return Marker(
-                  markerId: MarkerId(element['id']),
-                  position: LatLng(element['lat'], element['lng']),
-                  // infoWindow: InfoWindow(
-                  //   title: 'title :' + element['title'],
-                  //   snippet: 'tel : ' + element['appPhoneNum'],
+            List<Marker> changeWellhadaMark =
+                selectWellhadaMarker(shopInfoList);
 
-                  //   //onTap: _launchURL,
-                  // ),
-                  onTap: () {
-                    setState(() {
-                      itemSelected = true;
-                      model.id = element['id'];
-                      model.name = element['name'];
-                      model.img = element['img'];
-                      model.phone = element['phone'];
-                      model.sorting = element['sorting'];
-                      model.sorting = element['sorting'];
-                      model.distance = Geolocator.distanceBetween(currentlat,
-                              currentlng, element['lat'], element['lng']) *
-                          0.001;
-                    });
-                  });
-            }).toList();
+            // List<Marker> changeMark = selectMarker(shopInfoList);
 
-            restaurantMarker =
-                parsedJson.where((map) => map['sorting'] == 2).map((element) {
-              return Marker(
-                  markerId: MarkerId(element['id']),
-                  position: LatLng(element['lat'], element['lng']),
-                  // infoWindow: InfoWindow(
-                  //   title: 'title :' + element['title'],
-                  //   snippet: 'tel : ' + element['appPhoneNum'],
-
-                  //   //onTap: _launchURL,
-                  // ),
-                  onTap: () {
-                    setState(() {
-                      itemSelected = true;
-                      model.id = element['id'];
-                      model.name = element['name'];
-                      model.img = element['img'];
-                      model.phone = element['phone'];
-                      model.sorting = element['sorting'];
-                      model.sorting = element['sorting'];
-                      model.distance = Geolocator.distanceBetween(currentlat,
-                              currentlng, element['lat'], element['lng']) *
-                          0.001;
-                      //          <
-                      //     1
-                      // ? Geolocator.distanceBetween(37.4835727, 126.8931279,
-                      //         element['lat'], element['lng']) *
-                      //     10
-                      // : Geolocator.distanceBetween(37.4835727, 126.8931279,
-                      //         element['lat'], element['lng']) *
-                      //     0.001;
-                    });
-                  });
-            }).toList();
-
-            otherMarker =
-                parsedJson.where((map) => map['sorting'] == 3).map((element) {
-              return Marker(
-                  markerId: MarkerId(element['id']),
-                  position: LatLng(element['lat'], element['lng']),
-                  // infoWindow: InfoWindow(
-                  //   title: 'title :' + element['title'],
-                  //   snippet: 'tel : ' + element['appPhoneNum'],
-
-                  //   //onTap: _launchURL,
-                  // ),
-                  onTap: () {
-                    setState(() {
-                      itemSelected = true;
-                      model.id = element['id'];
-                      model.name = element['name'];
-                      model.img = element['img'];
-                      model.phone = element['phone'];
-                      model.sorting = element['sorting'];
-                      model.distance = Geolocator.distanceBetween(currentlat,
-                              currentlng, element['lat'], element['lng']) *
-                          0.001;
-                    });
-                  });
-            }).toList();
-
-            return Stack(
+            return Column(
               children: [
                 Container(
-                  height: MediaQuery.of(context).size.height * 0.8,
-                  child: GoogleMap(
-                    gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
-                      new Factory<OneSequenceGestureRecognizer>(
-                        () => new EagerGestureRecognizer(),
-                      ),
-                    ].toSet(),
-                    initialCameraPosition: CameraPosition(
-                        target: LatLng(currentlat, currentlng), zoom: 15.4746),
-                    myLocationEnabled: true,
-                    markers: a == 0
-                        ? Set.of(allMarkers)
-                        : a == 1
-                            ? Set.of(cafeMarker)
-                            : a == 2
-                                ? Set.of(restaurantMarker)
-                                : a == 3
-                                    ? Set.of(otherMarker)
-                                    : Text(''),
-                    onMapCreated: mapCreated,
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.topCenter,
+                  height: MediaQuery.of(context).size.height * 0.1,
+                  width: MediaQuery.of(context).size.width,
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      ClipOval(
-                        child: Material(
-                            color: Colors.white, // button color
-                            child: InkWell(
-                                splashColor: Colors.black, // inkwell color
-                                child: SizedBox(
-                                  width: 50,
-                                  height: 50,
-                                  child: Icon(Icons.add),
-                                ),
-                                onTap: () {
-                                  setState(() {
-                                    a = 0;
-                                  });
-                                })),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 5, right: 5),
-                      ),
-                      ClipOval(
-                        child: Material(
-                            color: Colors.white, // button color
-                            child: InkWell(
-                                splashColor: Colors.black, // inkwell color
-                                child: SizedBox(
-                                  width: 50,
-                                  height: 50,
-                                  child: Icon(Icons.ac_unit),
-                                ),
-                                onTap: () {
-                                  setState(() {
-                                    a = 1;
-                                    //1은 카페
-                                  });
-                                })),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 5, right: 5),
-                      ),
-                      ClipOval(
-                        child: Material(
-                            color: Colors.white, // button color
-                            child: InkWell(
-                                splashColor: Colors.black, // inkwell color
-                                child: SizedBox(
-                                  width: 50,
-                                  height: 50,
-                                  child: Icon(Icons.zoom_out_map_outlined),
-                                ),
-                                onTap: () {
-                                  setState(() {
-                                    a = 2;
-                                  });
-
-                                  //2 레스토랑
-                                })),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 5, right: 5),
-                      ),
-                      ClipOval(
-                        child: Material(
-                            color: Colors.white, // button color
-                            child: InkWell(
-                                splashColor: Colors.black, // inkwell color
-                                child: SizedBox(
-                                  width: 50,
-                                  height: 50,
-                                  child: Icon(Icons.mic),
-                                ),
-                                onTap: () {
-                                  setState(() {
-                                    a = 3;
-                                  });
-                                })),
+                      // Container(
+                      //     child: ClipOval(
+                      //   child: Material(
+                      //     color: check == true
+                      //         ? Colors.yellow
+                      //         : Colors.white, // button color
+                      //     child: Container(
+                      //       decoration: new BoxDecoration(
+                      //         shape: BoxShape.circle,
+                      //         border: new Border.all(
+                      //           color: Colors.yellow,
+                      //           width: 1.0,
+                      //         ),
+                      //       ),
+                      //       child: InkWell(
+                      //           child: SizedBox(
+                      //             width: 65,
+                      //             height: 55,
+                      //             child: Column(
+                      //               children: [
+                      //                 Padding(
+                      //                   padding: EdgeInsets.only(
+                      //                       top: 4.0, bottom: 1.0),
+                      //                 ),
+                      //                 Image(
+                      //                   image:
+                      //                       AssetImage('assets/img/cafe.png'),
+                      //                   width: 25,
+                      //                   height: 25,
+                      //                 ),
+                      //                 Padding(
+                      //                   padding: EdgeInsets.only(bottom: 1.0),
+                      //                 ),
+                      //                 Text(
+                      //                   "가맹점",
+                      //                   style: TextStyle(fontSize: 13),
+                      //                 )
+                      //               ],
+                      //             ),
+                      //           ),
+                      //           onTap: () {
+                      //             setState(() {
+                      //               check == true
+                      //                   ? check = false
+                      //                   : check = true;
+                      //             });
+                      //           }),
+                      //     ),
+                      //   ),
+                      // )),
+                      Expanded(
+                        child: _list(shopCategoryList),
                       ),
                     ],
                   ),
                 ),
-                itemSelected == true
-                    ? Align(
-                        alignment: Alignment.bottomCenter, child: _container())
-                    : Text("")
+                Padding(
+                  padding: EdgeInsets.only(top: 2.0, bottom: 2.0),
+                ),
+                Stack(
+                  children: [
+                    Container(
+                      height: MediaQuery.of(context).size.height * 0.5,
+                      child: GoogleMap(
+                        initialCameraPosition: CameraPosition(
+                          target: _currentLocation,
+                          zoom: 14.4746,
+                        ),
+                        rotateGesturesEnabled: false,
+                        tiltGesturesEnabled: false,
+                        markers: Set.from(changeWellhadaMark),
+                        myLocationEnabled: true,
+                        onMapCreated: (GoogleMapController controller) {
+                          _controller = controller;
+                        },
+                        onCameraMove: (position) {
+                          lat = position.target.latitude;
+                          lng = position.target.longitude;
+                          _currentLocation = LatLng(lat, lng);
+                        },
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: FloatingActionButton(
+                        onPressed: _determinePosition,
+                        child: Icon(
+                          Icons.location_on,
+                          color: Colors.yellow,
+                        ),
+                        backgroundColor: Colors.white,
+                      ),
+                    ),
+                    Positioned(
+                        bottom: 0,
+                        width: MediaQuery.of(context).size.width,
+                        child: itemSelected == true ? _container() : Text("")),
+                  ],
+                ),
               ],
             );
           },
         ),
       ),
     ]);
-  }
-
-  void mapCreated(controller) {
-    setState(() {
-      _controller = controller;
-    });
   }
 }

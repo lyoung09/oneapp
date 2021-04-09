@@ -5,6 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:kakao_flutter_sdk/all.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,17 +13,15 @@ import 'package:overlay_support/overlay_support.dart';
 import 'package:wellhada_oneapp/UI/login/login.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_detail/private_info.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_nav.dart';
-
 import 'dart:io';
 import 'package:uuid/uuid.dart';
 import 'package:wellhada_oneapp/UI/main/home_screen.dart';
-import 'package:wellhada_oneapp/UI/main/map_scene.dart';
-import 'package:wellhada_oneapp/model/map/my_location.dart';
+import 'package:wellhada_oneapp/model/map/map_model.dart';
 import 'UI/login/email_login/email_complete.dart';
 import 'package:geolocator/geolocator.dart';
-
 import 'UI/login/mobile_authen/certification.dart';
 import 'UI/login/mobile_authen/certification_result.dart';
+import 'UI/main/home_detail/map_scene.dart';
 import 'notification/custom_notification.dart';
 
 void main() {
@@ -54,6 +53,7 @@ class MyApp extends StatelessWidget {
           '/certification-result': (context) => CertificationResult(),
           '/login': (context) => LOGIN(),
           '/private_info': (context) => PriavateInfo(),
+          '/BottomNav': (context) => BottomNav(),
         },
       ),
     );
@@ -79,12 +79,14 @@ class _MyHomePageState extends State<MyHomePage> {
   SharedPreferences prefs;
   var userDevice;
   var appStatus;
-  MyMapModel myMapModel = new MyMapModel();
+  LatLng _currentLocation;
+
   @override
   void initState() {
     super.initState();
 
-    startTime();
+    _getCurrentLocation();
+
     // if (Platform.isIOS) {
     //   iosSubscription =
     //       _firebaseMessaging.onIosSettingsRegistered.listen((data) {
@@ -136,6 +138,39 @@ class _MyHomePageState extends State<MyHomePage> {
     // });
   }
 
+  MyMapModel ma = MyMapModel();
+  MyClass mc = new MyClass();
+  _getCurrentLocation() async {
+    Position geoPos;
+
+    try {
+      geoPos = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.bestForNavigation);
+      startTime();
+      _currentLocation = LatLng(geoPos.latitude, geoPos.longitude);
+
+      ma.setLats = geoPos.latitude;
+      ma.setLngs = geoPos.longitude;
+
+      ma.setLocation(geoPos.latitude, geoPos.longitude);
+      mc.aProperty = 5;
+
+      print("mc : ${mc.aProperty}");
+      print("method : ${ma.methodLat()}");
+
+      prefs.setDouble("lat", geoPos.latitude);
+      prefs.setDouble("lng", geoPos.longitude);
+    } catch (e, stackTrace) {
+      print(stackTrace);
+      prefs.setDouble("lat", 37.49152820899407);
+      prefs.setDouble("lng", 127.07285755753348);
+      startTime();
+    }
+  }
+
+//37.49152820899407, 127.07285755753348 대모산
+//37.4835543,126.8930976 hnd
+//37.49130687785801, 127.07144135121183 대모산주변병원
   @override
   void dispose() {
     super.dispose();
@@ -146,12 +181,10 @@ class _MyHomePageState extends State<MyHomePage> {
     try {
       geoPos = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.bestForNavigation);
-    } catch (e, stackTrace) {
+    } catch (e) {
       geoPos = await Geolocator.getLastKnownPosition();
       print(e.toString());
     }
-    print(geoPos.latitude);
-    print(geoPos.longitude);
 
     return geoPos;
   }

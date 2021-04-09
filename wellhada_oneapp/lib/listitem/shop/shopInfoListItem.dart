@@ -522,7 +522,7 @@ Future<Map<String, dynamic>> getShopInfoCategoryList() async {
   final response = await http
       //    .get('https://run.mocky.io/v3/c5cb3e9e-b58d-4d1d-95b3-daa77d5c0617');
       //.get('https://run.mocky.io/v3/cdd16867-7a32-4335-a02e-b0f0fba54a3e');
-      .get('https://run.mocky.io/v3/4215498a-dd9f-4473-9ebf-fc6981b5002b');
+      .get('https://run.mocky.io/v3/a2fdeec4-f539-43ad-8f17-ce45b7cfa265');
 
   //.get('192.168.0.35:8080/getShopInfoCategoryList?lat=126.89300592139&lon=37.4835140850512&radius=1000&appId=com.hndsolution.wellhada&category_code=MT1');
   if (200 == response.statusCode) {
@@ -544,7 +544,7 @@ Future<ShopInfoCategory> getShopInfoCategoryListEntire() async {
       //.get('https://run.mocky.io/v3/26deeae0-46b1-49de-8ca4-c3ef28bbf906');
       //.get('https://run.mocky.io/v3/4215498a-dd9f-4473-9ebf-fc6981b5002b');
       //.get('https://run.mocky.io/v3/4215498a-dd9f-4473-9ebf-fc6981b5002b');
-      .get('https://run.mocky.io/v3/e4c6069f-0440-471b-be56-b33940ecd394');
+      .get('https://run.mocky.io/v3/a2fdeec4-f539-43ad-8f17-ce45b7cfa265');
   //.get('https://run.mocky.io/v3/a0b52afe-c1ab-477a-a869-3a7a8ec51eca');
   //.get(    '192.168.0.35:8080/getShopInfoList?lat=126.89300592139&lon=37.4835140850512&radius=1000&appId=com.hndsolution.wellhada');
   if (response.statusCode == 200) {
