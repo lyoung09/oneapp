@@ -6,7 +6,9 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:kakao_flutter_sdk/auth.dart';
 import 'package:kakao_flutter_sdk/user.dart';
 import 'package:kakao_flutter_sdk/common.dart';
+import 'package:wellhada_oneapp/UI/login/mobile_authen/mobil_authen.dart';
 import 'account_login/signup_agree.dart';
+import 'email_login/email.dart';
 import 'email_login/email_login.dart';
 import 'email_login/email_signup.dart';
 
@@ -27,18 +29,18 @@ class _LOGINState extends State<LOGIN> {
   var mainUserScSeq;
   bool checkId = false;
   String errorText = "";
-  bool _isKakaoTalkInstalled = true;
   String _kakaoEmail = 'None';
 
   var appColor = '#ffffff';
   var menuColor = '#ffd428';
   var appFontColor = '#333333';
   var menuFontColor = '#333333';
-
+  bool _isKakaoTalkInstalled = false;
+  final _formKey2 = GlobalKey<FormState>();
   @override
   void initState() {
     super.initState();
-    _initData();
+    _initKakaoTalkInstalled();
   }
 
   @override
@@ -53,19 +55,17 @@ class _LOGINState extends State<LOGIN> {
     });
   }
 
-  Future<void> _initData() async {
-    _initKakaoTalkInstalled();
-    prefs = await SharedPreferences.getInstance();
-
-    setState(() {
-      appId = prefs.getString("appId");
-      screenSeq = prefs.getString("screenSeq");
-      if (prefs.getString("limitYn") == "Y") {
-        checkId = true;
-        userId = TextEditingController(text: '${prefs.getString("userId")}');
-      }
-    });
-  }
+  // Future<void> _initData() async {
+  //   prefs = await SharedPreferences.getInstance();
+  //   setState(() {
+  //     appId = prefs.getString("appId");
+  //     screenSeq = prefs.getString("screenSeq");
+  //     if (prefs.getString("limitYn") == "Y") {
+  //       checkId = true;
+  //       userId = TextEditingController(text: '${prefs.getString("userId")}');
+  //     }
+  //   });
+  // }
 
   _loginWithKakao() async {
     try {
@@ -79,7 +79,9 @@ class _LOGINState extends State<LOGIN> {
   _loginWithTalk() async {
     try {
       var code = await AuthCodeClient.instance.requestWithTalk();
+      print("A");
       await _issueAccessToken(code);
+      Navigator.pushNamed(context, '/BottomNav');
     } catch (e) {
       print(e);
     }
@@ -93,17 +95,17 @@ class _LOGINState extends State<LOGIN> {
       AccessTokenStore.instance.toStore(token);
 
       final User user = await UserApi.instance.me();
-
+      print(token);
       setState(() {
         _kakaoEmail = user.kakaoAccount.email;
       });
       print(_kakaoEmail);
       prefs.setString("userId", _kakaoEmail);
       prefs.setString("userName", user.kakaoAccount.profile.nickname);
-      prefs.setString("appId", appId);
       prefs.setString("limitYn", 'Y');
-
       prefs.setString("userChk", "00");
+
+      Navigator.pushNamed(context, '/BottomNav');
       //userInfo(kakaoAccessToken);
     } catch (e) {
       print("error on issuing access token: $e");
@@ -112,7 +114,6 @@ class _LOGINState extends State<LOGIN> {
 
   Future<void> _insertData() async {
     prefs = await SharedPreferences.getInstance();
-    var result;
     setState(() {
       if (checkId == true) {
         limitYn = 'Y';
@@ -125,6 +126,8 @@ class _LOGINState extends State<LOGIN> {
 
   @override
   Widget build(BuildContext context) {
+    KakaoContext.clientId = "be0c4a7d667d7766083ba8dcdf6048df";
+    isKakaoTalkInstalled();
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
     return Scaffold(
@@ -305,7 +308,8 @@ class _LOGINState extends State<LOGIN> {
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (BuildContext context) {
-                      return new Email_signup();
+                      return new Email();
+                      //return new Mobil_authen();
                     },
                     fullscreenDialog: true));
               },

@@ -39,7 +39,6 @@ class IamportWebView extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset('assets/images/iamport-logo.png'),
                   Container(
                     padding: EdgeInsets.fromLTRB(0.0, 30.0, 0.0, 0.0),
                     child:

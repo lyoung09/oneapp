@@ -9,7 +9,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/UI/banner/main_banner.dart';
-import 'package:wellhada_oneapp/UI/main/home_screen.dart';
+
 import 'package:wellhada_oneapp/listitem/shop/shopInfoListItem.dart'
     as shopInfoListItem;
 import 'package:hexcolor/hexcolor.dart';
@@ -23,8 +23,7 @@ class MainScreen extends StatefulWidget {
   _MainScreenState createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen>
-    with SingleTickerProviderStateMixin {
+class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   var appColor = '#ffffff';
   var menuColor = '#ffd428';
   var appFontColor = '#333333';
@@ -45,8 +44,14 @@ class _MainScreenState extends State<MainScreen>
   // For storing the current position
   @override
   void initState() {
-    _getCurrentLocation();
-    getShopCategory();
+    //_getCurrentLocation();
+
+    // getShopCategory();
+    // getShop();
+    // _tabController = new TabController(length: 9, vsync: this)
+    //   ..addListener(() {
+    //     distance = new Map();
+    //   });
     getShop();
     _tabController = new TabController(length: 9, vsync: this)
       ..addListener(() {
@@ -57,18 +62,23 @@ class _MainScreenState extends State<MainScreen>
   }
 
   @override
+  void didUpdateWidget(Widget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    try {
+      _currentLocation = Provider.of<LatLng>(context, listen: true);
+    } catch (e) {
+      print(e);
+    }
+    getShopCategory();
+  }
+
+  @override
   void setState(fn) {
     if (mounted) {
       super.setState(fn);
     }
   }
-
-  // @override
-  // void didChangeDependencies() {
-  //   _currentLocation = Provider.of<LatLng>(context);
-
-  //   super.didChangeDependencies();
-  // }
 
   String _coordinateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
@@ -78,19 +88,6 @@ class _MainScreenState extends State<MainScreen>
         c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
 
     return ((12742 * asin(sqrt(a)) * 1000)).toStringAsFixed(0);
-  }
-
-  void _getCurrentLocation() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    setState(() {
-      lat = prefs.getDouble("lat");
-      lng = prefs.getDouble("lng");
-
-      _currentLocation = LatLng(lat, lng);
-    });
-
-    //return _currentLocation;
   }
 
   void getShop() async {
@@ -325,8 +322,6 @@ class _MainScreenState extends State<MainScreen>
               newPosition[0] = 0;
             } else {
               for (int i = 0; i < menuCode.length; i++) {
-                print(i);
-                print('distance ${distance}');
                 distance[i] = _coordinateDistance(
                     _currentLocation.latitude,
                     _currentLocation.longitude,

@@ -41,8 +41,6 @@ class _Mobil_authenState extends State<Mobil_authen> {
 
   _initData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    print(model.email);
-    print(model.phone);
 
     setState(() {
       prefs.setString('userEmail', model.email);
@@ -138,6 +136,9 @@ class _Mobil_authenState extends State<Mobil_authen> {
                                 color: Colors.black,
                               ),
                               validator: (String value) {
+                                if (value.length < 8 || value.length > 11) {
+                                  return 'check please';
+                                }
                                 return null;
                               },
                               onSaved: (String value) {

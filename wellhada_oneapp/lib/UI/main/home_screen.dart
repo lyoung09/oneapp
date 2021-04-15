@@ -8,6 +8,8 @@ import 'package:wellhada_oneapp/UI/banner/top_banner.dart';
 import 'package:wellhada_oneapp/UI/mapUI/map.dart';
 import 'package:provider/provider.dart';
 
+import 'package:location_permissions/location_permissions.dart';
+
 import 'home_detail/main_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,16 +19,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   TabController _tabController;
-  var lat, lng;
+  double lat, lng;
   int _selectedTab;
   LatLng _currentLocation;
-  GlobalKey refreshKey = GlobalKey<RefreshIndicatorState>();
-
+  bool provideLocation = false;
   @override
   void initState() {
     super.initState();
     _initLocation();
     _tabController = TabController(vsync: this, length: 2);
+
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
         setState(() {
@@ -66,120 +68,138 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       return BorderRadius.zero;
   }
 
-  Future _getCurrentLocation() async {
+  _getCurrentLocation() async {
     Position geoPos;
-    SharedPreferences prefs = await SharedPreferences.getInstance();
 
     try {
       geoPos = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.bestForNavigation);
 
-      prefs.setDouble("lat", geoPos.latitude);
-      prefs.setDouble("lng", geoPos.longitude);
+      _currentLocation = LatLng(geoPos.latitude, geoPos.longitude);
+      setState(() {
+        provideLocation = !provideLocation;
+      });
     } catch (e, stackTrace) {
-      geoPos = await Geolocator.getLastKnownPosition();
-
-      prefs.setDouble("lat", geoPos.latitude);
-      prefs.setDouble("lng", geoPos.longitude);
-      print(stackTrace);
+      //try {
+      setState(() {
+        provideLocation = !provideLocation;
+      });
+      // geoPos = await Geolocator.getLastKnownPosition();
+      // if (geoPos == null) {
+      _currentLocation = LatLng(37.49152820899407, 127.07285755753348);
+      // }
+      // _currentLocation = LatLng(geoPos.latitude, geoPos.longitude);
+      // } catch (e) {
+      //   _currentLocation = LatLng(37.49152820899407, 127.07285755753348);
+      //   setState(() {
+      //     provideLocation = !provideLocation;
+      //   });
+      //}
     }
+    // build(this.context);
 
+    //Navigator.of(this.context, rootNavigator: true).pop(this.context);
     // Navigator.of(context)
     //     .pushNamedAndRemoveUntil('', ModalRoute.withName('/'));
-    //Navigator.of(context).pushReplacementNamed('/BottomNav').whenComplete();
-  }
 
-  //@override
-  // void didUpdateWidget(covariant HomeScreen oldWidget) {
-  //   // TODO: implement didUpdateWidget
-  //   super.didUpdateWidget(oldWidget);
-  //   _getCurrentLocation();
-  //   _tabController = TabController(vsync: this, length: 2);
-  //   _tabController.addListener(() {
-  //     if (!_tabController.indexIsChanging) {
-  //       setState(() {
-  //         _selectedTab = _tabController.index;
-  //       });
-  //     }
-  //   });
-  // }
+    //Navigator.of(context).pushReplacementNamed('/BottomNav');
+
+    // Navigator.popAndPushNamed(context, '/BottomNav');
+    //
+  }
 
   _initLocation() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    lat = prefs.getDouble("lat");
-    lng = prefs.getDouble("lng");
+
+    setState(() {
+      lat = prefs.getDouble("lat");
+      lng = prefs.getDouble("lng");
+    });
     _currentLocation = LatLng(lat, lng);
-    return _currentLocation;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        child: Column(
-          children: <Widget>[
-            PreferredSize(
-              preferredSize:
-                  Size.fromHeight(MediaQuery.of(context).size.height * 0.02),
-              child: AppBar(
-                title: Center(
-                    child: Text(
-                  '# 스토리',
-                  style: TextStyle(color: Colors.black),
-                )),
-                actions: <Widget>[
-                  RefreshIndicator(
-                    onRefresh: _getCurrentLocation,
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.location_on_outlined,
-                        color: Colors.black,
-                      ),
-                      onPressed: _getCurrentLocation,
-                    ),
-                  )
-                ],
-                backgroundColor: Colors.white,
+    return Provider.value(
+      value: _currentLocation,
+      updateShouldNotify: (oldValue, newValue) => newValue != oldValue,
+      child: Center(
+        child: Container(
+          child: Column(
+            children: <Widget>[
+              PreferredSize(
+                preferredSize:
+                    Size.fromHeight(MediaQuery.of(context).size.height * 0.02),
+                child: AppBar(
+                  title: Center(
+                      child: Text(
+                    '# 스토리',
+                    style: TextStyle(color: Colors.black),
+                  )),
+                  actions: <Widget>[
+                    provideLocation
+                        ? FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: CircularProgressIndicator(
+                              valueColor: new AlwaysStoppedAnimation<Color>(
+                                  Colors.black),
+                            ),
+                          )
+                        : IconButton(
+                            icon: Icon(
+                              Icons.location_on_outlined,
+                              color: Colors.black,
+                            ),
+                            onPressed: () {
+                              _getCurrentLocation();
+                              setState(() {
+                                provideLocation = !provideLocation;
+                              });
+                            },
+                          ),
+                  ],
+                  backgroundColor: Colors.white,
+                ),
               ),
-            ),
-            Container(
-                height: MediaQuery.of(context).size.height * 0.115,
-                width: MediaQuery.of(context).size.width,
-                child: TopBanner()),
-            TabBar(
-              unselectedLabelColor: Colors.black,
-              labelColor: Colors.blue,
-              indicatorColor: Colors.white,
-              controller: _tabController,
-              labelPadding: const EdgeInsets.all(0.0),
-              tabs: [
-                _getTab(
-                    0,
-                    Center(
-                        child: Text(
-                      "리스트로 보기",
-                      textAlign: TextAlign.center,
-                    ))),
-                _getTab(
-                    1,
-                    Center(
-                        child: Text(
-                      "지도로 보기",
-                      textAlign: TextAlign.center,
-                    ))),
-              ],
-            ),
-            Expanded(
-              child: TabBarView(
-                physics: NeverScrollableScrollPhysics(),
+              Container(
+                  height: MediaQuery.of(context).size.height * 0.115,
+                  width: MediaQuery.of(context).size.width,
+                  child: TopBanner()),
+              TabBar(
+                unselectedLabelColor: Colors.black,
+                labelColor: Colors.blue,
+                indicatorColor: Colors.white,
                 controller: _tabController,
-                children: [
-                  MainScreen(),
-                  GoogleMapUI(),
+                labelPadding: const EdgeInsets.all(0.0),
+                tabs: [
+                  _getTab(
+                      0,
+                      Center(
+                          child: Text(
+                        "리스트로 보기",
+                        textAlign: TextAlign.center,
+                      ))),
+                  _getTab(
+                      1,
+                      Center(
+                          child: Text(
+                        "지도로 보기",
+                        textAlign: TextAlign.center,
+                      ))),
                 ],
               ),
-            ),
-          ],
+              Expanded(
+                child: TabBarView(
+                  physics: NeverScrollableScrollPhysics(),
+                  controller: _tabController,
+                  children: [
+                    MainScreen(),
+                    GoogleMapUI(),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

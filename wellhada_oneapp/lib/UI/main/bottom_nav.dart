@@ -42,14 +42,16 @@ class _BottomNavState extends State<BottomNav> {
                 .copyWith(caption: new TextStyle(color: Colors.yellow))),
         child: BottomNavigationBar(
           currentIndex: _selectedIndex,
-          showSelectedLabels: false,
-          showUnselectedLabels: false,
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
           items: [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: "home"),
-            BottomNavigationBarItem(icon: Icon(Icons.map), label: "aa"),
-            BottomNavigationBarItem(icon: Icon(Icons.ac_unit), label: "dk"),
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: "홈"),
+            BottomNavigationBarItem(icon: Icon(Icons.map), label: "이용내역"),
+            BottomNavigationBarItem(icon: Icon(Icons.ac_unit), label: "즐겨찾기"),
             BottomNavigationBarItem(
-                icon: Icon(Icons.star_purple500_sharp), label: "plus"),
+              icon: Icon(Icons.add),
+              label: '더보기',
+            )
           ],
           onTap: (index) {
             setState(() {

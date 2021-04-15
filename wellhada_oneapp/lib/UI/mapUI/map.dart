@@ -4,15 +4,13 @@ import 'dart:typed_data';
 import 'dart:ui';
 import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wellhada_oneapp/model/map/map_model.dart' as aa;
+
 import 'package:wellhada_oneapp/listitem/shop/shopInfoListItem.dart'
     as shopInfoListItem;
 
@@ -27,6 +25,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
     with AutomaticKeepAliveClientMixin<GoogleMapUI> {
   var lat;
   var lng;
+  var click = false;
   _Google1MapUIState();
 
   Map_model model = new Map_model();
@@ -50,18 +49,29 @@ class _Google1MapUIState extends State<GoogleMapUI>
   LatLng _currentLocation;
   var geoLocator = Geolocator();
   CameraPosition _cameraPosition;
-
   List<dynamic> shopInfoList = [];
-
+  List shopCategory;
   //googlemap marker icon
 
   @override
   void initState() {
     super.initState();
     //getShowAppBar();
-    _sendLocation();
+    //_sendLocation();
     category = "MT1";
     itemSelected = false;
+    getShop();
+    _categoryFuture = getShopCategory();
+  }
+
+  @override
+  void didUpdateWidget(Widget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    try {
+      _currentLocation = Provider.of<LatLng>(context, listen: true);
+    } catch (e) {
+      print(e);
+    }
     getShop();
     _categoryFuture = getShopCategory();
   }
@@ -76,59 +86,21 @@ class _Google1MapUIState extends State<GoogleMapUI>
   @override
   void dispose() {
     getShopCategory();
-    _sendLocation();
+    //_sendLocation();
     getShop();
     super.dispose();
   }
 
-  // @override
-  // void didChangeDependencies() {
-  //   setState(() {});
-  //   _currentLocation = Provider.of<LatLng>(context);
-  //   // -
-  //   super.didChangeDependencies();
+  // void _sendLocation() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  //   lat = prefs.getDouble("lat");
+  //   lng = prefs.getDouble("lng");
+
+  //   _currentLocation = LatLng(lat, lng);
+  //   //_currentLocation = Provider.of<LatLng>(context, listen: true);
+  //   //distance(geoPos.latitude, geoPos.longitude);
   // }
-
-  MyMapModel ma = MyMapModel();
-  MyClass mc = new MyClass();
-  void _sendLocation() async {
-    print("method : ${ma.methodLat()}");
-    print("method : ${mc.aProperty}");
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    setState(() {
-      lat = prefs.getDouble("lat");
-      lng = prefs.getDouble("lng");
-    });
-
-    _currentLocation = LatLng(lat, lng);
-    _cameraPosition = new CameraPosition(target: _currentLocation, zoom: 14.5);
-
-    //distance(geoPos.latitude, geoPos.longitude);
-  }
-
-  _getCurrentLocation() async {
-    Position geoPos;
-    try {
-      Position pos = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-      geoPos = pos;
-
-      _currentLocation = LatLng(geoPos.latitude, geoPos.longitude);
-      //distance(geoPos.latitude, geoPos.longitude);
-      _controller.animateCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(target: _currentLocation, zoom: 14.4746),
-      ));
-    } catch (e, stackTrace) {
-      geoPos = await Geolocator.getLastKnownPosition();
-      _currentLocation = LatLng(geoPos.latitude, geoPos.longitude);
-      _controller.animateCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(target: _currentLocation, zoom: 14.4746),
-      ));
-      print(stackTrace);
-    }
-  }
 
   _determinePosition() async {
     bool serviceEnabled;
@@ -147,15 +119,6 @@ class _Google1MapUIState extends State<GoogleMapUI>
     _controller.animateCamera(CameraUpdate.newCameraPosition(
       CameraPosition(target: _currentLocation, zoom: 14.4746),
     ));
-  }
-
-  double _coordinateDistance(lat1, lon1, lat2, lon2) {
-    var p = 0.017453292519943295;
-    var c = cos;
-    var a = 0.5 -
-        c((lat2 - lat1) * p) / 2 +
-        c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
-    return 12742 * asin(sqrt(a));
   }
 
   Future<Map<String, dynamic>> getShopCategory() async {
@@ -181,7 +144,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
       int width, int height, String title) async {
     final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
-    final Paint paint = Paint()..color = Colors.white;
+    final Paint paint = Paint()..color = Colors.yellowAccent;
     final Radius radius = Radius.circular(20.0);
     final radiusPaint = Paint()
       ..style = PaintingStyle.stroke
@@ -216,14 +179,6 @@ class _Google1MapUIState extends State<GoogleMapUI>
     return data.buffer.asUint8List();
   }
 
-  void moveCamera(GoogleMapController _controller) async {
-    setState(() {
-      _controller.moveCamera(CameraUpdate.newLatLng(LatLng(lat, lng)));
-      print('lat ${lat} , lng ${lng}');
-    });
-    //setState((){markers[id]=markers[id].copyWith(positionParam:LatLng(yournewlat,your new long));});
-  }
-
   Future<ui.Image> getImage(String path) async {
     Completer<ImageInfo> completer = Completer();
     var img = new NetworkImage(path);
@@ -250,13 +205,22 @@ class _Google1MapUIState extends State<GoogleMapUI>
               child: Material(
                 color: Colors.white, // button color
                 child: Container(
-                  decoration: new BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: new Border.all(
-                      color: Colors.indigo,
-                      width: 1.0,
-                    ),
-                  ),
+                  decoration:
+                      category == shopCategoryList[position]['CATEGORY_CD']
+                          ? new BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: new Border.all(
+                                color: Colors.indigo,
+                                width: 3.0,
+                              ),
+                            )
+                          : new BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: new Border.all(
+                                color: Colors.indigo,
+                                width: 1.0,
+                              ),
+                            ),
                   child: InkWell(
                       child: SizedBox(
                         width: 65,
@@ -362,27 +326,55 @@ class _Google1MapUIState extends State<GoogleMapUI>
   //   }).toList();
   // }
 
-  List<Marker> selectWellhadaMarker(List<dynamic> shopInfoList) {
-    return shopInfoList
-        .where((element) =>
-            element.categoryGroupCode == category &&
-            element.wellhadaShop == "Y")
-        .map((element) {
-      return Marker(
-          markerId: MarkerId(element.id),
-          position: LatLng(double.parse(element.y), double.parse(element.x)),
-          icon: BitmapDescriptor.fromBytes(wellhadaIconSet[element.id]),
-          //wellhadaIconSet[element['id']
-          onTap: () {
-            setState(() {
-              itemSelected = true;
-              model.id = element.id;
-              model.distance = element.distance;
-              model.placeName = element.placeName;
-              model.phone = element.phone;
+  LatLngBounds latLngBounds;
+  List<Marker> nullMark = [];
+  List<Marker> selectWellhadaMarker() {
+    try {
+      getCenter().then((result) {
+        setState(() {
+          latLngBounds = result;
+        });
+      }).catchError((error) {
+        print(error);
+      });
+      return shopInfoList
+          .where((element) =>
+              element.categoryGroupCode == category &&
+              latLngBounds.northeast.latitude > double.parse(element.y) &&
+              latLngBounds.northeast.longitude > double.parse(element.x) &&
+              latLngBounds.southwest.latitude < double.parse(element.y) &&
+              latLngBounds.southwest.longitude < double.parse(element.x) &&
+              element.wellhadaShop == "Y")
+          .map((element) {
+        return Marker(
+            markerId: MarkerId(element.id),
+            position: LatLng(double.parse(element.y), double.parse(element.x)),
+            icon: BitmapDescriptor.fromBytes(wellhadaIconSet[element.id]),
+            //wellhadaIconSet[element['id']
+            onTap: () {
+              setState(() {
+                itemSelected = true;
+                model.id = element.id;
+                model.distance = element.distance;
+                model.placeName = element.placeName;
+                model.phone = element.phone;
+              });
             });
-          });
-    }).toList();
+      }).toList();
+    } catch (e) {
+      return nullMark;
+    }
+  }
+
+  Future<LatLngBounds> getCenter() async {
+    LatLngBounds bounds;
+    try {
+      bounds = await _controller.getVisibleRegion();
+      return bounds;
+    } catch (e) {
+      print(e);
+    }
+    // print(center);
   }
 
   @override
@@ -401,8 +393,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
             Map<String, dynamic> shopCategory = snapshot.data;
             List<dynamic> shopCategoryList = shopCategory["LIST"];
 
-            List<Marker> changeWellhadaMark =
-                selectWellhadaMarker(shopInfoList);
+            List<Marker> changeWellhadaMark = selectWellhadaMarker();
 
             // List<Marker> changeMark = selectMarker(shopInfoList);
 
@@ -411,106 +402,109 @@ class _Google1MapUIState extends State<GoogleMapUI>
                 Container(
                   height: MediaQuery.of(context).size.height * 0.1,
                   width: MediaQuery.of(context).size.width,
-                  child: Row(
-                    children: [
-                      // Container(
-                      //     child: ClipOval(
-                      //   child: Material(
-                      //     color: check == true
-                      //         ? Colors.yellow
-                      //         : Colors.white, // button color
-                      //     child: Container(
-                      //       decoration: new BoxDecoration(
-                      //         shape: BoxShape.circle,
-                      //         border: new Border.all(
-                      //           color: Colors.yellow,
-                      //           width: 1.0,
-                      //         ),
-                      //       ),
-                      //       child: InkWell(
-                      //           child: SizedBox(
-                      //             width: 65,
-                      //             height: 55,
-                      //             child: Column(
-                      //               children: [
-                      //                 Padding(
-                      //                   padding: EdgeInsets.only(
-                      //                       top: 4.0, bottom: 1.0),
-                      //                 ),
-                      //                 Image(
-                      //                   image:
-                      //                       AssetImage('assets/img/cafe.png'),
-                      //                   width: 25,
-                      //                   height: 25,
-                      //                 ),
-                      //                 Padding(
-                      //                   padding: EdgeInsets.only(bottom: 1.0),
-                      //                 ),
-                      //                 Text(
-                      //                   "가맹점",
-                      //                   style: TextStyle(fontSize: 13),
-                      //                 )
-                      //               ],
-                      //             ),
-                      //           ),
-                      //           onTap: () {
-                      //             setState(() {
-                      //               check == true
-                      //                   ? check = false
-                      //                   : check = true;
-                      //             });
-                      //           }),
-                      //     ),
-                      //   ),
-                      // )),
-                      Expanded(
-                        child: _list(shopCategoryList),
-                      ),
-                    ],
-                  ),
+                  // child: Row(
+                  //   children: [
+                  // Container(
+                  //     child: ClipOval(
+                  //   child: Material(
+                  //     color: check == true
+                  //         ? Colors.yellow
+                  //         : Colors.white, // button color
+                  //     child: Container(
+                  //       decoration: new BoxDecoration(
+                  //         shape: BoxShape.circle,
+                  //         border: new Border.all(
+                  //           color: Colors.yellow,
+                  //           width: 1.0,
+                  //         ),
+                  //       ),
+                  //       child: InkWell(
+                  //           child: SizedBox(
+                  //             width: 65,
+                  //             height: 55,
+                  //             child: Column(
+                  //               children: [
+                  //                 Padding(
+                  //                   padding: EdgeInsets.only(
+                  //                       top: 4.0, bottom: 1.0),
+                  //                 ),
+                  //                 Image(
+                  //                   image:
+                  //                       AssetImage('assets/img/cafe.png'),
+                  //                   width: 25,
+                  //                   height: 25,
+                  //                 ),
+                  //                 Padding(
+                  //                   padding: EdgeInsets.only(bottom: 1.0),
+                  //                 ),
+                  //                 Text(
+                  //                   "가맹점",
+                  //                   style: TextStyle(fontSize: 13),
+                  //                 )
+                  //               ],
+                  //             ),
+                  //           ),
+                  //           onTap: () {
+                  //             setState(() {
+                  //               check == true
+                  //                   ? check = false
+                  //                   : check = true;
+                  //             });
+                  //           }),
+                  //     ),
+                  //   ),
+                  // )),
+                  //   Expanded(
+                  //   ),
+                  // ],
+                  child: _list(shopCategoryList),
+                  //),
                 ),
                 Padding(
-                  padding: EdgeInsets.only(top: 2.0, bottom: 2.0),
+                  padding: EdgeInsets.only(top: 2.0),
                 ),
-                Stack(
-                  children: [
-                    Container(
-                      height: MediaQuery.of(context).size.height * 0.5,
-                      child: GoogleMap(
-                        initialCameraPosition: CameraPosition(
-                          target: _currentLocation,
-                          zoom: 14.4746,
+                Expanded(
+                  child: Stack(
+                    children: [
+                      Container(
+                        //height: MediaQuery.of(context).size.height * 0.5,
+                        child: GoogleMap(
+                          initialCameraPosition: CameraPosition(
+                            target: _currentLocation,
+                            zoom: 14.4746,
+                          ),
+                          rotateGesturesEnabled: false,
+                          tiltGesturesEnabled: false,
+                          markers: Set.from(changeWellhadaMark),
+                          myLocationEnabled: true,
+                          onMapCreated: (GoogleMapController controller) {
+                            print(_currentLocation);
+                            _controller = controller;
+                            getCenter();
+                          },
+                          onCameraMove: (position) {
+                            getCenter();
+                          },
                         ),
-                        rotateGesturesEnabled: false,
-                        tiltGesturesEnabled: false,
-                        markers: Set.from(changeWellhadaMark),
-                        myLocationEnabled: true,
-                        onMapCreated: (GoogleMapController controller) {
-                          _controller = controller;
-                        },
-                        onCameraMove: (position) {
-                          lat = position.target.latitude;
-                          lng = position.target.longitude;
-                          _currentLocation = LatLng(lat, lng);
-                        },
                       ),
-                    ),
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: FloatingActionButton(
-                        onPressed: _determinePosition,
-                        child: Icon(
-                          Icons.location_on,
-                          color: Colors.yellow,
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: FloatingActionButton(
+                          onPressed: _determinePosition,
+                          child: Icon(
+                            Icons.location_on,
+                            color: Colors.yellow,
+                          ),
+                          backgroundColor: Colors.white,
                         ),
-                        backgroundColor: Colors.white,
                       ),
-                    ),
-                    Positioned(
-                        bottom: 0,
-                        width: MediaQuery.of(context).size.width,
-                        child: itemSelected == true ? _container() : Text("")),
-                  ],
+                      Positioned(
+                          bottom: 0,
+                          width: MediaQuery.of(context).size.width,
+                          child:
+                              itemSelected == true ? _container() : Text("")),
+                    ],
+                  ),
                 ),
               ],
             );

@@ -28,7 +28,7 @@ class _Email_passwordState extends State<Email_password> {
     super.initState();
     _completeButton = false;
     _err = false;
-    print(model.email);
+    model.password = null;
     //_initData();
   }
 

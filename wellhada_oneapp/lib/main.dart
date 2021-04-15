@@ -25,8 +25,6 @@ import 'UI/main/home_detail/map_scene.dart';
 import 'notification/custom_notification.dart';
 
 void main() {
-  KakaoContext.clientId = "be0c4a7d667d7766083ba8dcdf6048df";
-
   runApp(MyApp());
 }
 
@@ -80,7 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var userDevice;
   var appStatus;
   LatLng _currentLocation;
-
+  var z;
   @override
   void initState() {
     super.initState();
@@ -138,25 +136,12 @@ class _MyHomePageState extends State<MyHomePage> {
     // });
   }
 
-  MyMapModel ma = MyMapModel();
-  MyClass mc = new MyClass();
   _getCurrentLocation() async {
     Position geoPos;
 
     try {
       geoPos = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.bestForNavigation);
-      startTime();
-      _currentLocation = LatLng(geoPos.latitude, geoPos.longitude);
-
-      ma.setLats = geoPos.latitude;
-      ma.setLngs = geoPos.longitude;
-
-      ma.setLocation(geoPos.latitude, geoPos.longitude);
-      mc.aProperty = 5;
-
-      print("mc : ${mc.aProperty}");
-      print("method : ${ma.methodLat()}");
 
       prefs.setDouble("lat", geoPos.latitude);
       prefs.setDouble("lng", geoPos.longitude);
@@ -164,8 +149,9 @@ class _MyHomePageState extends State<MyHomePage> {
       print(stackTrace);
       prefs.setDouble("lat", 37.49152820899407);
       prefs.setDouble("lng", 127.07285755753348);
-      startTime();
     }
+
+    startTime();
   }
 
 //37.49152820899407, 127.07285755753348 대모산
@@ -194,8 +180,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void goMain() {
-    Navigator.of(context).pushReplacement(
-        (PageRouteBuilder(pageBuilder: (_, __, ___) => BottomNav())));
+    Navigator.pushNamed(context, '/BottomNav');
   }
 
   _function() async {

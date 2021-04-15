@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:wellhada_oneapp/listitem/shop/shopInfoListItem.dart';
 
 class Map_model {
@@ -39,11 +40,25 @@ class ShopCategoryList {
   ShopCategoryList({this.categorycdnm, this.categorycd, this.fileurl});
 }
 
+class currentLocation with ChangeNotifier {
+  currentLocation({this.lat, this.lng});
+
+  double lat;
+  double lng;
+
+  void current() {
+    lat = this.lat;
+    lng = this.lng;
+    print(
+        "lat ${lat} , lng ${lng} , this.lat ${this.lat} , this.lng ${this.lng} ");
+    notifyListeners();
+  }
+}
+
 class MyMapModel {
   double _lat = 0;
   double _lng = 0;
   bool check = false;
-
   setLocation(double lat, double lng) {
     _lat = lat;
     _lng = lng;

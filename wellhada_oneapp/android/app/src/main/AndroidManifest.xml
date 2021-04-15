@@ -38,16 +38,16 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        
         </activity>
                 <activity android:name="com.kakao.sdk.flutter.AuthCodeCustomTabsActivity">
             <intent-filter android:label="flutter_web_auth">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="kakao6723819d0e4968fba2b0c875c8ca6510" android:host="oauth"/>
+                <data android:scheme="kakaobe0c4a7d667d7766083ba8dcdf6048df" android:host="oauth"/>
             </intent-filter>
-
-        </activity>
+</activity>
             <meta-data android:name="com.google.android.geo.API_KEY"
                         android:value="AIzaSyCMaxmHp6Upf7sx1G6HzFF99zdhDsOyrMo"/>
         <!-- Don't delete the meta-data below.

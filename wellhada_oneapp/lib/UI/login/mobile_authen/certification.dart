@@ -15,7 +15,11 @@ class Certification extends StatelessWidget {
 
     return IamportCertification(
       appBar: new AppBar(
-        title: new Text('아임포트 본인인증'),
+        title: new Text(
+          '샾스토리 본인인증',
+          style: TextStyle(color: Colors.black),
+        ),
+        backgroundColor: Colors.white,
       ),
       initialChild: Container(
         child: Center(
@@ -36,7 +40,7 @@ class Certification extends StatelessWidget {
       callback: (Map<String, String> result) {
         Navigator.pushReplacementNamed(
           context,
-          '/Email_complete',
+          '/BottomNav',
           arguments: result,
         );
       },
