@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_detail/private_info.dart';
+import 'package:wellhada_oneapp/UI/main/bottom_detail/usage_history.dart';
 import 'package:wellhada_oneapp/UI/main/home_screen.dart';
+import 'package:wellhada_oneapp/UI/usageHistory_detail/review.dart';
 
 import 'package:wellhada_oneapp/model/menu/drawer_detail/qr_34.dart';
 
-import 'home_detail/map_scene.dart';
+import 'bottom_detail/favorite.dart';
 
 class BottomNav extends StatefulWidget {
   @override
@@ -22,8 +25,8 @@ class _BottomNavState extends State<BottomNav> {
 
   List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
-    MapScreen(),
-    QR_34(1),
+    UsageHistory(),
+    Favorite(),
     PriavateInfo(),
   ];
 
@@ -34,23 +37,46 @@ class _BottomNavState extends State<BottomNav> {
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
             // sets the background color of the `BottomNavigationBar`
-            canvasColor: Colors.green,
+            canvasColor: Colors.amberAccent,
             // sets the active color of the `BottomNavigationBar` if `Brightness` is light
-            primaryColor: Colors.red,
+            primaryColor: Colors.amberAccent,
             textTheme: Theme.of(context)
                 .textTheme
-                .copyWith(caption: new TextStyle(color: Colors.yellow))),
+                .copyWith(caption: new TextStyle(color: Colors.black))),
         child: BottomNavigationBar(
+          backgroundColor: Colors.amberAccent,
+          type: BottomNavigationBarType.fixed,
+          selectedItemColor: Colors.black,
+          unselectedItemColor: Colors.white,
           currentIndex: _selectedIndex,
           showSelectedLabels: true,
           showUnselectedLabels: true,
           items: [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: "홈"),
-            BottomNavigationBarItem(icon: Icon(Icons.map), label: "이용내역"),
-            BottomNavigationBarItem(icon: Icon(Icons.ac_unit), label: "즐겨찾기"),
             BottomNavigationBarItem(
-              icon: Icon(Icons.add),
-              label: '더보기',
+                icon: SvgPicture.asset(
+                  "assets/svg/home.svg",
+                  fit: BoxFit.fill,
+                  width: 20,
+                  height: 20,
+                ),
+                label: "홈"),
+            BottomNavigationBarItem(icon: Icon(Icons.map), label: "이용내역"),
+            BottomNavigationBarItem(
+                icon: SvgPicture.asset(
+                  "assets/svg/star.svg",
+                  fit: BoxFit.fill,
+                  width: 20,
+                  height: 20,
+                ),
+                label: "즐겨찾기"),
+            BottomNavigationBarItem(
+              icon: SvgPicture.asset(
+                "assets/svg/user.svg",
+                fit: BoxFit.fill,
+                width: 20,
+                height: 20,
+              ),
+              label: '내 정보',
             )
           ],
           onTap: (index) {

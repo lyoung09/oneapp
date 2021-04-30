@@ -8,10 +8,9 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:wellhada_oneapp/UI/login/login.dart';
-import 'package:wellhada_oneapp/UI/main/home_detail/main_screen.dart';
-import 'package:wellhada_oneapp/UI/main/home_detail/map_scene.dart';
+
 import 'package:wellhada_oneapp/UI/main/home_screen.dart';
+import 'package:wellhada_oneapp/UI/privateInfo_detail/login.dart';
 import 'package:wellhada_oneapp/model/menu/drawer_detail/account_user_info.dart';
 
 import 'drawer_detail/qr_34.dart';
@@ -30,7 +29,7 @@ class _DRAWER_MENUState extends State<DRAWER_MENU> {
 
   var userScSeq;
   var accessToken = "";
-  var userChk = "01";
+  var userChk = '01';
   var userName;
   var userGrade;
   var _colorText = Hexcolor('#242A37');
@@ -104,11 +103,6 @@ class _DRAWER_MENUState extends State<DRAWER_MENU> {
         (PageRouteBuilder(pageBuilder: (_, __, ___) => HomeScreen())));
   }
 
-  moveMap() {
-    Navigator.of(context).pushReplacement(
-        (PageRouteBuilder(pageBuilder: (_, __, ___) => MapScreen())));
-  }
-
   moveQr() {
     Navigator.of(context)
         .push(MaterialPageRoute(builder: (context) => new QR_34(1)));
@@ -157,7 +151,7 @@ class _DRAWER_MENUState extends State<DRAWER_MENU> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      userChk == "00"
+                      userChk == '00'
                           ? InkWell(
                               onTap: () {
                                 Navigator.of(context).push(MaterialPageRoute(

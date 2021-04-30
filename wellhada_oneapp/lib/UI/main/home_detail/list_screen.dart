@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:ffi';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,26 +10,24 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/UI/banner/main_banner.dart';
+import 'package:wellhada_oneapp/UI/main/home_detail/webview.dart';
 
 import 'package:wellhada_oneapp/listitem/shop/shopInfoListItem.dart'
     as shopInfoListItem;
 import 'package:hexcolor/hexcolor.dart';
 import 'dart:math' show cos, sqrt, asin;
 
-import 'package:wellhada_oneapp/listitem/shop/shopInfoListItem.dart';
-import 'package:wellhada_oneapp/model/map/map_model.dart';
-
-class MainScreen extends StatefulWidget {
+class ListScreen extends StatefulWidget {
   @override
-  _MainScreenState createState() => _MainScreenState();
+  _ListScreenState createState() => _ListScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
+class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
   var appColor = '#ffffff';
   var menuColor = '#ffd428';
   var appFontColor = '#333333';
   var menuFontColor = '#333333';
-  var userChk = "01";
+  String coupon = 'C:\Users\hndso\Desktop\icon_jandi\coupon.svg';
   var category;
   List shop, shopCategory;
   TabController _tabController;
@@ -40,7 +39,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   Map<int, String> initDistance = new Map();
   Map<int, String> distance = new Map();
   var lat, lng;
-
+  String webviewDefault = 'http://192.168.0.47:8080/usermngr';
   // For storing the current position
   @override
   void initState() {
@@ -78,6 +77,16 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     if (mounted) {
       super.setState(fn);
     }
+  }
+
+  void _handleURLButtonPress(
+      BuildContext context, String url, String placeName) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => WebViewContainer(url, placeName)));
+
+    // Navigator.pushNamed(context, '/webview');
   }
 
   String _coordinateDistance(lat1, lon1, lat2, lon2) {
@@ -227,18 +236,19 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                       color: Colors.green,
                                       child: InkWell(
                                         onTap: () {},
-                                        child: Icon(
-                                          Icons.add,
-                                          color: Colors.white,
-                                          size: 15,
+                                        child: SvgPicture.asset(
+                                          "assets/svg/coupon.svg",
+                                          fit: BoxFit.fill,
+                                          width: 20,
+                                          height: 20,
                                         ),
                                       ),
                                     ),
                                   ),
                                   Spacer(),
-                                  Image.asset(
-                                    'assets/img/location.png',
-                                    width: 20.0,
+                                  SvgPicture.asset(
+                                    'assets/svg/location.svg',
+                                    width: 15.0,
                                     height: 20.0,
                                   ),
                                   Padding(
@@ -264,6 +274,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   setState(() {
                     category = menuCode[position].placeName;
                     print(category);
+                    _handleURLButtonPress(context,
+                        '${webviewDefault}/shopTmplatView.do', category);
                   });
                 });
           },

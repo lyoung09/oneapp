@@ -1,16 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/UI/banner/top_banner.dart';
-import 'package:wellhada_oneapp/UI/mapUI/map.dart';
+
 import 'package:provider/provider.dart';
 
 import 'package:location_permissions/location_permissions.dart';
 
-import 'home_detail/main_screen.dart';
+import 'home_detail/list_screen.dart';
+import 'home_detail/mapUI/map.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -131,10 +133,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 preferredSize:
                     Size.fromHeight(MediaQuery.of(context).size.height * 0.02),
                 child: AppBar(
+                  centerTitle: true,
+                  automaticallyImplyLeading: false,
+                  backgroundColor: Colors.black,
                   title: Center(
                       child: Text(
                     '# 스토리',
-                    style: TextStyle(color: Colors.black),
+                    style: TextStyle(color: Colors.white),
                   )),
                   actions: <Widget>[
                     provideLocation
@@ -142,13 +147,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             fit: BoxFit.scaleDown,
                             child: CircularProgressIndicator(
                               valueColor: new AlwaysStoppedAnimation<Color>(
-                                  Colors.black),
+                                  Colors.white),
                             ),
                           )
                         : IconButton(
-                            icon: Icon(
-                              Icons.location_on_outlined,
-                              color: Colors.black,
+                            icon: SvgPicture.asset(
+                              'assets/svg/location.svg',
+                              width: 15.0,
+                              height: 20.0,
                             ),
                             onPressed: () {
                               _getCurrentLocation();
@@ -158,7 +164,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             },
                           ),
                   ],
-                  backgroundColor: Colors.white,
                 ),
               ),
               Container(
@@ -167,7 +172,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   child: TopBanner()),
               TabBar(
                 unselectedLabelColor: Colors.black,
-                labelColor: Colors.blue,
+                labelColor: Colors.blueAccent,
                 indicatorColor: Colors.white,
                 controller: _tabController,
                 labelPadding: const EdgeInsets.all(0.0),
@@ -193,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   physics: NeverScrollableScrollPhysics(),
                   controller: _tabController,
                   children: [
-                    MainScreen(),
+                    ListScreen(),
                     GoogleMapUI(),
                   ],
                 ),

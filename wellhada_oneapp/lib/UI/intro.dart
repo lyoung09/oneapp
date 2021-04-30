@@ -1,55 +1,227 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
-class Intro extends StatefulWidget {
+class Introduce extends StatefulWidget {
   @override
-  _IntroState createState() => _IntroState();
+  _IntroduceState createState() => _IntroduceState();
 }
 
-class _IntroState extends State<Intro> {
-  Future<Position> _determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-    bool isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
-    // Test if location services are enabled.
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    print(isLocationServiceEnabled);
-    if (!serviceEnabled) {
-      LocationPermission permission = await Geolocator.checkPermission();
+class _IntroduceState extends State<Introduce> {
+  var index;
 
-      // Location services are not enabled don't continue
-      // accessing the position and request users of the
-      // App to enable the location services.
-      return Future.error('Location services are disabled.');
-    }
+  initState() {
+    super.initState();
+    index = 0;
+  }
 
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.deniedForever) {
-        // Permissions are denied forever, handle appropriately.
-        return Future.error(
-            'Location permissions are permanently denied, we cannot request permissions.');
-      }
+  dispose() {
+    super.dispose();
+    checkIndex();
+  }
 
-      if (permission == LocationPermission.denied) {
-        // Permissions are denied, next time you could try
-        // requesting permissions again (this is also where
-        // Android's shouldShowRequestPermissionRationale
-        // returned true. According to Android guidelines
-        // your App should show an explanatory UI now.
-        return Future.error('Location permissions are denied');
-      }
-    }
-    //isLocationServiceEnabled == true ? _location() : print("hi");
+  checkIndex() async {
+    index = 0;
+    setState(() {
+      index++;
+    });
+    print(index);
+  }
 
-    // When we reach here, permissions are granted and we can
-    // continue accessing the position of the device.
-    return await Geolocator.getCurrentPosition();
+  goStart() {
+    Navigator.pushNamed(context, '/BottomNav');
+  }
+
+  goBack() async {
+    setState(() {
+      index = 0;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Scaffold(
+        body: Stack(
+      children: <Widget>[
+        index == 0 ? _firstIntroduce() : _secondIntroduce(),
+
+        // Align(
+        //   alignment: Alignment.bottomCenter,
+        //   child: FloatingActionButton(
+        //     onPressed: () {},
+        //     heroTag: "btn2",
+        //     child: Text(''),
+        //   ),
+        // ),
+      ],
+    ));
+  }
+
+  Widget _firstIntroduce() {
+    return Container(
+        padding: EdgeInsets.fromLTRB(10, 30, 10, 10),
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        alignment: Alignment.center,
+        color: Colors.black,
+        child: Card(
+            elevation: 5,
+            child: Padding(
+                padding: EdgeInsets.all(7),
+                child: Stack(children: <Widget>[
+                  Align(
+                    alignment: Alignment.center,
+                    child: Stack(
+                      children: <Widget>[
+                        Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height,
+                        ),
+                        // ClipPath(
+                        //   clipper: OvalBottomBorderClipper(),
+                        //   child: Container(
+                        //     height: MediaQuery.of(context).size.height / 4 + 40,
+                        //     color: Colors.white,
+                        //   ),
+                        // ),
+                        Positioned(
+                          top: -20.0,
+                          left: -40.0,
+                          child: Container(
+                            height: 150,
+                            width: 150,
+                            decoration: BoxDecoration(
+                                color: Colors.amberAccent,
+                                shape: BoxShape.circle),
+                          ),
+                        ),
+                        Column(
+                          children: <Widget>[
+                            Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 40, top: 30),
+                                child: Text("안녕하세요")),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 40, top: 20),
+                                child: Text("웰하다입니다")),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 40, top: 20),
+                                child: Text("여러 가게 구경하고 가세요")),
+                            SizedBox(
+                              width: 20,
+                            )
+                          ],
+                        ),
+
+                        Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Align(
+                            alignment: Alignment.bottomRight,
+                            child: InkWell(
+                              onTap: checkIndex,
+                              child: Text("넘어가기"),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  )
+                ]))));
+  }
+
+  Widget _secondIntroduce() {
+    return Container(
+        padding: EdgeInsets.fromLTRB(10, 30, 10, 10),
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        alignment: Alignment.center,
+        color: Colors.black,
+        child: Card(
+            elevation: 5,
+            child: Padding(
+                padding: EdgeInsets.all(7),
+                child: Stack(children: <Widget>[
+                  Align(
+                    alignment: Alignment.center,
+                    child: Stack(
+                      children: <Widget>[
+                        Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height,
+                        ),
+                        // ClipPath(
+                        //   clipper: OvalBottomBorderClipper(),
+                        //   child: Container(
+                        //     height: MediaQuery.of(context).size.height / 4 + 40,
+                        //     color: Colors.white,
+                        //   ),
+                        // ),
+                        Positioned(
+                          top: -20.0,
+                          left: -40.0,
+                          child: Container(
+                            height: 150,
+                            width: 150,
+                            decoration: BoxDecoration(
+                                color: Colors.amberAccent,
+                                shape: BoxShape.circle),
+                          ),
+                        ),
+                        Column(
+                          children: <Widget>[
+                            Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 30, left: 30),
+                                child: Text("저희 가맹점들은")),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 40, top: 20),
+                                child: Text("호잇호잇")),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 40, top: 20),
+                                child: Text("헤에에에")),
+                            SizedBox(
+                              width: 20,
+                            )
+                          ],
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Align(
+                            alignment: Alignment.bottomLeft,
+                            child: InkWell(
+                              onTap: goBack,
+                              child: Text("돌아가기"),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Align(
+                            alignment: Alignment.bottomRight,
+                            child: InkWell(
+                              onTap: goStart,
+                              child: Text("시작하기"),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  )
+                ]))));
   }
 }

@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wellhada_oneapp/UI/main/home_detail/webview.dart';
 
 import 'package:wellhada_oneapp/listitem/shop/shopInfoListItem.dart'
     as shopInfoListItem;
@@ -28,7 +29,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
   var click = false;
   _Google1MapUIState();
 
-  Map_model model = new Map_model();
+  MapModel model = new MapModel();
 
   @override
   bool get wantKeepAlive {
@@ -40,7 +41,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
   Map<String, Uint8List> wellhadaIconSet = new Map();
   // button click
   String category;
-
+  String webviewDefault = 'http://192.168.0.47:8080/usermngr';
   // contanier boolean
   bool itemSelected;
   Future _categoryFuture;
@@ -52,7 +53,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
   List<dynamic> shopInfoList = [];
   List shopCategory;
   //googlemap marker icon
-
+  bool favorite = false;
   @override
   void initState() {
     super.initState();
@@ -102,6 +103,16 @@ class _Google1MapUIState extends State<GoogleMapUI>
   //   //distance(geoPos.latitude, geoPos.longitude);
   // }
 
+  void _handleURLButtonPress(
+      BuildContext context, String url, String placeName) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => WebViewContainer(url, placeName)));
+
+    // Navigator.pushNamed(context, '/webview');
+  }
+
   _determinePosition() async {
     bool serviceEnabled;
 
@@ -144,7 +155,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
       int width, int height, String title) async {
     final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
-    final Paint paint = Paint()..color = Colors.yellowAccent;
+    final Paint paint = Paint()..color = Colors.grey[400];
     final Radius radius = Radius.circular(20.0);
     final radiusPaint = Paint()
       ..style = PaintingStyle.stroke
@@ -270,6 +281,8 @@ class _Google1MapUIState extends State<GoogleMapUI>
             onTap: () {
               setState(() {
                 itemSelected = false;
+                _handleURLButtonPress(context,
+                    '${webviewDefault}/shopTmplatView.do', model.placeName);
               });
             },
             child: Row(
@@ -300,10 +313,30 @@ class _Google1MapUIState extends State<GoogleMapUI>
                             color: Hexcolor('#333333')))
                   ],
                 ),
+                Expanded(
+                    child: Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.star,
+                      color:
+                          favorite == true ? Colors.red[400] : Colors.grey[300],
+                    ),
+                    onPressed: favoriteMethod,
+                  ),
+                ))
               ],
             )),
       ),
     );
+  }
+
+  favoriteMethod() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      print(favorite);
+      favorite = !favorite;
+    });
   }
 
   // List<Marker> selectMarker(List<dynamic> shopInfoList) {

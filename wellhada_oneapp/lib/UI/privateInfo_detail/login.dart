@@ -6,11 +6,11 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:kakao_flutter_sdk/auth.dart';
 import 'package:kakao_flutter_sdk/user.dart';
 import 'package:kakao_flutter_sdk/common.dart';
-import 'package:wellhada_oneapp/UI/login/mobile_authen/mobil_authen.dart';
-import 'account_login/signup_agree.dart';
+import 'package:wellhada_oneapp/UI/privateInfo_detail/email_login/extraLogin.dart';
 import 'email_login/email.dart';
-import 'email_login/email_login.dart';
-import 'email_login/email_signup.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'package:http/http.dart' as http;
 
 class LOGIN extends StatefulWidget {
   @override
@@ -30,13 +30,15 @@ class _LOGINState extends State<LOGIN> {
   bool checkId = false;
   String errorText = "";
   String _kakaoEmail = 'None';
-
+  var email, password, userChk;
   var appColor = '#ffffff';
   var menuColor = '#ffd428';
   var appFontColor = '#333333';
   var menuFontColor = '#333333';
   bool _isKakaoTalkInstalled = false;
   final _formKey2 = GlobalKey<FormState>();
+  var uriUserProfile;
+  String userProfile = '';
   @override
   void initState() {
     super.initState();
@@ -67,6 +69,24 @@ class _LOGINState extends State<LOGIN> {
   //   });
   // }
 
+  checkEmail() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userChk = '01';
+
+    setState(() {
+      email = prefs.getString("userEmail");
+      password = prefs.getString("password");
+      prefs.setString("userChk", '01');
+    });
+    print('${email} : ${password} : ${userChk}');
+
+    if (userChk == '01' && userId == email && userPassword == password) {
+      Navigator.pushNamed(context, '/BottomNav');
+    } else {
+      print("z");
+    }
+  }
+
   _loginWithKakao() async {
     try {
       var code = await AuthCodeClient.instance.request();
@@ -79,9 +99,8 @@ class _LOGINState extends State<LOGIN> {
   _loginWithTalk() async {
     try {
       var code = await AuthCodeClient.instance.requestWithTalk();
-      print("A");
+
       await _issueAccessToken(code);
-      Navigator.pushNamed(context, '/BottomNav');
     } catch (e) {
       print(e);
     }
@@ -93,19 +112,24 @@ class _LOGINState extends State<LOGIN> {
       var token = await AuthApi.instance.issueAccessToken(authCode);
       String kakaoAccessToken = token.accessToken;
       AccessTokenStore.instance.toStore(token);
-
       final User user = await UserApi.instance.me();
-      print(token);
+
       setState(() {
         _kakaoEmail = user.kakaoAccount.email;
-      });
-      print(_kakaoEmail);
-      prefs.setString("userId", _kakaoEmail);
-      prefs.setString("userName", user.kakaoAccount.profile.nickname);
-      prefs.setString("limitYn", 'Y');
-      prefs.setString("userChk", "00");
+        uriUserProfile = user.kakaoAccount.profile.profileImageUrl;
 
-      Navigator.pushNamed(context, '/BottomNav');
+        userProfile = uriUserProfile.toString();
+      });
+      prefs.setString("marketing", "N");
+      prefs.setString("userProfile", userProfile);
+      prefs.setString("userEmail", _kakaoEmail);
+      prefs.setString("userName", user.kakaoAccount.profile.nickname);
+      prefs.setString("userChk", '00');
+      prefs.setString("userPhone", '');
+      prefs.setString("userPoint", '0');
+
+      prefs.setInt("cookie", 0);
+      Navigator.pushNamed(context, '/last_selection');
       //userInfo(kakaoAccessToken);
     } catch (e) {
       print("error on issuing access token: $e");
@@ -241,30 +265,31 @@ class _LOGINState extends State<LOGIN> {
                     )),
               ),
             ),
-            Row(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.only(left: 30.0),
-                  child: Checkbox(
-                    value: checkId,
-                    checkColor: Hexcolor('#FFFFFF'),
-                    activeColor: Hexcolor('#FF8900'),
-                    onChanged: (bool value) {
-                      setState(() {
-                        checkId = value;
-                      });
-                    },
+            InkWell(
+              onTap: checkEmail,
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.6,
+                height: MediaQuery.of(context).size.height * 0.07,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white),
+                child:
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Icon(
+                    Icons.email,
+                    size: 30.0,
                   ),
-                ),
-                Text(
-                  "아이디 저장",
-                  style: TextStyle(
-                      color: Hexcolor('#242A37'),
-                      fontSize: 13.0,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: "Sans"),
-                ),
-              ],
+                  Padding(padding: EdgeInsets.symmetric(horizontal: 7.0)),
+                  Text(
+                    '로그인',
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 15.0,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'NotoSans'),
+                  )
+                ]),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.only(
@@ -308,7 +333,7 @@ class _LOGINState extends State<LOGIN> {
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (BuildContext context) {
-                      return new Email();
+                      return new ExtraLogin();
                       //return new Mobil_authen();
                     },
                     fullscreenDialog: true));

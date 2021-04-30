@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wellhada_oneapp/listitem/shop/shopInfoListItem.dart';
 
-class Map_model {
+class MapModel {
   String placeUrl;
   String placeName;
   String categoryGroupName;
@@ -16,7 +16,7 @@ class Map_model {
   String id;
   String wellhadaShop;
   String category;
-  Map_model(
+  MapModel(
       {this.placeUrl,
       this.placeName,
       this.categoryGroupName,
@@ -38,21 +38,6 @@ class ShopCategoryList {
   String categorycd;
   String fileurl;
   ShopCategoryList({this.categorycdnm, this.categorycd, this.fileurl});
-}
-
-class currentLocation with ChangeNotifier {
-  currentLocation({this.lat, this.lng});
-
-  double lat;
-  double lng;
-
-  void current() {
-    lat = this.lat;
-    lng = this.lng;
-    print(
-        "lat ${lat} , lng ${lng} , this.lat ${this.lat} , this.lng ${this.lng} ");
-    notifyListeners();
-  }
 }
 
 class MyMapModel {

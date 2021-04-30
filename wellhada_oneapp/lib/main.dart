@@ -1,7 +1,10 @@
 import 'dart:async';
-
+import 'package:firebase_core/firebase_core.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:async/async.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -10,21 +13,26 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:kakao_flutter_sdk/all.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:overlay_support/overlay_support.dart';
-import 'package:wellhada_oneapp/UI/login/login.dart';
+import 'package:wellhada_oneapp/UI/intro.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_detail/private_info.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_nav.dart';
 import 'dart:io';
 import 'package:uuid/uuid.dart';
 import 'package:wellhada_oneapp/UI/main/home_screen.dart';
-import 'package:wellhada_oneapp/model/map/map_model.dart';
-import 'UI/login/email_login/email_complete.dart';
+
 import 'package:geolocator/geolocator.dart';
-import 'UI/login/mobile_authen/certification.dart';
-import 'UI/login/mobile_authen/certification_result.dart';
-import 'UI/main/home_detail/map_scene.dart';
+import 'UI/privateInfo_detail/lastSelector.dart';
+import 'UI/privateInfo_detail/login.dart';
+import 'UI/privateInfo_detail/mobile_authen/certification.dart';
+import 'UI/privateInfo_detail/mobile_authen/certification_result.dart';
+
+import 'UI/privateInfo_detail/user/updateUser.dart';
 import 'notification/custom_notification.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -45,13 +53,14 @@ class MyApp extends StatelessWidget {
         home: MyHomePage(title: 'wellhada Client'),
         routes: {
           '/main': (context) => HomeScreen(),
-          '/map': (context) => MapScreen(),
-          '/Email_complete': (context) => Email_complete(),
+          '/last_selection': (context) => LastSelection(),
           '/certification': (context) => Certification(),
           '/certification-result': (context) => CertificationResult(),
           '/login': (context) => LOGIN(),
           '/private_info': (context) => PriavateInfo(),
           '/BottomNav': (context) => BottomNav(),
+          '/userUpdate': (context) => UserUpdate(),
+          '/Introduce': (context) => Introduce(),
         },
       ),
     );
@@ -68,72 +77,19 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   //final FirebaseAuth fAuth = FirebaseAuth.instance;
   final AsyncMemoizer _memoizer = AsyncMemoizer();
-  StreamSubscription iosSubscription;
-  String _messagingTitle = "";
   var appFontColor = "#000000";
   SharedPreferences prefs;
   var userDevice;
   var appStatus;
   LatLng _currentLocation;
-  var z;
+
   @override
   void initState() {
     super.initState();
 
     _getCurrentLocation();
-
-    // if (Platform.isIOS) {
-    //   iosSubscription =
-    //       _firebaseMessaging.onIosSettingsRegistered.listen((data) {
-    //     //_saveDeviceToken();
-    //   });
-    //   _firebaseMessaging
-    //       .requestNotificationPermissions(IosNotificationSettings());
-    // } else {
-    //   //_saveDeviceToken();
-    // }
-    // _firebaseMessaging.configure(
-    //   onMessage: (Map<String, dynamic> message) async {
-    //     _messagingTitle = message['notification']['title'].toString();
-    //     if (_messagingTitle.endsWith("null")) {
-    //       _messagingTitle = "";
-    //     }
-    //     showOverlayNotification((context) {
-    //       return MessageNotification(
-    //         title: _messagingTitle,
-    //         message: message['notification']['body'],
-    //         onReply: () {
-    //           OverlaySupportEntry.of(context).dismiss();
-    //           //toast('you checked this message');
-    //         },
-    //       );
-    //     }, duration: Duration(milliseconds: 4000));
-    //   },
-    //   onLaunch: (Map<String, dynamic> message) async {
-    //     print("onLaunch: $message");
-    //   },
-    //   onResume: (Map<String, dynamic> message) async {
-    //     print("onResume: $message");
-    //   },
-    // );
-    // _firebaseMessaging.requestNotificationPermissions(
-    //     const IosNotificationSettings(sound: true, badge: true, alert: true));
-    // _firebaseMessaging.onIosSettingsRegistered
-    //     .listen((IosNotificationSettings settings) {
-    //   print("Settings registered: $settings");
-    // });
-    // _firebaseMessaging.getToken().then((String token) {
-    //   assert(token != null);
-    //   print("Push Messaging token: $token");
-    //   setState(() async {
-    //     SharedPreferences prefs;
-    //     prefs = await SharedPreferences.getInstance();
-    //     prefs.setString("appPushToken", "$token");
-    //   });
-    // });
   }
 
   _getCurrentLocation() async {
@@ -151,7 +107,19 @@ class _MyHomePageState extends State<MyHomePage> {
       prefs.setDouble("lng", 127.07285755753348);
     }
 
-    startTime();
+    _checkForCameraPermission();
+  }
+
+  _checkForCameraPermission() async {
+    var cameraPermission = await Permission.camera.status;
+    print("camera permissions is $cameraPermission");
+    final permissionStatus = await Permission.camera.request();
+
+    if (permissionStatus == PermissionStatus.granted) {
+      startTime();
+    } else {
+      startTime();
+    }
   }
 
 //37.49152820899407, 127.07285755753348 대모산
@@ -180,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void goMain() {
-    Navigator.pushNamed(context, '/BottomNav');
+    Navigator.pushNamed(context, '/Introduce');
   }
 
   _function() async {
@@ -210,6 +178,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
       body: FutureBuilder(
           future: _function(),
           builder: (context, snapshot) {
