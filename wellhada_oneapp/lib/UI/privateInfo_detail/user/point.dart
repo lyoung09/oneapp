@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
@@ -42,7 +43,7 @@ class _UsagePointState extends State<UsagePoint> {
             padding: const EdgeInsets.all(3.0),
             child: Container(
               width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height * 0.1,
+              height: MediaQuery.of(context).size.height * 0.12,
               child: InkWell(
                 onTap: () {
                   pointInfoList[index]['usingPoint'] == 'Y'
@@ -62,7 +63,6 @@ class _UsagePointState extends State<UsagePoint> {
                           ));
                 },
                 child: Card(
-                  elevation: 20,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
@@ -92,24 +92,28 @@ class _UsagePointState extends State<UsagePoint> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  "${pointInfoList[index]['date_time']}",
-                                  style: TextStyle(
-                                      fontSize: 11.0,
-                                      fontWeight: FontWeight.w400),
+                              Padding(
+                                padding: EdgeInsets.only(top: 5),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    "${pointInfoList[index]['date_time']}",
+                                    style: TextStyle(
+                                        fontSize: 11.0,
+                                        fontWeight: FontWeight.w400),
+                                  ),
                                 ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.only(top: 15),
                               ),
                               Text(
                                 pointInfoList[index]['place_name'].length > 8
                                     ? "${pointInfoList[index]['place_name'].substring(0, 6)}..."
                                     : "${pointInfoList[index]['place_name']}",
                                 style: TextStyle(
-                                    fontSize: 15.0,
+                                    fontSize: 18.0,
                                     fontWeight: FontWeight.w800),
                               ),
                               Align(
@@ -117,7 +121,7 @@ class _UsagePointState extends State<UsagePoint> {
                                 child: Text(
                                   "${pointInfoList[index]['order']}",
                                   style: TextStyle(
-                                      fontSize: 11.0,
+                                      fontSize: 14.0,
                                       fontWeight: FontWeight.w600),
                                 ),
                               ),

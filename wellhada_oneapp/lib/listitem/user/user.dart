@@ -109,7 +109,7 @@ Map<String, dynamic> _$UsagePointToJsonMap(UsagePoint instance) =>
 
 Future<Map<String, dynamic>> getUsagePointList() async {
   final response = await http
-      .get('https://run.mocky.io/v3/4d999cbf-6105-4a4b-a98f-b56e89d2efb7');
+      .get('https://run.mocky.io/v3/cdccb31e-5ced-4ee3-9cfb-810827f8e068');
 
   if (200 == response.statusCode) {
     var datauser = json.decode(response.body);
@@ -126,7 +126,7 @@ Future<ShopInfo> getUsagePointEntire() async {
   //   body: {'period': 'ALL'},
   // );
   final response = await http
-      .get('https://run.mocky.io/v3/4d999cbf-6105-4a4b-a98f-b56e89d2efb7');
+      .get('https://run.mocky.io/v3/cdccb31e-5ced-4ee3-9cfb-810827f8e068');
 
   if (response.statusCode == 200) {
     return ShopInfo.fromJsonMap(json.decode(response.body));
@@ -263,7 +263,7 @@ Map<String, dynamic> _$FavoriteToJsonMap(Favorite instance) =>
 
 Future<Map<String, dynamic>> getFavoriteList() async {
   final response = await http
-      .get('https://run.mocky.io/v3/20c189c1-8ae8-445e-8b07-c65edad3026b');
+      .get('https://run.mocky.io/v3/937ec6e2-6911-4c2b-91b4-b4880ce776c1');
 
   if (200 == response.statusCode) {
     var datauser = json.decode(response.body);
@@ -280,10 +280,339 @@ Future<Favorite> getFavoriteEntire() async {
   //   body: {'period': 'ALL'},
   // );
   final response = await http
-      .get('https://run.mocky.io/v3/20c189c1-8ae8-445e-8b07-c65edad3026b');
+      .get('https://run.mocky.io/v3/937ec6e2-6911-4c2b-91b4-b4880ce776c1');
 
   if (response.statusCode == 200) {
     return Favorite.fromJsonMap(json.decode(response.body));
+  } else {
+    throw HttpException(
+      'Unexpected status code ${response.statusCode}:'
+      ' ${response.reasonPhrase}',
+      //uri: Uri.parse(query)
+    );
+  }
+}
+
+/////////////////////////////////////////
+/////////////////////////////////////////
+/////////////////////////////////////////
+////////////USERREVIEW///////////////////
+/////////////////////////////////////////
+/////////////////////////////////////////
+/////////////////////////////////////////
+/////////////////////////////////////////
+/////////////////////////////////////////
+
+class ReviewInfo {
+  String status;
+  int cnt;
+  Review reviewList;
+  final List<Review> list;
+
+  ReviewInfo({this.status, this.cnt, this.list, this.reviewList});
+
+  factory ReviewInfo.fromJson(Map<String, dynamic> json) => ReviewInfo(
+        status: json["STATUS"],
+        reviewList: Review.fromJson(json["LIST"]),
+        cnt: json["CNT"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "status": status,
+        "cnt": cnt,
+        "list": reviewList.toJson(),
+      };
+
+  factory ReviewInfo.fromJsonMap(Map<String, dynamic> json) =>
+      _$ReviewInfoItemFromJsonMap(json);
+
+  Map<String, dynamic> toJsonMap() => _$ReviewInfoItemToJsonMap(this);
+}
+
+ReviewInfo _$ReviewInfoItemFromJsonMap(Map<String, dynamic> json) {
+  return ReviewInfo(
+    list: (json['LIST'] as List)
+        ?.map((e) =>
+            e == null ? null : Review.fromJsonMap(e as Map<String, dynamic>))
+        ?.toList(),
+//      meta: (json['meta'] as List)
+//          ?.map((e) =>
+//      e == null ? null : Meta.fromJson(e as Map<String, dynamic>))
+//          ?.toList()
+  );
+}
+
+Map<String, dynamic> _$ReviewInfoItemToJsonMap(ReviewInfo instance) =>
+    <String, dynamic>{'documents': instance.list};
+
+class Review {
+  String placeUrl;
+  String placeName;
+  String userId;
+  String userName;
+  String userProfile;
+  String date;
+  String order;
+  String review;
+  String shopId;
+  String using;
+  Review(
+      {this.placeUrl,
+      this.placeName,
+      this.date,
+      this.order,
+      this.shopId,
+      this.userId,
+      this.userProfile,
+      this.review,
+      this.userName,
+      this.using});
+  factory Review.fromJson(Map<String, dynamic> json) => Review(
+        placeUrl: json["place_url"],
+        date: json["date"],
+        order: json["order"],
+        placeName: json['place_name'],
+        shopId: json["shopId"],
+        userId: json["userId"],
+        userName: json["userName"],
+        userProfile: json["user_profile"],
+        review: json["review"],
+        using: json["using"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "place_url": placeUrl,
+        "place_name": placeName,
+        "date": date,
+        "order": order,
+        "shopId": shopId,
+        "userId": userId,
+        "user_name": userName,
+        "user_profile": userProfile,
+        "review": review,
+        "using": using,
+      };
+  factory Review.fromJsonMap(Map<String, dynamic> json) =>
+      _$ReviewFromJsonMap(json);
+  Map<String, dynamic> toJsonMap() => _$ReviewToJsonMap(this);
+}
+
+Review _$ReviewFromJsonMap(Map<String, dynamic> json) {
+  return Review(
+    placeUrl: json['place_url'] as String,
+    placeName: json['place_name'] as String,
+    date: json['date'] as String,
+    order: json['order'] as String,
+    shopId: json['shopId'] as String,
+    userId: json['userId'] as String,
+    userName: json['user_name'] as String,
+    userProfile: json['user_profile'] as String,
+    review: json['review'] as String,
+    using: json['using'] as String,
+  );
+}
+
+Map<String, dynamic> _$ReviewToJsonMap(Review instance) => <String, dynamic>{
+      'place_url': instance.placeUrl,
+      'place_name': instance.placeName,
+      'date': instance.date,
+      'order': instance.order,
+      'shopId': instance.shopId,
+      'userId': instance.userId,
+      'user_name': instance.userName,
+      'user_profile': instance.userProfile,
+      'using': instance.using,
+      'review': instance.review,
+    };
+
+Future<Map<String, dynamic>> getReviewList() async {
+  final response = await http
+      .get('https://run.mocky.io/v3/20c189c1-8ae8-445e-8b07-c65edad3026b');
+
+  if (200 == response.statusCode) {
+    var datauser = json.decode(response.body);
+    return datauser;
+  } else {
+    return json.decode(response.body);
+  }
+}
+
+Future<Review> getReviewEntire() async {
+  // http.Response response = await http.post(
+  //   Uri.encodeFull('https://wellhada.com/getAppNoticeList'),
+  //   headers: {"Accept": "application/json"},
+  //   body: {'period': 'ALL'},
+  // );
+  final response = await http
+      .get('https://run.mocky.io/v3/20c189c1-8ae8-445e-8b07-c65edad3026b');
+
+  if (response.statusCode == 200) {
+    return Review.fromJsonMap(json.decode(response.body));
+  } else {
+    throw HttpException(
+      'Unexpected status code ${response.statusCode}:'
+      ' ${response.reasonPhrase}',
+      //uri: Uri.parse(query)
+    );
+  }
+}
+
+/////////////////////////////////////////
+/////////////////////////////////////////
+/////////////////////////////////////////
+////////////MyReview/////////////////////
+/////////////////////////////////////////
+/////////////////////////////////////////
+/////////////////////////////////////////
+/////////////////////////////////////////
+/////////////////////////////////////////
+
+class MyMyReviewInfo {
+  String status;
+  int cnt;
+  MyReview myReviewList;
+  final List<MyReview> list;
+
+  MyMyReviewInfo({this.status, this.cnt, this.list, this.myReviewList});
+
+  factory MyMyReviewInfo.fromJson(Map<String, dynamic> json) => MyMyReviewInfo(
+        status: json["STATUS"],
+        myReviewList: MyReview.fromJson(json["LIST"]),
+        cnt: json["CNT"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "status": status,
+        "cnt": cnt,
+        "list": myReviewList.toJson(),
+      };
+
+  factory MyMyReviewInfo.fromJsonMap(Map<String, dynamic> json) =>
+      _$MyMyReviewInfoItemFromJsonMap(json);
+
+  Map<String, dynamic> toJsonMap() => _$MyMyReviewInfoItemToJsonMap(this);
+}
+
+MyMyReviewInfo _$MyMyReviewInfoItemFromJsonMap(Map<String, dynamic> json) {
+  return MyMyReviewInfo(
+    list: (json['LIST'] as List)
+        ?.map((e) =>
+            e == null ? null : MyReview.fromJsonMap(e as Map<String, dynamic>))
+        ?.toList(),
+//      meta: (json['meta'] as List)
+//          ?.map((e) =>
+//      e == null ? null : Meta.fromJson(e as Map<String, dynamic>))
+//          ?.toList()
+  );
+}
+
+Map<String, dynamic> _$MyMyReviewInfoItemToJsonMap(MyMyReviewInfo instance) =>
+    <String, dynamic>{'documents': instance.list};
+
+class MyReview {
+  String placeUrl;
+  String placeName;
+  String userId;
+  String date;
+  String order;
+  String review;
+  String shopId;
+  String reviewPicutre;
+  String story;
+  String using;
+  MyReview({
+    this.placeUrl,
+    this.placeName,
+    this.date,
+    this.order,
+    this.shopId,
+    this.userId,
+    this.review,
+    this.story,
+    this.using,
+    this.reviewPicutre,
+  });
+  factory MyReview.fromJson(Map<String, dynamic> json) => MyReview(
+        placeUrl: json["place_url"],
+        date: json["date"],
+        order: json["order"],
+        placeName: json['place_name'],
+        shopId: json["shopId"],
+        userId: json["userId"],
+        review: json["review"],
+        story: json["story"],
+        using: json["using"],
+        reviewPicutre: json["review_picutre"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "place_url": placeUrl,
+        "place_name": placeName,
+        "date": date,
+        "order": order,
+        "shopId": shopId,
+        "userId": userId,
+        "review": review,
+        "story": story,
+        "using": using,
+        "review_picutre": reviewPicutre,
+      };
+  factory MyReview.fromJsonMap(Map<String, dynamic> json) =>
+      _$MyReviewFromJsonMap(json);
+  Map<String, dynamic> toJsonMap() => _$MyReviewToJsonMap(this);
+}
+
+MyReview _$MyReviewFromJsonMap(Map<String, dynamic> json) {
+  return MyReview(
+    placeUrl: json['place_url'] as String,
+    placeName: json['place_name'] as String,
+    date: json['date'] as String,
+    order: json['order'] as String,
+    shopId: json['shopId'] as String,
+    userId: json['userId'] as String,
+    review: json['review'] as String,
+    story: json['story'] as String,
+    reviewPicutre: json['review_picutre'] as String,
+    using: json['using'] as String,
+  );
+}
+
+Map<String, dynamic> _$MyReviewToJsonMap(MyReview instance) =>
+    <String, dynamic>{
+      'place_url': instance.placeUrl,
+      'place_name': instance.placeName,
+      'date': instance.date,
+      'order': instance.order,
+      'shopId': instance.shopId,
+      'userId': instance.userId,
+      'story': instance.story,
+      'review_picutre': instance.reviewPicutre,
+      'review': instance.review,
+      'using': instance.using,
+    };
+
+Future<Map<String, dynamic>> getMyReviewList() async {
+  final response = await http
+      .get('https://run.mocky.io/v3/0672a3ae-a66d-4ee1-9680-3e0d2d7b09ff');
+  if (200 == response.statusCode) {
+    var datauser = json.decode(response.body);
+    return datauser;
+  } else {
+    return json.decode(response.body);
+  }
+}
+
+Future<MyReview> getMyReviewEntire() async {
+  // http.Response response = await http.post(
+  //   Uri.encodeFull('https://wellhada.com/getAppNoticeList'),
+  //   headers: {"Accept": "application/json"},
+  //   body: {'period': 'ALL'},
+  // );
+  final response = await http
+      .get('https://run.mocky.io/v3/0672a3ae-a66d-4ee1-9680-3e0d2d7b09ff');
+
+  if (response.statusCode == 200) {
+    return MyReview.fromJsonMap(json.decode(response.body));
   } else {
     throw HttpException(
       'Unexpected status code ${response.statusCode}:'

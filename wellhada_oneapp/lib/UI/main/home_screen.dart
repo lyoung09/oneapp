@@ -139,7 +139,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   title: Center(
                       child: Text(
                     '# 스토리',
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.w900),
                   )),
                   actions: <Widget>[
                     provideLocation
@@ -183,6 +184,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           child: Text(
                         "리스트로 보기",
                         textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'Godo',
+                        ),
                       ))),
                   _getTab(
                       1,
@@ -190,6 +194,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           child: Text(
                         "지도로 보기",
                         textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'Godo',
+                        ),
                       ))),
                 ],
               ),

@@ -156,10 +156,13 @@ class _LastSelectionState extends State<LastSelection> {
                       ),
                       Row(
                         children: [
-                          Text(
-                            "생일 : ",
-                            style: TextStyle(color: Colors.black, fontSize: 15),
-                          ),
+                          Padding(
+                              padding: EdgeInsets.only(left: 5),
+                              child: Text(
+                                "생일 : ",
+                                style: TextStyle(
+                                    color: Colors.black, fontSize: 15),
+                              )),
                           Padding(
                             padding: EdgeInsets.only(left: 10, right: 10),
                           ),
@@ -188,10 +191,13 @@ class _LastSelectionState extends State<LastSelection> {
                       ),
                       Row(
                         children: [
-                          Text(
-                            "성별 : ",
-                            style: TextStyle(color: Colors.black, fontSize: 15),
-                          ),
+                          Padding(
+                              padding: EdgeInsets.only(left: 5),
+                              child: Text(
+                                "성별 : ",
+                                style: TextStyle(
+                                    color: Colors.black, fontSize: 15),
+                              )),
                           Padding(
                             padding: EdgeInsets.only(left: 10, right: 10),
                           ),

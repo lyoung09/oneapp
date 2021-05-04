@@ -233,6 +233,7 @@ class _UserUpdateState extends State<UserUpdate> {
       setState(() {
         //for rebuilding the ui
         birthdayJson = formatterSave.format(pickedDate);
+
         birthday = formatter.format(pickedDate);
       });
     });
@@ -390,6 +391,7 @@ class _UserUpdateState extends State<UserUpdate> {
       prefs.setString("userPhone", mobileController.text);
       prefs.setString("birthday", birthdayJson);
       prefs.setString("gender", gender);
+      print(gender);
       prefs.setString("userProfile", userProfile);
     });
 

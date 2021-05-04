@@ -73,8 +73,8 @@ class _IntroduceState extends State<Introduce> {
                     child: Stack(
                       children: <Widget>[
                         Container(
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height,
+                          width: MediaQuery.of(context).size.width * 0.8,
+                          height: MediaQuery.of(context).size.height * 0.8,
                         ),
                         // ClipPath(
                         //   clipper: OvalBottomBorderClipper(),
@@ -95,38 +95,56 @@ class _IntroduceState extends State<Introduce> {
                           ),
                         ),
                         Column(
-                          children: <Widget>[
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          verticalDirection: VerticalDirection.down,
+                          children: [
                             Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 40, top: 30),
-                                child: Text("안녕하세요")),
-                            SizedBox(
-                              height: 10,
+                              padding: EdgeInsets.only(top: 30, bottom: 30),
                             ),
                             Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 40, top: 20),
-                                child: Text("웰하다입니다")),
-                            SizedBox(
-                              height: 10,
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                '어서오세요',
+                                style: TextStyle(
+                                    color: Colors.black, fontSize: 30.0),
+                              ),
                             ),
                             Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 40, top: 20),
-                                child: Text("여러 가게 구경하고 가세요")),
-                            SizedBox(
-                              width: 20,
-                            )
+                              padding: const EdgeInsets.all(12.0),
+                              child: Container(
+                                  child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.baseline,
+                                  textBaseline: TextBaseline.alphabetic,
+                                  children: <Widget>[
+                                    Text("#STORY",
+                                        style: TextStyle(fontSize: 27)),
+                                    Text("를 사용하여",
+                                        style: TextStyle(fontSize: 13)),
+                                  ],
+                                ),
+                              )),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Text(
+                                '빠르고 싸게 물건을 구하세요!',
+                                style: TextStyle(
+                                    color: Colors.black, fontSize: 15.0),
+                              ),
+                            ),
                           ],
                         ),
 
                         Padding(
-                          padding: EdgeInsets.all(20),
+                          padding: EdgeInsets.all(40),
                           child: Align(
                             alignment: Alignment.bottomRight,
                             child: InkWell(
                               onTap: checkIndex,
-                              child: Text("넘어가기"),
+                              child: Icon(Icons.arrow_forward_ios_outlined),
                             ),
                           ),
                         )
@@ -175,47 +193,69 @@ class _IntroduceState extends State<Introduce> {
                           ),
                         ),
                         Column(
-                          children: <Widget>[
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          verticalDirection: VerticalDirection.down,
+                          children: [
                             Padding(
-                                padding:
-                                    const EdgeInsets.only(top: 30, left: 30),
-                                child: Text("저희 가맹점들은")),
-                            SizedBox(
-                              height: 10,
+                              padding: EdgeInsets.only(top: 30, bottom: 30),
                             ),
                             Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 40, top: 20),
-                                child: Text("호잇호잇")),
-                            SizedBox(
-                              height: 10,
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                '저희 가맹점들은',
+                                style: TextStyle(
+                                    color: Colors.black, fontSize: 30.0),
+                              ),
                             ),
                             Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 40, top: 20),
-                                child: Text("헤에에에")),
-                            SizedBox(
-                              width: 20,
-                            )
+                              padding: const EdgeInsets.all(12.0),
+                              child: Container(
+                                  child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.baseline,
+                                  textBaseline: TextBaseline.alphabetic,
+                                  children: <Widget>[
+                                    Text("#STORY",
+                                        style: TextStyle(fontSize: 27)),
+                                    Text("를 사용하여",
+                                        style: TextStyle(fontSize: 13)),
+                                  ],
+                                ),
+                              )),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Text(
+                                '너네를 편하게 해준답니다!',
+                                style: TextStyle(
+                                    color: Colors.black, fontSize: 15.0),
+                              ),
+                            ),
                           ],
                         ),
                         Padding(
-                          padding: EdgeInsets.all(20),
+                          padding: EdgeInsets.all(40),
                           child: Align(
                             alignment: Alignment.bottomLeft,
                             child: InkWell(
                               onTap: goBack,
-                              child: Text("돌아가기"),
+                              child: Icon(Icons.arrow_back_ios_outlined),
                             ),
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.all(20),
+                          padding: EdgeInsets.all(40),
                           child: Align(
                             alignment: Alignment.bottomRight,
                             child: InkWell(
                               onTap: goStart,
-                              child: Text("시작하기"),
+                              child: Text(
+                                "시작하기",
+                                style: TextStyle(
+                                    fontSize: 15, fontWeight: FontWeight.w900),
+                              ),
                             ),
                           ),
                         )

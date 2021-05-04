@@ -52,9 +52,7 @@ class _WebViewContainerState extends State<WebViewContainer> {
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.amberAccent[400],
-          iconTheme: IconThemeData(
-            color: Colors.black, //change your color here
-          ),
+          automaticallyImplyLeading: false,
           title: Text(
             "${placeName}",
             style: TextStyle(

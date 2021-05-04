@@ -67,7 +67,7 @@ class HndSolution extends StatelessWidget {
                       padding: EdgeInsets.only(left: 35),
                     ),
                     Text(
-                      "회사명",
+                      "회사명 :",
                       style: TextStyle(
                         // color: _colorText,
                         fontSize: 20.0,
@@ -76,7 +76,7 @@ class HndSolution extends StatelessWidget {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 30),
+                      padding: EdgeInsets.only(left: 10),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
@@ -108,7 +108,7 @@ class HndSolution extends StatelessWidget {
                       padding: EdgeInsets.only(left: 35),
                     ),
                     Text(
-                      "주소",
+                      "주소 :",
                       style: TextStyle(
                         // color: _colorText,
                         fontSize: 20.0,
@@ -117,7 +117,7 @@ class HndSolution extends StatelessWidget {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 30),
+                      padding: EdgeInsets.only(left: 10),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
@@ -149,7 +149,7 @@ class HndSolution extends StatelessWidget {
                       padding: EdgeInsets.only(left: 35),
                     ),
                     Text(
-                      "TEL",
+                      "TEL :",
                       style: TextStyle(
                         // color: _colorText,
                         fontSize: 20.0,
@@ -158,7 +158,7 @@ class HndSolution extends StatelessWidget {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 30),
+                      padding: EdgeInsets.only(left: 10),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
@@ -190,7 +190,7 @@ class HndSolution extends StatelessWidget {
                       padding: EdgeInsets.only(left: 35),
                     ),
                     Text(
-                      "Email",
+                      "Email :",
                       style: TextStyle(
                         // color: _colorText,
                         fontSize: 20.0,
@@ -199,7 +199,7 @@ class HndSolution extends StatelessWidget {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 30),
+                      padding: EdgeInsets.only(left: 10),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
@@ -231,7 +231,7 @@ class HndSolution extends StatelessWidget {
                       padding: EdgeInsets.only(left: 35),
                     ),
                     Text(
-                      "대표",
+                      "대표 :",
                       style: TextStyle(
                         // color: _colorText,
                         fontSize: 20.0,
@@ -240,7 +240,7 @@ class HndSolution extends StatelessWidget {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 30),
+                      padding: EdgeInsets.only(left: 10),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
@@ -272,7 +272,7 @@ class HndSolution extends StatelessWidget {
                       padding: EdgeInsets.only(left: 35),
                     ),
                     Text(
-                      "사업자 번호",
+                      "사업자 번호 :",
                       style: TextStyle(
                         // color: _colorText,
                         fontSize: 20.0,
@@ -281,7 +281,7 @@ class HndSolution extends StatelessWidget {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 30),
+                      padding: EdgeInsets.only(left: 10),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
