@@ -96,7 +96,7 @@ class _ReviewState extends State<Review> {
                     "${shopName}",
                     style: TextStyle(
                       fontSize: 21.0,
-                      fontFamily: "Sans",
+                      fontFamily: "nanumB",
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -104,10 +104,11 @@ class _ReviewState extends State<Review> {
                     "에서 주문하신",
                     style: TextStyle(
                       fontSize: 12.0,
-                      fontFamily: "Sans",
-                      fontWeight: FontWeight.w800,
+                      fontFamily: "nanumR",
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
+                  Padding(padding: EdgeInsets.only(right: 5)),
                 ],
               ),
               Align(
@@ -116,13 +117,13 @@ class _ReviewState extends State<Review> {
                   order,
                   style: TextStyle(
                     fontSize: 12.0,
-                    fontFamily: "Sans",
+                    fontFamily: "nanumB",
                     fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
               Padding(
-                padding: EdgeInsets.only(top: 10),
+                padding: EdgeInsets.only(top: 10, bottom: 10),
               ),
               Center(
                 child: GestureDetector(

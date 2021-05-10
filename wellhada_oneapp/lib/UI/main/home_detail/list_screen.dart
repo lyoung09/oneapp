@@ -143,163 +143,149 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
     return shopInfoListItem.getShopCategoryList();
   }
 
-  Widget _menuList(String code) {
-    List menuCode;
-    List<int> sortedKeys;
-    LinkedHashMap sortedMap;
-    List fromUserToMarket;
-    Map<int, int> newPosition;
+  // Widget _menuList(String code) {
+  //   List menuCode;
+  //   List<int> sortedKeys;
+  //   LinkedHashMap sortedMap;
+  //   List fromUserToMarket;
+  //   Map<int, int> newPosition;
 
-    try {
-      menuCode =
-          shopCategory.where((el) => el.categoryGroupCode == code).toList();
+  //   try {
+  //     menuCode =
+  //         shopCategory.where((el) => el.categoryGroupCode == code).toList();
 
-      return Stack(children: [
-        ListView.builder(
-          scrollDirection: Axis.vertical,
-          shrinkWrap: true,
-          controller: _controller,
-          physics: ClampingScrollPhysics(),
-          itemCount: menuCode.length == null ? 0 : menuCode.length,
-          itemBuilder: (context, position) {
-            var size = MediaQuery.of(context).size;
-            newPosition = new Map();
+  //     return Stack(children: [
+  //       ListView.builder(
+  //         scrollDirection: Axis.vertical,
+  //         shrinkWrap: true,
+  //         controller: _controller,
+  //         physics: ClampingScrollPhysics(),
+  //         itemCount: menuCode.length == null ? 0 : menuCode.length,
+  //         itemBuilder: (context, position) {
+  //           var size = MediaQuery.of(context).size;
+  //           newPosition = new Map();
 
-            var alone;
-            if (menuCode.length == 1) {
-              alone = _coordinateDistance(
-                  _currentLocation.latitude,
-                  _currentLocation.longitude,
-                  double.parse(menuCode[0].y),
-                  double.parse(menuCode[0].x));
+  //           var alone;
+  //           if (menuCode.length == 1) {
+  //             alone = _coordinateDistance(
+  //                 _currentLocation.latitude,
+  //                 _currentLocation.longitude,
+  //                 double.parse(menuCode[0].y),
+  //                 double.parse(menuCode[0].x));
 
-              newPosition[0] = 0;
-            } else {
-              for (int i = 0; i < menuCode.length; i++) {
-                distance[i] = _coordinateDistance(
-                    _currentLocation.latitude,
-                    _currentLocation.longitude,
-                    double.parse(menuCode[i].y),
-                    double.parse(menuCode[i].x));
-                sortedKeys = distance.keys.toList(growable: false)
-                  ..sort((k1, k2) => int.parse(distance[k1])
-                      .compareTo(int.parse(distance[k2])));
+  //             newPosition[0] = 0;
+  //           } else {
+  //             for (int i = 0; i < menuCode.length; i++) {
+  //               distance[i] = _coordinateDistance(
+  //                   _currentLocation.latitude,
+  //                   _currentLocation.longitude,
+  //                   double.parse(menuCode[i].y),
+  //                   double.parse(menuCode[i].x));
+  //               sortedKeys = distance.keys.toList(growable: false)
+  //                 ..sort((k1, k2) => int.parse(distance[k1])
+  //                     .compareTo(int.parse(distance[k2])));
 
-                sortedMap = new LinkedHashMap.fromIterable(sortedKeys,
-                    key: (k) => k, value: (k) => distance[k]);
-              }
-              fromUserToMarket = sortedMap.values.toList();
-            }
+  //               sortedMap = new LinkedHashMap.fromIterable(sortedKeys,
+  //                   key: (k) => k, value: (k) => distance[k]);
+  //             }
+  //             fromUserToMarket = sortedMap.values.toList();
+  //           }
 
-            return InkWell(
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(right: 10),
-                        ),
-                        Container(
-                          child: Image.network(
-                            menuCode[position].placeUrl,
-                            fit: BoxFit.fill,
-                            width: 40.0,
-                            height: 40.0,
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(right: 20),
-                        ),
-                        Container(
-                          width: MediaQuery.of(context).size.width - 110,
-                          child: Column(
-                            //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                menuCode[position].placeName,
-                                style: TextStyle(fontSize: 18.0),
-                              ),
-                              Row(
-                                verticalDirection: VerticalDirection.down,
-                                children: [
-                                  Text(
-                                    menuCode[position].addressName,
-                                    style: TextStyle(fontSize: 10.0),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(left: 5, right: 5),
-                                  ),
-                                  ClipOval(
-                                    child: Material(
-                                      color: Colors.green,
-                                      child: InkWell(
-                                        onTap: () {},
-                                        child: SvgPicture.asset(
-                                          "assets/svg/coupon.svg",
-                                          fit: BoxFit.fill,
-                                          width: 20,
-                                          height: 20,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Spacer(),
-                                  SvgPicture.asset(
-                                    'assets/svg/location.svg',
-                                    width: 15.0,
-                                    height: 20.0,
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(right: 3.0),
-                                  ),
-                                  Text(fromUserToMarket == null
-                                      ? alone.length > 3
-                                          ? '${(int.parse(alone) * 0.001).toStringAsFixed(1)}km'
-                                          : '${alone}m'
-                                      : fromUserToMarket[position].length > 3
-                                          ? '${(int.parse(fromUserToMarket[position]) * 0.001).toStringAsFixed(1)}km'
-                                          : '${fromUserToMarket[position]}m'),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                onTap: () {
-                  setState(() {
-                    category = menuCode[position].placeName;
-                    print(category);
-                    _handleURLButtonPress(context,
-                        '${webviewDefault}/shopTmplatView.do', category);
-                  });
-                });
-          },
-        ),
-        Align(
-          alignment: Alignment.topRight,
-          child: FloatingActionButton(
-              mini: true,
-              onPressed: () {
-                setState(() {
-                  wellhada == true ? wellhada = false : wellhada = true;
-                });
-              },
-              child: Icon(
-                Icons.done_sharp,
-                color: Colors.black,
-              ),
-              backgroundColor: wellhada == true ? Colors.yellow : Colors.white),
-        ),
-      ]);
-    } catch (e) {
-      return Center(child: CupertinoActivityIndicator());
-    }
-  }
+  //           return InkWell(
+  //               child: Card(
+  //                 child: Padding(
+  //                   padding: const EdgeInsets.all(16.0),
+  //                   child: Row(
+  //                     children: [
+  //                       Padding(
+  //                         padding: EdgeInsets.only(right: 10),
+  //                       ),
+  //                       Container(
+  //                         child: Image.network(
+  //                           menuCode[position].placeUrl,
+  //                           fit: BoxFit.fill,
+  //                           width: 40.0,
+  //                           height: 40.0,
+  //                         ),
+  //                       ),
+  //                       Padding(
+  //                         padding: EdgeInsets.only(right: 20),
+  //                       ),
+  //                       Container(
+  //                         width: MediaQuery.of(context).size.width - 110,
+  //                         child: Column(
+  //                           //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                           crossAxisAlignment: CrossAxisAlignment.start,
+  //                           children: <Widget>[
+  //                             Text(
+  //                               menuCode[position].placeName,
+  //                               style: TextStyle(fontSize: 18.0),
+  //                             ),
+  //                             Row(
+  //                               verticalDirection: VerticalDirection.down,
+  //                               children: [
+  //                                 Text(
+  //                                   menuCode[position].addressName,
+  //                                   style: TextStyle(fontSize: 10.0),
+  //                                 ),
+  //                                 Padding(
+  //                                   padding: EdgeInsets.only(left: 5, right: 5),
+  //                                 ),
+  //                                 ClipOval(
+  //                                   child: Material(
+  //                                     color: Colors.green,
+  //                                     child: InkWell(
+  //                                       onTap: () {},
+  //                                       child: SvgPicture.asset(
+  //                                         "assets/svg/coupon.svg",
+  //                                         fit: BoxFit.fill,
+  //                                         width: 20,
+  //                                         height: 20,
+  //                                       ),
+  //                                     ),
+  //                                   ),
+  //                                 ),
+  //                                 Spacer(),
+  //                                 SvgPicture.asset(
+  //                                   'assets/svg/location.svg',
+  //                                   width: 15.0,
+  //                                   height: 20.0,
+  //                                 ),
+  //                                 Padding(
+  //                                   padding: EdgeInsets.only(right: 3.0),
+  //                                 ),
+  //                                 Text(fromUserToMarket == null
+  //                                     ? alone.length > 3
+  //                                         ? '${(int.parse(alone) * 0.001).toStringAsFixed(1)}km'
+  //                                         : '${alone}m'
+  //                                     : fromUserToMarket[position].length > 3
+  //                                         ? '${(int.parse(fromUserToMarket[position]) * 0.001).toStringAsFixed(1)}km'
+  //                                         : '${fromUserToMarket[position]}m'),
+  //                               ],
+  //                             ),
+  //                           ],
+  //                         ),
+  //                       ),
+  //                     ],
+  //                   ),
+  //                 ),
+  //               ),
+  //               onTap: () {
+  //                 setState(() {
+  //                   category = menuCode[position].placeName;
+  //                   print(category);
+  //                   _handleURLButtonPress(context,
+  //                       '${webviewDefault}/shopTmplatView.do', category);
+  //                 });
+  //               });
+  //         },
+  //       ),
+
+  //     ]);
+  //   } catch (e) {
+  //     return Center(child: CupertinoActivityIndicator());
+  //   }
+  // }
 
   Widget _wellhadaView(String code) {
     List menuCode;
@@ -347,6 +333,9 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
 
                 sortedMap = new LinkedHashMap.fromIterable(sortedKeys,
                     key: (k) => k, value: (k) => distance[k]);
+
+                print(sortedKeys);
+                print(sortedMap);
               }
 
               fromUserToMarket = sortedMap.values.toList();
@@ -434,24 +423,11 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
                   setState(() {
                     category = menuCode[position].placeName;
                     print(category);
+                    _handleURLButtonPress(context,
+                        '${webviewDefault}/shopTmplatView.do', category);
                   });
                 });
           },
-        ),
-        Align(
-          alignment: Alignment.topRight,
-          child: FloatingActionButton(
-              mini: true,
-              onPressed: () {
-                setState(() {
-                  wellhada == true ? wellhada = false : wellhada = true;
-                });
-              },
-              child: Icon(
-                Icons.done_sharp,
-                color: Colors.black,
-              ),
-              backgroundColor: wellhada == true ? Colors.yellow : Colors.white),
         ),
       ]);
     } catch (e) {
@@ -477,7 +453,7 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
 
           List<Tab> tabs = new List<Tab>();
 
-          List<Widget> menuList = List<Widget>();
+          //List<Widget> menuList = List<Widget>();
           List<Widget> wellhadaList = List<Widget>();
 
           for (int i = 0; i < shopInfoList.length; i++) {
@@ -490,8 +466,8 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
               ),
             );
 
-            menuView[i] = shopInfoList[i]["CATEGORY_CD"];
-            menuList.add(_menuList(menuView[i]));
+            // menuView[i] = shopInfoList[i]["CATEGORY_CD"];
+            // menuList.add(_menuList(menuView[i]));
 
             wellhadaView[i] = shopInfoList[i]["CATEGORY_CD"];
             wellhadaList.add(_wellhadaView(wellhadaView[i]));
@@ -524,8 +500,7 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
                   )),
               Expanded(
                 child: TabBarView(
-                    controller: _tabController,
-                    children: wellhada == true ? wellhadaList : menuList
+                    controller: _tabController, children: wellhadaList
                     //  [
                     //   _menuList(menuView[_tabController.index]),
                     //   _menuList(menuView[_tabController.index]),

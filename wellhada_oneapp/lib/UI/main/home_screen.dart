@@ -46,8 +46,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         child: Container(
           child: child,
           decoration: BoxDecoration(
-              color:
-                  (_selectedTab == index ? Colors.white : Colors.grey.shade300),
+              color: (_selectedTab == index ? Colors.grey[300] : Colors.white),
               borderRadius: _generateBorderRadius(index)),
         ),
       ),
@@ -172,8 +171,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   width: MediaQuery.of(context).size.width,
                   child: TopBanner()),
               TabBar(
-                unselectedLabelColor: Colors.black,
-                labelColor: Colors.blueAccent,
+                //unselectedLabelColor: Colors.grey[850],
+                //labelColor: Colors.grey[300],
+                //indicatorColor: Colors.grey[300],
                 indicatorColor: Colors.white,
                 controller: _tabController,
                 labelPadding: const EdgeInsets.all(0.0),
@@ -185,8 +185,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         "리스트로 보기",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontFamily: 'Godo',
-                        ),
+                            fontFamily: 'nanumB',
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold),
                       ))),
                   _getTab(
                       1,
@@ -195,8 +196,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         "지도로 보기",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontFamily: 'Godo',
-                        ),
+                            fontFamily: 'nanumB',
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold),
                       ))),
                 ],
               ),

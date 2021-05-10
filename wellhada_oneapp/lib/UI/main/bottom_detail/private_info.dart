@@ -255,7 +255,7 @@ class _PriavateInfoState extends State<PriavateInfo> {
                                                 style: TextStyle(
                                                   // color: _colorText,
                                                   fontSize: 25.0,
-                                                  fontFamily: "Godo",
+                                                  fontFamily: "nanumB",
                                                   fontWeight: FontWeight.w600,
                                                 ),
                                               ),
@@ -302,7 +302,7 @@ class _PriavateInfoState extends State<PriavateInfo> {
                                                 style: TextStyle(
                                                   // color: _colorText,
                                                   fontSize: 25.0,
-                                                  fontFamily: "Godo",
+                                                  fontFamily: "nanumR",
                                                   fontWeight: FontWeight.w600,
                                                 ),
                                               ),
@@ -370,8 +370,8 @@ class _PriavateInfoState extends State<PriavateInfo> {
                                                   style: TextStyle(
                                                     // color: _colorText,
                                                     fontSize: 16.0,
-                                                    fontFamily: "Godo",
-                                                    fontWeight: FontWeight.w600,
+                                                    fontFamily: 'nanumB',
+                                                    fontWeight: FontWeight.w800,
                                                   ),
                                                 ),
                                           Text(
@@ -379,7 +379,7 @@ class _PriavateInfoState extends State<PriavateInfo> {
                                             style: TextStyle(
                                               //color: _colorText,
                                               fontSize: 14.0,
-                                              fontFamily: "Godo",
+                                              fontFamily: "nanumR",
                                               fontWeight: FontWeight.w400,
                                             ),
                                           ),

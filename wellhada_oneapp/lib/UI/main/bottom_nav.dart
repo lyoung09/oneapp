@@ -32,58 +32,68 @@ class _BottomNavState extends State<BottomNav> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _widgetOptions.elementAt(_selectedIndex),
-      bottomNavigationBar: Theme(
-        data: Theme.of(context).copyWith(
-            // sets the background color of the `BottomNavigationBar`
-            canvasColor: Colors.amberAccent,
-            // sets the active color of the `BottomNavigationBar` if `Brightness` is light
-            primaryColor: Colors.amberAccent,
-            textTheme: Theme.of(context)
-                .textTheme
-                .copyWith(caption: new TextStyle(color: Colors.black))),
-        child: BottomNavigationBar(
-          backgroundColor: Colors.amberAccent,
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: Colors.black,
-          unselectedItemColor: Colors.white,
-          currentIndex: _selectedIndex,
-          showSelectedLabels: true,
-          showUnselectedLabels: true,
-          items: [
-            BottomNavigationBarItem(
-                icon: SvgPicture.asset(
-                  "assets/svg/home.svg",
+    return WillPopScope(
+      onWillPop: () {},
+      child: Scaffold(
+        body: _widgetOptions.elementAt(_selectedIndex),
+        bottomNavigationBar: Theme(
+          data: Theme.of(context).copyWith(
+              // sets the background color of the `BottomNavigationBar`
+              canvasColor: Colors.amberAccent,
+              // sets the active color of the `BottomNavigationBar` if `Brightness` is light
+              primaryColor: Colors.amberAccent,
+              textTheme: Theme.of(context).textTheme.copyWith(
+                  caption: new TextStyle(
+                      color: Colors.grey[350], fontFamily: 'nanumB'))),
+          child: BottomNavigationBar(
+            backgroundColor: Colors.white,
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: Colors.black,
+            unselectedItemColor: Colors.grey[350],
+            currentIndex: _selectedIndex,
+            showSelectedLabels: true,
+            showUnselectedLabels: true,
+            items: [
+              BottomNavigationBarItem(
+                  icon: SvgPicture.asset(
+                    "assets/svg/home1.svg",
+                    fit: BoxFit.fill,
+                    width: 20,
+                    height: 20,
+                  ),
+                  label: "홈"),
+              BottomNavigationBarItem(
+                  icon: SvgPicture.asset(
+                    "assets/svg/uselist.svg",
+                    fit: BoxFit.fill,
+                    width: 20,
+                    height: 20,
+                  ),
+                  label: "이용내역"),
+              BottomNavigationBarItem(
+                  icon: Image.asset(
+                    'assets/img/favorite.png',
+                    fit: BoxFit.fill,
+                    width: 20,
+                    height: 20,
+                  ),
+                  label: "즐겨찾기"),
+              BottomNavigationBarItem(
+                icon: Image.asset(
+                  'assets/img/information.png',
                   fit: BoxFit.fill,
                   width: 20,
                   height: 20,
                 ),
-                label: "홈"),
-            BottomNavigationBarItem(icon: Icon(Icons.map), label: "이용내역"),
-            BottomNavigationBarItem(
-                icon: SvgPicture.asset(
-                  "assets/svg/star.svg",
-                  fit: BoxFit.fill,
-                  width: 20,
-                  height: 20,
-                ),
-                label: "즐겨찾기"),
-            BottomNavigationBarItem(
-              icon: SvgPicture.asset(
-                "assets/svg/user.svg",
-                fit: BoxFit.fill,
-                width: 20,
-                height: 20,
-              ),
-              label: '내 정보',
-            )
-          ],
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
+                label: '내 정보',
+              )
+            ],
+            onTap: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+          ),
         ),
       ),
     );

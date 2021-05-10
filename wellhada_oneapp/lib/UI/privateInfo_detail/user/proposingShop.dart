@@ -163,7 +163,7 @@ class _ProposingShopState extends State<ProposingShop> {
                                 contentPadding: const EdgeInsets.all(6.0),
                                 hintText: "이름(*)",
                                 hintStyle: TextStyle(
-                                    fontFamily: 'Godo',
+                                    fontFamily: 'nanumR',
                                     fontSize: 14.0,
                                     color: Colors.grey[500]),
                               ),
@@ -207,7 +207,7 @@ class _ProposingShopState extends State<ProposingShop> {
                                 contentPadding: const EdgeInsets.all(6.0),
                                 hintText: "연락처(*)",
                                 hintStyle: TextStyle(
-                                    fontFamily: 'Godo',
+                                    fontFamily: 'nanumR',
                                     fontSize: 14.0,
                                     color: Colors.grey[500]),
                               ),
@@ -283,7 +283,7 @@ class _ProposingShopState extends State<ProposingShop> {
                                 contentPadding: const EdgeInsets.all(6.0),
                                 hintText: "상호명(*)",
                                 hintStyle: TextStyle(
-                                    fontFamily: 'Godo',
+                                    fontFamily: 'nanumR',
                                     fontSize: 14.0,
                                     color: Colors.grey[500]),
                               ),
@@ -327,7 +327,7 @@ class _ProposingShopState extends State<ProposingShop> {
                                 contentPadding: const EdgeInsets.all(6.0),
                                 hintText: "주소(*)",
                                 hintStyle: TextStyle(
-                                    fontFamily: 'Godo',
+                                    fontFamily: 'nanumR',
                                     fontSize: 14.0,
                                     color: Colors.grey[500]),
                               ),
@@ -368,7 +368,7 @@ class _ProposingShopState extends State<ProposingShop> {
                               contentPadding: const EdgeInsets.all(6.0),
                               hintText: "업종(*)",
                               hintStyle: TextStyle(
-                                  fontFamily: 'Godo',
+                                  fontFamily: 'nanumR',
                                   fontSize: 14.0,
                                   color: Colors.grey[500]),
                             ),

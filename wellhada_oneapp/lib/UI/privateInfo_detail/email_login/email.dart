@@ -6,6 +6,7 @@ import 'package:wellhada_oneapp/UI/privateInfo_detail/mobile_authen/mobil_authen
 import 'package:wellhada_oneapp/UI/privateInfo_detail/mobile_authen/mobile.dart';
 import 'package:wellhada_oneapp/model/login/user.dart';
 import 'package:validators/validators.dart' as validator;
+import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
 
 class Email extends StatefulWidget {
   @override
@@ -30,11 +31,13 @@ class _EmailState extends State<Email> {
   void checkPassword(String value) async {
     setState(() {
       passwordFirst = value;
+      model.password = passwordFirst;
     });
   }
 
   void verificationPassword(String value) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    //await user.insertUser(model.email, model.password);
 
     setState(() {
       if (value == passwordCheck) {
@@ -91,8 +94,8 @@ class _EmailState extends State<Email> {
                     ),
                     hintText: "email",
                     hintStyle: TextStyle(
-                        fontFamily: 'Godo',
-                        fontSize: 14.0,
+                        fontFamily: 'nanumB',
+                        fontSize: 20.0,
                         color: Colors.grey[500]),
                   ),
                   validator: (String value) {
@@ -140,7 +143,7 @@ class _EmailState extends State<Email> {
                         style: TextStyle(
                             color: Hexcolor('#242A37'),
                             letterSpacing: 0.2,
-                            fontFamily: "Sans",
+                            fontFamily: "nanumR",
                             fontSize: 16.0,
                             fontWeight: FontWeight.w800),
                       ),
@@ -196,8 +199,8 @@ class _EmailState extends State<Email> {
                     ),
                     hintText: "비밀번호",
                     hintStyle: TextStyle(
-                        fontFamily: 'Godo',
-                        fontSize: 14.0,
+                        fontFamily: 'nanumB',
+                        fontSize: 20.0,
                         color: Colors.grey[500]),
                   ),
                   validator: (String value) {
@@ -235,7 +238,7 @@ class _EmailState extends State<Email> {
                         style: TextStyle(
                             color: Hexcolor('#242A37'),
                             letterSpacing: 0.2,
-                            fontFamily: "Sans",
+                            fontFamily: "nanumR",
                             fontSize: 16.0,
                             fontWeight: FontWeight.w800),
                       ),
@@ -300,8 +303,8 @@ class _EmailState extends State<Email> {
                     ),
                     hintText: "비밀번호 확인",
                     hintStyle: TextStyle(
-                        fontFamily: 'Godo',
-                        fontSize: 14.0,
+                        fontFamily: 'nanumB',
+                        fontSize: 20.0,
                         color: Colors.grey[500]),
                   ),
                 ),
@@ -330,7 +333,7 @@ class _EmailState extends State<Email> {
                         style: TextStyle(
                             color: Hexcolor('#242A37'),
                             letterSpacing: 0.2,
-                            fontFamily: "Sans",
+                            fontFamily: "nanumR",
                             fontSize: 16.0,
                             fontWeight: FontWeight.w800),
                       ),
@@ -388,9 +391,9 @@ class _EmailState extends State<Email> {
                       textAlign: TextAlign.end,
                       style: TextStyle(
                         color: Hexcolor('#242A37'),
-                        fontFamily: "Sans",
-                        fontWeight: FontWeight.w800,
-                        fontSize: 15.0,
+                        fontFamily: "nanumB",
+                        fontWeight: FontWeight.w900,
+                        fontSize: 25.0,
                       ),
                     ),
                   ),

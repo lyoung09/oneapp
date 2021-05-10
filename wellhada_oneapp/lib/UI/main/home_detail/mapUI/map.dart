@@ -295,19 +295,19 @@ class _Google1MapUIState extends State<GoogleMapUI>
                   children: [
                     Text(model.placeName,
                         style: TextStyle(
-                            fontFamily: 'Godo',
+                            fontFamily: 'nanumB',
                             fontWeight: FontWeight.w900,
                             fontSize: 17.0,
                             color: Hexcolor('#333333'))),
                     Text(model.phone,
                         style: TextStyle(
-                            fontFamily: 'Godo',
+                            fontFamily: 'nanumR',
                             fontWeight: FontWeight.w500,
                             fontSize: 12.0,
                             color: Hexcolor('#333333'))),
                     Text(model.distance + 'm',
                         style: TextStyle(
-                            fontFamily: 'Godo',
+                            fontFamily: 'nanumR',
                             fontWeight: FontWeight.w500,
                             fontSize: 12.0,
                             color: Hexcolor('#333333')))

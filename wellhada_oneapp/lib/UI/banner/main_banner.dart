@@ -75,7 +75,7 @@ class _MainBannerState extends State<MainBanner> {
                           child: Text(
                             "${banner[index].bannerTitle}",
                             style: TextStyle(
-                              fontFamily: "Sans",
+                              fontFamily: "nanumB",
                               fontSize: 20.0,
                               fontWeight: FontWeight.w500,
                             ),
@@ -86,7 +86,7 @@ class _MainBannerState extends State<MainBanner> {
                           child: Text(
                             "${banner[index].bannerType}",
                             style: TextStyle(
-                              fontFamily: "Sans",
+                              fontFamily: "nanumR",
                               fontSize: 10.0,
                               fontWeight: FontWeight.w500,
                             ),

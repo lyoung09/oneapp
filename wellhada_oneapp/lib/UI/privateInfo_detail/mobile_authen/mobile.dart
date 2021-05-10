@@ -48,10 +48,12 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
+      print("1");
       final authCredential =
           await _auth.signInWithCredential(phoneAuthCredential);
 
       setState(() {
+        print("2");
         showLoading = false;
       });
 
@@ -71,6 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } on FirebaseAuthException catch (e) {
       setState(() {
+        print("3");
         showLoading = false;
       });
 
@@ -110,10 +113,13 @@ class _LoginScreenState extends State<LoginScreen> {
         children: [
           TextField(
             controller: phoneController,
+            keyboardType: TextInputType.number,
             decoration: InputDecoration(
               hintText: "핸드폰 번호",
               hintStyle: TextStyle(
-                  fontFamily: 'Godo', fontSize: 14.0, color: Colors.grey[500]),
+                  fontFamily: 'nanumB',
+                  fontSize: 20.0,
+                  color: Colors.grey[500]),
               border: UnderlineInputBorder(
                 borderSide: BorderSide(color: Colors.red),
               ),
@@ -215,12 +221,13 @@ class _LoginScreenState extends State<LoginScreen> {
               Container(
                 width: MediaQuery.of(context).size.width * 0.6,
                 child: TextField(
+                  keyboardType: TextInputType.number,
                   controller: otpController,
                   decoration: InputDecoration(
                     hintText: "인증 번호",
                     hintStyle: TextStyle(
-                        fontFamily: 'Godo',
-                        fontSize: 14.0,
+                        fontFamily: 'nanumB',
+                        fontSize: 20.0,
                         color: Colors.grey[500]),
                     border: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.red),
@@ -306,9 +313,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         textAlign: TextAlign.end,
                         style: TextStyle(
                           color: Hexcolor('#242A37'),
-                          fontFamily: "Sans",
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15.0,
+                          fontFamily: "nanumB",
+                          fontWeight: FontWeight.w900,
+                          fontSize: 25.0,
                         ),
                       ),
                     ),

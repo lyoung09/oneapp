@@ -590,7 +590,7 @@ class _ExtraLoginState extends State<ExtraLogin> {
                       textAlign: TextAlign.end,
                       style: TextStyle(
                         // color: Hexcolor('#242A37'),
-                        fontFamily: "Sans",
+                        fontFamily: "nanumB",
                         fontWeight: FontWeight.w900,
                         fontSize: 20.0,
                       ),

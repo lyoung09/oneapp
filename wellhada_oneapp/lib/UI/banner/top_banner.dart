@@ -14,7 +14,7 @@ class TopBanner extends StatefulWidget {
 }
 
 class _TopBannerState extends State<TopBanner> {
-  List banner;
+  List banner = [];
   int _currentPage = 0;
   PageController _pageController = PageController(
     initialPage: 0,
@@ -105,7 +105,7 @@ class _TopBannerState extends State<TopBanner> {
                           child: Text(
                             "${banner[index].bannerTitle}",
                             style: TextStyle(
-                              fontFamily: "Sans",
+                              fontFamily: "nanumB",
                               fontSize: 20.0,
                               fontWeight: FontWeight.w500,
                             ),

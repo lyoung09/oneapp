@@ -35,6 +35,9 @@ class _MyReviewState extends State<MyReview> {
   }
 
   Widget _practice(reviewInfoList) {
+    reviewInfoList
+        .sort((a, b) => int.parse(a['date']).compareTo(int.parse(b['date'])));
+
     return ListView.builder(
         scrollDirection: Axis.vertical,
         shrinkWrap: true,
@@ -82,7 +85,7 @@ class _MyReviewState extends State<MyReview> {
                           child: Text(
                             reviewInfoList[position]['place_name'],
                             style: TextStyle(
-                              fontFamily: "Sans",
+                              fontFamily: "nanumB",
                               fontWeight: FontWeight.w800,
                               fontSize: 18.0,
                             ),
@@ -96,7 +99,7 @@ class _MyReviewState extends State<MyReview> {
                       children: [
                         Text("<주문완료>",
                             style: TextStyle(
-                              fontFamily: "Sans",
+                              fontFamily: "nanumR",
                               fontWeight: FontWeight.w500,
                               fontSize: 9.0,
                             )),
@@ -106,7 +109,7 @@ class _MyReviewState extends State<MyReview> {
                         Text(
                           '${showDate}',
                           style: TextStyle(
-                            fontFamily: "Sans",
+                            fontFamily: "nanumR",
                             fontWeight: FontWeight.w500,
                             fontSize: 12.0,
                           ),
@@ -124,7 +127,7 @@ class _MyReviewState extends State<MyReview> {
                           child: Text(
                             '${reviewInfoList[position]['story']}',
                             style: TextStyle(
-                              fontFamily: "Sans",
+                              fontFamily: "nanumR",
                               fontWeight: FontWeight.w400,
                               fontSize: 12.0,
                             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Introduce extends StatefulWidget {
   @override
@@ -39,21 +40,24 @@ class _IntroduceState extends State<Introduce> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: Stack(
-      children: <Widget>[
-        index == 0 ? _firstIntroduce() : _secondIntroduce(),
+    return WillPopScope(
+      onWillPop: () {},
+      child: Scaffold(
+          body: Stack(
+        children: <Widget>[
+          index == 0 ? _firstIntroduce() : _secondIntroduce(),
 
-        // Align(
-        //   alignment: Alignment.bottomCenter,
-        //   child: FloatingActionButton(
-        //     onPressed: () {},
-        //     heroTag: "btn2",
-        //     child: Text(''),
-        //   ),
-        // ),
-      ],
-    ));
+          // Align(
+          //   alignment: Alignment.bottomCenter,
+          //   child: FloatingActionButton(
+          //     onPressed: () {},
+          //     heroTag: "btn2",
+          //     child: Text(''),
+          //   ),
+          // ),
+        ],
+      )),
+    );
   }
 
   Widget _firstIntroduce() {

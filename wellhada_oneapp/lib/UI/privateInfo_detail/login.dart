@@ -11,6 +11,7 @@ import 'email_login/email.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
 
 class LOGIN extends StatefulWidget {
   @override
@@ -78,7 +79,11 @@ class _LOGINState extends State<LOGIN> {
       password = prefs.getString("password");
       prefs.setString("userChk", '01');
     });
-    print('${email} : ${password} : ${userChk}');
+    var a = await user.getUser(userId.text, userPassword.text);
+
+    print(a.accessToken);
+    print(a.cnt);
+    print(a.status);
 
     if (userChk == '01' && userId == email && userPassword == password) {
       Navigator.pushNamed(context, '/BottomNav');
@@ -162,7 +167,7 @@ class _LOGINState extends State<LOGIN> {
             child: Text(
               "#story",
               style: TextStyle(
-                  fontFamily: 'Godo',
+                  fontFamily: 'nanumB',
                   fontWeight: FontWeight.w900,
                   fontSize: 20.0,
                   color: Hexcolor(appFontColor)),
@@ -185,7 +190,7 @@ class _LOGINState extends State<LOGIN> {
                 child: Text(
                   "${errorText}",
                   style: TextStyle(
-                    fontFamily: 'Godo',
+                    fontFamily: 'nanumR',
                     fontSize: 14.0,
                     color: Hexcolor('#FF8900'),
                   ),
@@ -199,7 +204,7 @@ class _LOGINState extends State<LOGIN> {
                 "로그인",
                 style: TextStyle(
                   color: Hexcolor('#242A37'),
-                  fontFamily: "Sans",
+                  fontFamily: "nanumB",
                   fontWeight: FontWeight.w800,
                   fontSize: 15.0,
                 ),
@@ -228,7 +233,7 @@ class _LOGINState extends State<LOGIN> {
                     contentPadding: const EdgeInsets.all(13.0),
                     hintText: "아이디(*)",
                     hintStyle: TextStyle(
-                        fontFamily: 'Godo',
+                        fontFamily: 'nanumB',
                         fontSize: 14.0,
                         color: Colors.grey[500]),
                   ),
@@ -259,7 +264,7 @@ class _LOGINState extends State<LOGIN> {
                       contentPadding: const EdgeInsets.all(13.0),
                       hintText: "비밀번호(*)",
                       hintStyle: TextStyle(
-                          fontFamily: 'Godo',
+                          fontFamily: 'nanumB',
                           fontSize: 14.0,
                           color: Colors.grey[500]),
                     )),
@@ -285,8 +290,8 @@ class _LOGINState extends State<LOGIN> {
                     style: TextStyle(
                         color: Colors.black,
                         fontSize: 15.0,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'NotoSans'),
+                        fontWeight: FontWeight.w700,
+                        fontFamily: 'nanumB'),
                   )
                 ]),
               ),
@@ -320,7 +325,7 @@ class _LOGINState extends State<LOGIN> {
                         color: Colors.brown,
                         fontSize: 15.0,
                         fontWeight: FontWeight.w500,
-                        fontFamily: 'NotoSans'),
+                        fontFamily: 'nanumB'),
                   )
                 ]),
               ),
@@ -357,7 +362,7 @@ class _LOGINState extends State<LOGIN> {
                         color: Colors.black,
                         fontSize: 15.0,
                         fontWeight: FontWeight.w500,
-                        fontFamily: 'NotoSans'),
+                        fontFamily: 'nanumB'),
                   )
                 ]),
               ),

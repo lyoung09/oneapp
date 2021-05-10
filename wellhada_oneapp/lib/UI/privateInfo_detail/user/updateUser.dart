@@ -336,7 +336,7 @@ class _UserUpdateState extends State<UserUpdate> {
                       decoration: InputDecoration(
                         hintText: "인증 번호",
                         hintStyle: TextStyle(
-                            fontFamily: 'Godo',
+                            fontFamily: 'nanumB',
                             fontSize: 14.0,
                             color: Colors.grey[500]),
                         border: UnderlineInputBorder(

@@ -593,7 +593,7 @@ Map<String, dynamic> _$MyReviewToJsonMap(MyReview instance) =>
 
 Future<Map<String, dynamic>> getMyReviewList() async {
   final response = await http
-      .get('https://run.mocky.io/v3/0672a3ae-a66d-4ee1-9680-3e0d2d7b09ff');
+      .get('https://run.mocky.io/v3/ecacd0f4-3bc4-45ce-ae27-44d24340ff57');
   if (200 == response.statusCode) {
     var datauser = json.decode(response.body);
     return datauser;
@@ -609,7 +609,7 @@ Future<MyReview> getMyReviewEntire() async {
   //   body: {'period': 'ALL'},
   // );
   final response = await http
-      .get('https://run.mocky.io/v3/0672a3ae-a66d-4ee1-9680-3e0d2d7b09ff');
+      .get('https://run.mocky.io/v3/ecacd0f4-3bc4-45ce-ae27-44d24340ff57');
 
   if (response.statusCode == 200) {
     return MyReview.fromJsonMap(json.decode(response.body));
@@ -621,3 +621,163 @@ Future<MyReview> getMyReviewEntire() async {
     );
   }
 }
+
+Future<Status> insertUser(
+  String userId,
+  String userPassword,
+) async {
+  var bodyParam = new Map();
+  bodyParam['userId'] = userId;
+  bodyParam['userPassword'] = userPassword;
+
+  http.Response response = await http.post(
+    Uri.encodeFull('http://192.168.0.47:8080/userinfo/userlogin.ajax'),
+    headers: {"Accept": "application/json"},
+    body: bodyParam,
+  );
+
+  if (response.statusCode == 200) {
+    print('access token is -> ${json.decode(response.body)['access_token']}');
+    print(Status.fromJson(json.decode(response.body)));
+    return json.decode(response.body);
+  } else {
+    throw HttpException(
+      'Unexpected status code ${response.statusCode}:'
+      ' ${response.reasonPhrase}',
+      //uri: Uri.parse(query)
+    );
+  }
+}
+
+@JsonSerializable()
+class Status {
+  final String status;
+  final String accessToken;
+  final int cnt;
+
+  Status(
+    this.status,
+    this.accessToken,
+    this.cnt,
+  );
+  Status.fromJson(Map<String, dynamic> json)
+      : status = json['STATUS'],
+        accessToken = json['ACCESSTOKEN'],
+        cnt = json['CNT'];
+
+  Map<String, dynamic> toJson() => {
+        'STATUS': status,
+        'ACCESSTOKEN': accessToken,
+        'cnt': cnt,
+      };
+}
+
+class ItemList {
+  ItemList({
+    this.userID,
+    this.userPassword,
+    this.idIntre,
+  });
+  final String userID;
+  final String userPassword;
+  final String idIntre;
+
+  factory ItemList.fromJson(Map<String, dynamic> json) =>
+      _$ItemListFromJson(json);
+  Map<String, dynamic> toJson() => _$ItemListToJson(this);
+}
+
+ItemList _$ItemListFromJson(Map<String, dynamic> json) {
+  return ItemList(
+    userID: json['userId'] as String,
+    userPassword: json['userPassword'] as String,
+    idIntre: json['id_intre'] as String,
+  );
+}
+
+Map<String, dynamic> _$ItemListToJson(ItemList instance) => <String, dynamic>{
+      'UID': instance.userID,
+      'userPassword': instance.userPassword,
+      'id_intre': instance.idIntre,
+    };
+
+@JsonSerializable()
+class UserItem {
+  UserItem({
+    this.status,
+    this.accessToken,
+    this.cnt,
+  });
+  final String status;
+  final String accessToken;
+  final String cnt;
+
+  // factory UserItem.fromJson(Map<String, dynamic> json) =>
+  //     _$UserItemFromJson(json);
+  // Map<String, dynamic> toJson() => _$UserItemToJson(this);
+
+}
+
+// UserItem _$UserItemFromJson(Map<String, dynamic> json) {
+//   return UserItem(
+//     LIST: (json['LIST'] as List)
+//         ?.map((e) =>
+//             e == null ? null : ItemList.fromJson(e as Map<String, dynamic>))
+//         ?.toList(),
+// //      meta: (json['meta'] as List)
+// //          ?.map((e) =>
+// //      e == null ? null : Meta.fromJson(e as Map<String, dynamic>))
+// //          ?.toList()
+//   );
+// }
+
+// Map<String, dynamic> _$UserItemToJson(UserItem instance) =>
+//     <String, dynamic>{'documents': instance.LIST};
+
+Future<Status> getUser(String user_Email, String user_password) async {
+  var bodyParam = new Map();
+  bodyParam['userId'] = user_Email;
+  bodyParam['userPassword'] = user_password;
+
+  http.Response response = await http.post(
+    Uri.encodeFull('http://192.168.0.47:8080/login'),
+    headers: {"Accept": "application/json"},
+    body: bodyParam,
+  );
+
+  if (response.statusCode == 200) {
+    print(Status.fromJson(json.decode(response.body)).status);
+    return Status.fromJson(json.decode(response.body));
+  } else {
+    throw HttpException(
+      'Unexpected status code ${response.statusCode}:'
+      ' ${response.reasonPhrase}',
+      //uri: Uri.parse(query)
+    );
+  }
+}
+// Future<Status> getUser(
+//   String userId,
+//   String userPassword,
+//   String idIntre,
+// ) async {
+//   var bodyParam = new Map();
+//   bodyParam['userId'] = userId;
+//   bodyParam['userPassword'] = userPassword;
+//   bodyParam['id_intre'] = idIntre;
+//   http.Response response = await http.post(
+//     Uri.encodeFull('http://192.168.0.47:8080/login'),
+//     headers: {"Accept": "application/json"},
+//     body: bodyParam,
+//   );
+
+//   if (response.statusCode == 200) {
+//     return Status.fromJson(json.decode(response.body));
+//   } else {
+//     throw HttpException(
+//       'Unexpected status code ${response.statusCode}:'
+//       ' ${response.reasonPhrase}',
+//       //uri: Uri.parse(query)
+//     );
+//   }
+// }

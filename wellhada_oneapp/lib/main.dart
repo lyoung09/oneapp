@@ -144,7 +144,21 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   startTime() async {
-    return new Timer(Duration(milliseconds: 200), goMain);
+    return new Timer(Duration(milliseconds: 200), () {
+      checkFirstSeen();
+    });
+  }
+
+  Future checkFirstSeen() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool _seen = (prefs.getBool('seen') ?? false);
+
+    if (_seen) {
+      Navigator.pushNamed(context, '/BottomNav');
+    } else {
+      prefs.setBool('seen', true);
+      Navigator.pushNamed(context, '/Introduce');
+    }
   }
 
   void goMain() {
@@ -194,7 +208,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       Text(
                         '#스토리',
                         style: TextStyle(
-                          fontFamily: 'Godo',
+                          fontFamily: 'nanumB',
                           fontWeight: FontWeight.w900,
                           fontSize: 40.0,
                           color: Hexcolor('${appFontColor}'),
@@ -206,7 +220,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       Text(
                         'hndSolution',
                         style: TextStyle(
-                          fontFamily: 'Godo',
+                          fontFamily: 'nanumB',
                           fontWeight: FontWeight.w900,
                           fontSize: 20.0,
                           color: Hexcolor('${appFontColor}'),

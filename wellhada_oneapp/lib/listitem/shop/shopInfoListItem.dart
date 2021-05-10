@@ -718,3 +718,321 @@ Future<Map<String, dynamic>> getShopDetailCategoryList(String category) async {
 //     );
 //   }
 // }
+
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+///
+///실제 서버
+///
+///
+///
+
+/////////////////////////////
+/////////////////////////////
+/////////////////////////////
+/////////////////////////////
+/////////////////////////////
+///////shop list/////////
+/////////////////////////////
+/////////////////////////////
+/////////////////////////////
+/////////////////////////////
+/////////////////////////////
+
+class ShopList {
+  String status;
+  int cnt;
+  ShopListDetail inFolist;
+  final List<ShopListDetail> list;
+
+  ShopList({this.status, this.cnt, this.list, this.inFolist});
+
+  factory ShopList.fromJson(Map<String, dynamic> json) => ShopList(
+        status: json["STATUS"],
+        inFolist: ShopListDetail.fromJson(json["LIST"]),
+        cnt: json["CNT"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "status": status,
+        "cnt": cnt,
+        "list": inFolist.toJson(),
+      };
+
+  factory ShopList.fromJsonMap(Map<String, dynamic> json) =>
+      _$ShopListItemFromJsonMap(json);
+
+  Map<String, dynamic> toJsonMap() => _$ShopListItemToJsonMap(this);
+}
+
+ShopList _$ShopListItemFromJsonMap(Map<String, dynamic> json) {
+  return ShopList(
+    list: (json['LIST'] as List)
+        ?.map((e) => e == null
+            ? null
+            : ShopListDetail.fromJsonMap(e as Map<String, dynamic>))
+        ?.toList(),
+//      meta: (json['meta'] as List)
+//          ?.map((e) =>
+//      e == null ? null : Meta.fromJson(e as Map<String, dynamic>))
+//          ?.toList()
+  );
+}
+
+Map<String, dynamic> _$ShopListItemToJsonMap(ShopList instance) =>
+    <String, dynamic>{'documents': instance.list};
+
+class ShopListDetail {
+  String placeName;
+  String categoryGroupName;
+  String wellhadaYn;
+  String distance;
+  String phone;
+  String categoryGroupCode;
+  String x;
+  String y;
+  String id;
+
+  ShopListDetail(
+      {this.placeName,
+      this.categoryGroupName,
+      this.wellhadaYn,
+      this.distance,
+      this.phone,
+      this.categoryGroupCode,
+      this.x,
+      this.y,
+      this.id});
+  factory ShopListDetail.fromJson(Map<String, dynamic> json) => ShopListDetail(
+        placeName: json["place_name"],
+        categoryGroupName: json["category_group_name"],
+        distance: json["distance"],
+        phone: json["phone"],
+        categoryGroupCode: json["category_group_code"],
+        x: json["x"],
+        y: json["y"],
+        wellhadaYn: json['wellhada_yn'],
+        id: json["id"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "place_name": placeName,
+        "category_group_name": categoryGroupName,
+        "wellhada_yn": wellhadaYn,
+        "distance": distance,
+        "phone": phone,
+        "category_group_code": categoryGroupCode,
+        "x": x,
+        "y": y,
+        "id": id,
+      };
+  factory ShopListDetail.fromJsonMap(Map<String, dynamic> json) =>
+      _$ShopListDetailFromJsonMap(json);
+  Map<String, dynamic> toJsonMap() => _$ShopListDetailToJsonMap(this);
+}
+
+ShopListDetail _$ShopListDetailFromJsonMap(Map<String, dynamic> json) {
+  return ShopListDetail(
+    placeName: json['place_name'] as String,
+    wellhadaYn: json['wellhadaYn'] as String,
+    categoryGroupName: json['category_group_name'] as String,
+    distance: json['distance'] as String,
+    phone: json['phone'] as String,
+    categoryGroupCode: json['category_group_code'] as String,
+    x: json['x'] as String,
+    y: json['y'] as String,
+    id: json['id'] as String,
+  );
+}
+
+Map<String, dynamic> _$ShopListDetailToJsonMap(ShopListDetail instance) =>
+    <String, dynamic>{
+      'place_name': instance.placeName,
+      'wellhadaYn': instance.wellhadaYn,
+      'category_group_name': instance.categoryGroupName,
+      'distance': instance.distance,
+      'phone': instance.phone,
+      'category_group_code': instance.categoryGroupCode,
+      'x': instance.x,
+      'y': instance.y,
+      'id': instance.id,
+    };
+
+Future<Map<String, dynamic>> getShopList() async {
+  final response = await http.get('http://192.168.0.47:8080/getShopCodeList');
+
+  if (200 == response.statusCode) {
+    var datauser = json.decode(response.body);
+    return datauser;
+  } else {
+    return json.decode(response.body);
+  }
+}
+
+Future<ShopInfo> getShopListEntire() async {
+  // http.Response response = await http.post(
+  //   Uri.encodeFull('https://wellhada.com/getAppNoticeList'),
+  //   headers: {"Accept": "application/json"},
+  //   body: {'period': 'ALL'},
+  // );
+  final response = await http.get('http://192.168.0.47:8080/getShopCodeList');
+
+  if (response.statusCode == 200) {
+    return ShopInfo.fromJsonMap(json.decode(response.body));
+  } else {
+    throw HttpException(
+      'Unexpected status code ${response.statusCode}:'
+      ' ${response.reasonPhrase}',
+      //uri: Uri.parse(query)
+    );
+  }
+}
+
+/////////////////////////////
+/////////////////////////////
+/////////////////////////////
+/////////////////////////////
+/////////////////////////////
+///////shop category/////////
+/////////////////////////////
+/////////////////////////////
+/////////////////////////////
+/////////////////////////////
+/////////////////////////////
+
+class ShopCode {
+  String status;
+  int cnt;
+  ShopCodeList infolist;
+  final List<ShopCodeList> list;
+  ShopCode({this.status, this.cnt, this.list, this.infolist});
+
+  factory ShopCode.fromJson(Map<String, dynamic> json) => ShopCode(
+        status: json["STATUS"],
+        infolist: ShopCodeList.fromJson(json["LIST"]),
+        cnt: json["CNT"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "status": status,
+        "cnt": cnt,
+        "list": infolist.toJson(),
+      };
+  factory ShopCode.fromJsonMap(Map<String, dynamic> json) =>
+      _$ShopCodeFromJsonMap(json);
+
+  Map<String, dynamic> toJsonMap() => _$SShopCodeToJsonMap(this);
+}
+
+ShopCode _$ShopCodeFromJsonMap(Map<String, dynamic> json) {
+  return ShopCode(
+    list: (json['LIST'] as List)
+        ?.map((e) => e == null
+            ? null
+            : ShopCodeList.fromJsonMap(e as Map<String, dynamic>))
+        ?.toList(),
+//      meta: (json['meta'] as List)
+//          ?.map((e) =>
+//      e == null ? null : Meta.fromJson(e as Map<String, dynamic>))
+//          ?.toList()
+  );
+}
+
+Map<String, dynamic> _$SShopCodeToJsonMap(ShopCode instance) =>
+    <String, dynamic>{'documents': instance.list};
+
+class ShopCodeList {
+  String categorycdnm;
+  int categorycd;
+  //String fileurl;
+
+  ShopCodeList({
+    this.categorycdnm,
+    this.categorycd,
+    //this.fileurl
+  });
+
+  factory ShopCodeList.fromJson(Map<String, dynamic> json) => ShopCodeList(
+        categorycdnm: json["CATEGORY_CDNM"],
+        categorycd: json["CATEGORY_CD"],
+        //    fileurl: json["FILE_URL"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "CATEGORY_CDNM": categorycdnm,
+        "CATEGORY_CD": categorycd,
+        // "FILE_URL": fileurl,
+      };
+
+  factory ShopCodeList.fromJsonMap(Map<String, dynamic> json) =>
+      _$ShopCodeListFromJsonMap(json);
+  Map<String, dynamic> toJsonMap() => _$ShopCodeListToJsonMap(this);
+}
+
+ShopCodeList _$ShopCodeListFromJsonMap(Map<String, dynamic> json) {
+  return ShopCodeList(
+    categorycdnm: json['CATEGORY_CDNM'] as String,
+    categorycd: json['CATEGORY_CD'] as int,
+
+    /// fileurl: json['FILE_URL'] as String,
+  );
+}
+
+Map<String, dynamic> _$ShopCodeListToJsonMap(ShopCodeList instance) =>
+    <String, dynamic>{
+      'CATEGORY_CDNM': instance.categorycdnm,
+      'CATEGORY_CD': instance.categorycd,
+      // 'FILE_URL': instance.fileurl,
+    };
+
+Future<Map<String, dynamic>> getShopCodeList() async {
+  final response = await http.get('http://192.168.0.47:8080/getShopCodeList');
+
+  if (200 == response.statusCode) {
+    var datauser = json.decode(response.body);
+    return datauser;
+  } else {
+    return json.decode(response.body);
+  }
+}
+
+Future<ShopCode> getShopCodeEntire() async {
+  // http.Response response = await http.post(
+  //   Uri.encodeFull('https://wellhada.com/getAppNoticeList'),
+  //   headers: {"Accept": "application/json"},
+  //   body: {'period': 'ALL'},
+  // );
+  final response = await http.get('http://192.168.0.47:8080/getShopCodeList');
+
+  if (response.statusCode == 200) {
+    return ShopCode.fromJsonMap(json.decode(response.body));
+  } else {
+    throw HttpException(
+      'Unexpected status code ${response.statusCode}:'
+      ' ${response.reasonPhrase}',
+      //uri: Uri.parse(query)
+    );
+  }
+}
+
+Future<Map<String, dynamic>> getShopDetailCodeList(String category) async {
+  var bodyParam = new Map();
+  bodyParam['CATEGORY_CD'] = category;
+
+  final response = await http
+      .get('http://192.168.0.47:8080/getShopCodeList');
+  //.get('https://192.168.0.35:8080/getShopCodeList');
+
+  if (200 == response.statusCode) {
+    var datauser = json.decode(response.body);
+    return datauser;
+  } else {
+    return json.decode(response.body);
+  }
+}

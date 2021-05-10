@@ -75,7 +75,7 @@ class _UsagePointState extends State<UsagePoint> {
                               textAlign: TextAlign.end,
                               style: TextStyle(
                                 fontSize: 21.0,
-                                fontFamily: "Sans",
+                                fontFamily: "nanumB",
                                 fontWeight: FontWeight.w800,
                               ),
                             )
@@ -84,7 +84,7 @@ class _UsagePointState extends State<UsagePoint> {
                               textAlign: TextAlign.end,
                               style: TextStyle(
                                 fontSize: 21.0,
-                                fontFamily: "Sans",
+                                fontFamily: "nanumB",
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
@@ -135,7 +135,7 @@ class _UsagePointState extends State<UsagePoint> {
                               textAlign: TextAlign.end,
                               style: TextStyle(
                                 fontSize: 21.0,
-                                fontFamily: "Sans",
+                                fontFamily: "nanumR",
                                 fontWeight: FontWeight.w800,
                               ),
                             )
@@ -144,7 +144,7 @@ class _UsagePointState extends State<UsagePoint> {
                               textAlign: TextAlign.end,
                               style: TextStyle(
                                 fontSize: 21.0,
-                                fontFamily: "Sans",
+                                fontFamily: "nanumR",
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
@@ -199,7 +199,7 @@ class _UsagePointState extends State<UsagePoint> {
                             "포인트 내역",
                             textAlign: TextAlign.end,
                             style: TextStyle(
-                              fontFamily: "Sans",
+                              fontFamily: "nanumB",
                               fontWeight: FontWeight.w800,
                               fontSize: 25.0,
                             ),

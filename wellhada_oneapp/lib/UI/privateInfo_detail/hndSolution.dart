@@ -38,7 +38,7 @@ class HndSolution extends StatelessWidget {
                   "회사 소개",
                   textAlign: TextAlign.end,
                   style: TextStyle(
-                    fontFamily: "Sans",
+                    fontFamily: "nanumB",
                     fontWeight: FontWeight.w800,
                     fontSize: 25.0,
                   ),
@@ -71,7 +71,7 @@ class HndSolution extends StatelessWidget {
                       style: TextStyle(
                         // color: _colorText,
                         fontSize: 20.0,
-                        fontFamily: "Godo",
+                        fontFamily: "nanumB",
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -85,7 +85,7 @@ class HndSolution extends StatelessWidget {
                         style: TextStyle(
                           // color: _colorText,
                           fontSize: 16.0,
-                          fontFamily: "Godo",
+                          fontFamily: "nanumR",
                           fontWeight: FontWeight.w400,
                         ),
                       ),
@@ -112,7 +112,7 @@ class HndSolution extends StatelessWidget {
                       style: TextStyle(
                         // color: _colorText,
                         fontSize: 20.0,
-                        fontFamily: "Godo",
+                        fontFamily: "nanumB",
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -126,7 +126,7 @@ class HndSolution extends StatelessWidget {
                         style: TextStyle(
                           // color: _colorText,
                           fontSize: 12.0,
-                          fontFamily: "Godo",
+                          fontFamily: "nanumR",
                           fontWeight: FontWeight.w400,
                         ),
                       ),
@@ -153,7 +153,7 @@ class HndSolution extends StatelessWidget {
                       style: TextStyle(
                         // color: _colorText,
                         fontSize: 20.0,
-                        fontFamily: "Godo",
+                        fontFamily: "nanumB",
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -167,7 +167,7 @@ class HndSolution extends StatelessWidget {
                         style: TextStyle(
                           // color: _colorText,
                           fontSize: 16.0,
-                          fontFamily: "Godo",
+                          fontFamily: "nanumR",
                           fontWeight: FontWeight.w400,
                         ),
                       ),
@@ -194,7 +194,7 @@ class HndSolution extends StatelessWidget {
                       style: TextStyle(
                         // color: _colorText,
                         fontSize: 20.0,
-                        fontFamily: "Godo",
+                        fontFamily: "nanumB",
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -208,7 +208,7 @@ class HndSolution extends StatelessWidget {
                         style: TextStyle(
                           // color: _colorText,
                           fontSize: 16.0,
-                          fontFamily: "Godo",
+                          fontFamily: "nanumR",
                           fontWeight: FontWeight.w400,
                         ),
                       ),
@@ -235,7 +235,7 @@ class HndSolution extends StatelessWidget {
                       style: TextStyle(
                         // color: _colorText,
                         fontSize: 20.0,
-                        fontFamily: "Godo",
+                        fontFamily: "nanumB",
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -249,7 +249,7 @@ class HndSolution extends StatelessWidget {
                         style: TextStyle(
                           // color: _colorText,
                           fontSize: 16.0,
-                          fontFamily: "Godo",
+                          fontFamily: "nanumR",
                           fontWeight: FontWeight.w400,
                         ),
                       ),
@@ -276,7 +276,7 @@ class HndSolution extends StatelessWidget {
                       style: TextStyle(
                         // color: _colorText,
                         fontSize: 20.0,
-                        fontFamily: "Godo",
+                        fontFamily: "nanumB",
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -290,7 +290,7 @@ class HndSolution extends StatelessWidget {
                         style: TextStyle(
                           // color: _colorText,
                           fontSize: 16.0,
-                          fontFamily: "Godo",
+                          fontFamily: "nanumR",
                           fontWeight: FontWeight.w400,
                         ),
                       ),
