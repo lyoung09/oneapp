@@ -218,7 +218,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         padding: EdgeInsets.only(top: size.height / 2),
                       ),
                       Text(
-                        'hndSolution',
+                        'HndSolution',
                         style: TextStyle(
                           fontFamily: 'nanumB',
                           fontWeight: FontWeight.w900,

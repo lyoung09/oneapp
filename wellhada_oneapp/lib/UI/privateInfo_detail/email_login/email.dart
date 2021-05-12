@@ -100,7 +100,7 @@ class _EmailState extends State<Email> {
                   ),
                   validator: (String value) {
                     if (!validator.isEmail(value)) {
-                      return 'Please enter a valid email';
+                      return '이메일 형태를 맞춰주세요';
                     }
                     return null;
                   },
@@ -205,7 +205,7 @@ class _EmailState extends State<Email> {
                   ),
                   validator: (String value) {
                     if (value.length < 7) {
-                      return 'Password should be minimum 7 characters';
+                      return '비밀번호는 7자리 이상이여야 합니다';
                     }
                     return null;
                   },
@@ -282,9 +282,9 @@ class _EmailState extends State<Email> {
                   obscureText: true,
                   validator: (String value) {
                     if (value.length < 7) {
-                      return 'Password should be minimum 7 characters';
+                      return '비밀번호는 7자리 이상이여야 합니다';
                     } else if (value != null && value != passwordFirst) {
-                      return 'Password not matched';
+                      return '비밀번호가 달라요';
                     }
                     verificationPassword(value);
                     return null;

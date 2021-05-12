@@ -65,6 +65,7 @@ dependencies:
   gallery_saver: ^1.0.6
   firebase_auth: ^0.18.4+1
   getwidget: ^1.2.2
+  slide_popup_dialog: ^0.0.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -83,6 +84,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/icon/icon_kakao.png   
+    - assets/icon/noImage.png   
     - assets/svg/coupon.svg   
     - assets/svg/home1.svg   
     - assets/svg/uselist.svg   

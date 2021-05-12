@@ -46,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         child: Container(
           child: child,
           decoration: BoxDecoration(
-              color: (_selectedTab == index ? Colors.grey[300] : Colors.white),
+              color: (_selectedTab == index ? Colors.white : Colors.grey[200]),
               borderRadius: _generateBorderRadius(index)),
         ),
       ),
@@ -62,7 +62,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   _generateBorderRadius(index) {
     if ((index + 1) == _selectedTab)
-      return BorderRadius.only(bottomRight: Radius.circular(10.0));
+      return BorderRadius.only(
+        bottomRight: Radius.circular(10.0),
+        topLeft: Radius.circular(10.0),
+        topRight: Radius.circular(10.0),
+        bottomLeft: Radius.circular(10.0),
+      );
     else if ((index - 1) == _selectedTab)
       return BorderRadius.only(bottomLeft: Radius.circular(10.0));
     else
@@ -174,9 +179,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 //unselectedLabelColor: Colors.grey[850],
                 //labelColor: Colors.grey[300],
                 //indicatorColor: Colors.grey[300],
-                indicatorColor: Colors.white,
+                indicatorColor: Colors.black,
+                labelColor: Colors.black,
+
                 controller: _tabController,
                 labelPadding: const EdgeInsets.all(0.0),
+
                 tabs: [
                   _getTab(
                       0,
@@ -185,9 +193,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         "리스트로 보기",
                         textAlign: TextAlign.center,
                         style: TextStyle(
+                            fontSize: 17.5,
                             fontFamily: 'nanumB',
                             color: Colors.black,
-                            fontWeight: FontWeight.bold),
+                            fontWeight: FontWeight.w700),
                       ))),
                   _getTab(
                       1,
@@ -196,9 +205,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         "지도로 보기",
                         textAlign: TextAlign.center,
                         style: TextStyle(
+                            fontSize: 17.5,
                             fontFamily: 'nanumB',
                             color: Colors.black,
-                            fontWeight: FontWeight.bold),
+                            fontWeight: FontWeight.w700),
                       ))),
                 ],
               ),

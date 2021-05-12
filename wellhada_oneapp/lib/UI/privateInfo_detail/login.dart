@@ -161,22 +161,11 @@ class _LOGINState extends State<LOGIN> {
     double height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
-        title: Center(
-          child: Padding(
-            padding: const EdgeInsets.only(right: 50.0),
-            child: Text(
-              "#story",
-              style: TextStyle(
-                  fontFamily: 'nanumB',
-                  fontWeight: FontWeight.w900,
-                  fontSize: 20.0,
-                  color: Hexcolor(appFontColor)),
-            ),
-          ),
-        ),
-        elevation: 0.0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(color: Hexcolor(menuColor)),
+        centerTitle: true,
+        backgroundColor: Colors.black,
+        title: Text(
+          "#STORY",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
         ),
       ),
       backgroundColor: Hexcolor('#F1F2F6'),

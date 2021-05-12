@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:flutter/material.dart';
@@ -40,7 +40,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
   Map<String, Uint8List> iconSet = new Map();
   Map<String, Uint8List> wellhadaIconSet = new Map();
   // button click
-  String category;
+  int category;
   String webviewDefault = 'http://192.168.0.47:8080/usermngr';
   // contanier boolean
   bool itemSelected;
@@ -59,7 +59,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
     super.initState();
     //getShowAppBar();
     //_sendLocation();
-    category = "MT1";
+    category = 18;
     itemSelected = false;
     getShop();
     _categoryFuture = getShopCategory();
@@ -133,7 +133,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
   }
 
   Future<Map<String, dynamic>> getShopCategory() async {
-    return shopInfoListItem.getShopCategoryList();
+    return shopInfoListItem.getShopCodeList();
   }
 
   void getShop() async {
@@ -234,7 +234,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
                             ),
                   child: InkWell(
                       child: SizedBox(
-                        width: 65,
+                        width: 75,
                         height: 55,
                         child: Column(
                           children: [
@@ -251,7 +251,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
                             ),
                             Text(
                               shopCategoryList[position]['CATEGORY_CDNM'],
-                              style: TextStyle(fontSize: 13),
+                              style: TextStyle(fontSize: 11),
                             )
                           ],
                         ),
@@ -271,8 +271,8 @@ class _Google1MapUIState extends State<GoogleMapUI>
   Widget _container() {
     return Material(
       child: Container(
-        height: MediaQuery.of(context).size.height * 0.1,
-        width: MediaQuery.of(context).size.width * 0.7,
+        height: MediaQuery.of(context).size.height * 0.12,
+        width: MediaQuery.of(context).size.width * 0.75,
         decoration: BoxDecoration(
           border: Border.all(color: Colors.black),
           borderRadius: BorderRadius.all(Radius.circular(25.0)),
@@ -291,26 +291,58 @@ class _Google1MapUIState extends State<GoogleMapUI>
                   padding: EdgeInsets.only(left: 13.0),
                 ),
                 Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(model.placeName,
-                        style: TextStyle(
-                            fontFamily: 'nanumB',
-                            fontWeight: FontWeight.w900,
-                            fontSize: 17.0,
-                            color: Hexcolor('#333333'))),
-                    Text(model.phone,
-                        style: TextStyle(
-                            fontFamily: 'nanumR',
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12.0,
-                            color: Hexcolor('#333333'))),
-                    Text(model.distance + 'm',
-                        style: TextStyle(
-                            fontFamily: 'nanumR',
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12.0,
-                            color: Hexcolor('#333333')))
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10, top: 8),
+                      child: Text(
+                          model.placeName.length > 15
+                              ? "${model.placeName.substring(0, 6)}..."
+                              : "${model.placeName}",
+                          style: TextStyle(
+                              fontFamily: 'nanumB',
+                              fontWeight: FontWeight.w900,
+                              fontSize: 20.0,
+                              color: Hexcolor('#333333'))),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(model.phone,
+                          style: TextStyle(
+                              fontFamily: 'nanumR',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13.0,
+                              color: Hexcolor('#333333'))),
+                    ),
+                    Row(
+                      children: [
+                        Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: ClipOval(
+                              child: Material(
+                                color: Colors.green,
+                                child: SvgPicture.asset(
+                                  "assets/svg/coupon.svg",
+                                  fit: BoxFit.fill,
+                                  width: 20,
+                                  height: 18,
+                                ),
+                              ),
+                            )),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8, left: 10),
+                          child: Text(
+                              model.distance.length > 3
+                                  ? '${(int.parse(model.distance) * 0.001).toStringAsFixed(1)}km'
+                                  : '${model.distance}m',
+                              style: TextStyle(
+                                  fontFamily: 'nanumR',
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 13.0,
+                                  color: Hexcolor('#333333'))),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
                 Expanded(
@@ -406,6 +438,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
       return bounds;
     } catch (e) {
       print(e);
+      return null;
     }
     // print(center);
   }
@@ -435,62 +468,10 @@ class _Google1MapUIState extends State<GoogleMapUI>
                 Container(
                   height: MediaQuery.of(context).size.height * 0.1,
                   width: MediaQuery.of(context).size.width,
-                  // child: Row(
-                  //   children: [
-                  // Container(
-                  //     child: ClipOval(
-                  //   child: Material(
-                  //     color: check == true
-                  //         ? Colors.yellow
-                  //         : Colors.white, // button color
-                  //     child: Container(
-                  //       decoration: new BoxDecoration(
-                  //         shape: BoxShape.circle,
-                  //         border: new Border.all(
-                  //           color: Colors.yellow,
-                  //           width: 1.0,
-                  //         ),
-                  //       ),
-                  //       child: InkWell(
-                  //           child: SizedBox(
-                  //             width: 65,
-                  //             height: 55,
-                  //             child: Column(
-                  //               children: [
-                  //                 Padding(
-                  //                   padding: EdgeInsets.only(
-                  //                       top: 4.0, bottom: 1.0),
-                  //                 ),
-                  //                 Image(
-                  //                   image:
-                  //                       AssetImage('assets/img/cafe.png'),
-                  //                   width: 25,
-                  //                   height: 25,
-                  //                 ),
-                  //                 Padding(
-                  //                   padding: EdgeInsets.only(bottom: 1.0),
-                  //                 ),
-                  //                 Text(
-                  //                   "가맹점",
-                  //                   style: TextStyle(fontSize: 13),
-                  //                 )
-                  //               ],
-                  //             ),
-                  //           ),
-                  //           onTap: () {
-                  //             setState(() {
-                  //               check == true
-                  //                   ? check = false
-                  //                   : check = true;
-                  //             });
-                  //           }),
-                  //     ),
-                  //   ),
-                  // )),
-                  //   Expanded(
-                  //   ),
-                  // ],
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.only(top: 8.0),
                   child: _list(shopCategoryList),
+
                   //),
                 ),
                 Padding(
@@ -501,24 +482,25 @@ class _Google1MapUIState extends State<GoogleMapUI>
                     children: [
                       Container(
                         //height: MediaQuery.of(context).size.height * 0.5,
-                        child: GoogleMap(
-                          initialCameraPosition: CameraPosition(
-                            target: _currentLocation,
-                            zoom: 14.4746,
-                          ),
-                          rotateGesturesEnabled: false,
-                          tiltGesturesEnabled: false,
-                          markers: Set.from(changeWellhadaMark),
-                          myLocationEnabled: true,
-                          onMapCreated: (GoogleMapController controller) {
-                            print(_currentLocation);
-                            _controller = controller;
-                            getCenter();
-                          },
-                          onCameraMove: (position) {
-                            getCenter();
-                          },
-                        ),
+                        child: _currentLocation == null
+                            ? CupertinoActivityIndicator()
+                            : GoogleMap(
+                                initialCameraPosition: CameraPosition(
+                                  target: _currentLocation,
+                                  zoom: 14.4746,
+                                ),
+                                rotateGesturesEnabled: false,
+                                tiltGesturesEnabled: false,
+                                markers: Set.from(changeWellhadaMark),
+                                myLocationEnabled: true,
+                                onMapCreated: (GoogleMapController controller) {
+                                  _controller = controller;
+                                  getCenter();
+                                },
+                                onCameraMove: (position) {
+                                  getCenter();
+                                },
+                              ),
                       ),
                       Align(
                         alignment: Alignment.topRight,

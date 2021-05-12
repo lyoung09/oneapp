@@ -97,12 +97,32 @@ class _MyReviewState extends State<MyReview> {
                     ),
                     subtitle: Row(
                       children: [
-                        Text("<주문완료>",
+                        Text(
+                          "",
+                        ),
+                        Container(
+                          width: 35,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: Colors.amberAccent,
+                            border: Border.all(
+                              color: Colors.amberAccent,
+                              width: 1,
+                            ),
+                            borderRadius: BorderRadius.all(Radius.circular(
+                                    5.0) //                 <--- border radius here
+                                ),
+                          ),
+                          child: Text(
+                            '리뷰완료',
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               fontFamily: "nanumR",
-                              fontWeight: FontWeight.w500,
-                              fontSize: 9.0,
-                            )),
+                              fontWeight: FontWeight.w800,
+                              fontSize: 7.3,
+                            ),
+                          ),
+                        ),
                         Padding(
                           padding: EdgeInsets.only(right: 4),
                         ),

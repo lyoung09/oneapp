@@ -45,17 +45,14 @@ class _FavoriteState extends State<Favorite> {
 
   Widget _card(favoriteInfoList) {
     return GridView.builder(
-        scrollDirection: Axis.vertical,
+        //scrollDirection: Axis.vertical,
         itemCount:
             favoriteInfoList.length == null ? null : favoriteInfoList.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          crossAxisSpacing: 5.0,
-          mainAxisSpacing: 10.0,
-          childAspectRatio: 0.65,
-
-          // childAspectRatio: (MediaQuery.of(context).size.width / 5) /
-          //     (MediaQuery.of(context).size.height / 2),
+          mainAxisSpacing: 5,
+          crossAxisSpacing: 5,
+          childAspectRatio: 0.79,
         ),
         itemBuilder: (context, index) {
           String list = favoriteInfoList[index]['shopId'];
@@ -63,53 +60,58 @@ class _FavoriteState extends State<Favorite> {
           bool isSaved = saveFav.contains(list);
 
           return InkWell(
-            onTap: () {},
+            onTap: () {
+              setState(() {
+                _handleURLButtonPress(
+                    context,
+                    '${webviewDefault}/shopTmplatView.do',
+                    favoriteInfoList[index]['place_name']);
+              });
+            },
             child: Container(
-              width: MediaQuery.of(context).size.width * 0.4,
-              height: MediaQuery.of(context).size.height * 0.7,
+              // decoration: BoxDecoration(
+              //     border: Border.all(color: Colors.grey[800], width: 1)),
               child: Card(
+                elevation: 0,
+                color: Colors.transparent,
                 child: Column(
                   children: <Widget>[
                     Padding(
                       padding: EdgeInsets.all(10.0),
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _handleURLButtonPress(
-                                context,
-                                '${webviewDefault}/shopTmplatView.do',
-                                favoriteInfoList[index]['place_name']);
-                          });
-                        },
-                        child: Image.network(
-                          favoriteInfoList[index]['place_url'],
-                          //'https://placeimg.com/500/500/any',
-                          height: MediaQuery.of(context).size.width * 0.38,
-                          width: MediaQuery.of(context).size.width * 0.4,
-                          fit: BoxFit.fill,
-                        ),
+                      child: Image.network(
+                        //favoriteInfoList[index]['place_url'],
+                        'https://placeimg.com/500/500/any',
+                        height: MediaQuery.of(context).size.height * 0.15,
+                        width: MediaQuery.of(context).size.width,
+                        fit: BoxFit.fitWidth,
                       ),
                     ),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                          favoriteInfoList[index]['place_name'].length > 8
-                              ? "${favoriteInfoList[index]['place_name'].substring(0, 6)}..."
-                              : "${favoriteInfoList[index]['place_name']}",
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                              fontSize: 20.0,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w900)),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 3.5),
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                            favoriteInfoList[index]['place_name'].length > 8
+                                ? "${favoriteInfoList[index]['place_name'].substring(0, 6)}..."
+                                : "${favoriteInfoList[index]['place_name']}",
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                                fontSize: 20.0,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w900)),
+                      ),
                     ),
                     Row(
                       children: [
-                        Text(favoriteInfoList[index]['phone'],
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                                fontSize: 12.0,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w600)),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 3.5),
+                          child: Text(favoriteInfoList[index]['phone'],
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                  fontSize: 12.0,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600)),
+                        ),
                         Spacer(),
                         Align(
                             alignment: Alignment.bottomRight,
@@ -145,6 +147,12 @@ class _FavoriteState extends State<Favorite> {
             ),
           );
         });
+  }
+
+  Widget noData() {
+    return Center(
+      child: Image.asset('assets/icon/noImage.png'),
+    );
   }
 
   @override
@@ -214,7 +222,9 @@ class _FavoriteState extends State<Favorite> {
                 Expanded(
                     child: Padding(
                   padding: const EdgeInsets.only(left: 12.0, right: 12.0),
-                  child: _card(favoriteInfoList),
+                  child: favoriteInfoList.isEmpty
+                      ? noData()
+                      : _card(favoriteInfoList),
                 ))
               ]);
             }));
