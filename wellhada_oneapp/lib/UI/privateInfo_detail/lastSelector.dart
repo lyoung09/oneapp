@@ -3,6 +3,7 @@ import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
 
 class LastSelection extends StatefulWidget {
   @override
@@ -10,9 +11,19 @@ class LastSelection extends StatefulWidget {
 }
 
 class _LastSelectionState extends State<LastSelection> {
-  var userName, userEmail, userPhone;
+  var userName,
+      userEmail,
+      userPhone,
+      userPassword,
+      marketing,
+      userToken,
+      appAgreeService,
+      appAgreePrivacy,
+      appPushToken,
+      userId,
+      appAgreePush;
   var userChk;
-  var userProfile, cookie;
+  var userProfile, cookie, userGenderDB, userCheckDB;
   bool isSelected;
   final _formKey = GlobalKey<FormState>();
   List<RadioModel> sampleData = new List<RadioModel>();
@@ -29,14 +40,32 @@ class _LastSelectionState extends State<LastSelection> {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       setState(() {
+        userId = prefs.getString("userId");
         userEmail = prefs.getString("userEmail");
         userName = prefs.getString("userName");
         userProfile = prefs.getString("userProfile");
         userPhone = prefs.getString("userPhone");
         userChk = prefs.getString("userChk");
         cookie = prefs.getInt("cookie");
+        userPassword = prefs.getString("userPassword");
+        marketing = prefs.getString("marketing");
+        userToken = prefs.getString("userToken");
+        appAgreeService = prefs.getString("appAgreeService");
+        appAgreePrivacy = prefs.getString("appAgreePrivacy");
+        appPushToken = prefs.getString("appPushToken");
+        appAgreePush = prefs.getString("appAgreePush");
+
         //userProfile = uriUserProfile.toString();
       });
+
+      if (userChk == "01") {
+        userCheckDB = "E";
+      }
+      if (userChk == "00") {
+        userCheckDB = "K";
+      }
+      print(
+          '${userEmail} : ${userName}: ${userProfile}: ${userPhone}: ${userChk}: ${userPassword}: ${marketing}: ${userToken}: ${appAgreeService}: ${appAgreePrivacy}: ${appPushToken}: ${appAgreePush}');
     } catch (e) {
       print(e);
     }
@@ -81,25 +110,42 @@ class _LastSelectionState extends State<LastSelection> {
     });
   }
 
-  void checkInfo() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  insertUser() async {
+    final signUp = await user.insertUser(
+        userCheckDB,
+        userId,
+        userPassword,
+        userEmail,
+        userPhone,
+        userName,
+        userGenderDB,
+        birthdayJson,
+        marketing,
+        appPushToken,
+        appAgreeService,
+        appAgreePrivacy,
+        appAgreePush);
 
-    setState(() {
-      prefs.setString("gender", gender);
-      prefs.setString("birthday", birthdayJson);
-    });
+    setState(() {});
 
     Navigator.pushNamed(context, '/BottomNav');
   }
 
-  void skip() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  void checkInfo() async {
+    if (gender == "남") {
+      userGenderDB = "M";
+    }
+    if (gender == "여") {
+      userGenderDB = "F";
+    }
 
-    setState(() {
-      prefs.setString("gender", '');
-      prefs.setString("birthday", '');
-    });
-    Navigator.pushNamed(context, '/BottomNav');
+    insertUser();
+  }
+
+  void skip() async {
+    userGenderDB = "";
+    birthdayJson = "";
+    insertUser();
   }
 
   Widget _selectionWidget() {

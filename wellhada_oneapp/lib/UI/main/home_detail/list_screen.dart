@@ -33,13 +33,14 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
   TabController _tabController;
   bool wellhada, init;
   Map<int, String> menuView = new Map();
-  Map<int, int> wellhadaView = new Map();
+  Map<int, String> wellhadaView = new Map();
   List exactDistance = [];
   LatLng _currentLocation;
   Map<int, String> initDistance = new Map();
   Map<int, String> distance = new Map();
   var lat, lng;
   String webviewDefault = 'http://192.168.0.47:8080/usermngr';
+  bool opening;
   // For storing the current position
   @override
   void initState() {
@@ -51,7 +52,7 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
     //   ..addListener(() {
     //     distance = new Map();
     //   });
-    getShop();
+
     _tabController = new TabController(length: 4, vsync: this)
       ..addListener(() {
         distance = new Map();
@@ -99,28 +100,45 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
     return ((12742 * asin(sqrt(a)) * 1000)).toStringAsFixed(0);
   }
 
-  void getShop() async {
-    final shopList = await shopInfoListItem.getShopCategoryEntire();
-    setState(() {
-      shop = shopList.list;
-    });
-  }
-
   void getShopCategory() async {
-    final shopCategoryList =
-        await shopInfoListItem.getShopInfoCategoryListEntire();
+    final shopCategoryList = await shopInfoListItem.getShopListEntire();
 
     setState(() {
       for (int i = 0; i < shopCategoryList.list.length; i++) {
-        initDistance[int.parse(shopCategoryList.list[i].id)] =
-            _coordinateDistance(
-                _currentLocation.latitude,
-                _currentLocation.longitude,
-                double.parse(shopCategoryList.list[i].y),
-                double.parse(shopCategoryList.list[i].x));
+        initDistance[shopCategoryList.list[i].shopSeq] = _coordinateDistance(
+            _currentLocation.latitude,
+            _currentLocation.longitude,
+            shopCategoryList.list[i].latitude,
+            shopCategoryList.list[i].longtitude);
+        DateTime now = DateTime.now();
+
+        String startHour, startMin, endHour, endMin;
+        TimeOfDay startTime, endTime;
+        if (now.weekday == 6 || now.weekday == 7) {
+          startHour = shopCategoryList.list[i].weekBeginTime.substring(0, 2);
+          startMin = shopCategoryList.list[i].weekBeginTime.substring(2, 4);
+          endHour = shopCategoryList.list[i].weekEndTime.substring(0, 2);
+          endMin = shopCategoryList.list[i].weekEndTime.substring(2, 4);
+
+          startTime = TimeOfDay(
+              hour: int.parse(startHour), minute: int.parse(startMin));
+          endTime =
+              TimeOfDay(hour: int.parse(endHour), minute: int.parse(endMin));
+        } else {
+          startHour = shopCategoryList.list[i].bsnBeginTime.substring(0, 2);
+          startMin = shopCategoryList.list[i].bsnBeginTime.substring(2, 4);
+          endHour = shopCategoryList.list[i].bsnEndTime.substring(0, 2);
+          endMin = shopCategoryList.list[i].bsnEndTime.substring(2, 4);
+
+          startTime = TimeOfDay(
+              hour: int.parse(startHour), minute: int.parse(startMin));
+          endTime =
+              TimeOfDay(hour: int.parse(endHour), minute: int.parse(endMin));
+        }
+        openingShop(startTime, endTime);
       }
       shopCategory = shopCategoryList.list
-          .where((el) => 3000 > int.parse(initDistance[int.parse(el.id)]))
+          .where((el) => 3000 > int.parse(initDistance[el.shopSeq]))
           .toList();
     });
   }
@@ -292,7 +310,20 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _wellhadaView(int code) {
+  openingShop(startTime, endTime) async {
+    setState(() {
+      DateTime now = DateTime.now();
+
+      if (startTime.hour < now.hour && now.hour < endTime.hour) {
+        if (startTime.minute < now.minute && now.minute < endTime.minute) {
+          opening = false;
+        }
+      }
+      opening = true;
+    });
+  }
+
+  Widget _wellhadaView(String code) {
     List menuCode;
 
     List<int> sortedKeys;
@@ -300,10 +331,8 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
     List fromUserToMarket;
     Map<int, int> newPosition = new Map();
     try {
-      menuCode = shopCategory
-          .where((el) => el.categoryGroupCode == code && el.wellhadaShop == "Y")
-          //code <- int ,,,,el.categoryGroupCode string임
-          .toList();
+      menuCode =
+          shopCategory.where((el) => el.categoryGroupCode == code).toList();
 
       return menuCode.isEmpty
           ? noData()
@@ -316,14 +345,14 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
                 itemCount: menuCode == null ? 0 : menuCode.length,
                 itemBuilder: (context, position) {
                   var size = MediaQuery.of(context).size;
-                  print(123);
+
                   var alone;
                   if (menuCode.length == 1) {
                     alone = _coordinateDistance(
                         _currentLocation.latitude,
                         _currentLocation.longitude,
-                        double.parse(menuCode[0].y),
-                        double.parse(menuCode[0].x));
+                        menuCode[0].latitude,
+                        menuCode[0].longtitude);
 
                     newPosition[0] = 0;
                   } else {
@@ -331,8 +360,8 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
                       distance[i] = _coordinateDistance(
                           _currentLocation.latitude,
                           _currentLocation.longitude,
-                          double.parse(menuCode[i].y),
-                          double.parse(menuCode[i].x));
+                          menuCode[i].latitude,
+                          menuCode[i].longtitude);
                       // distance.removeWhere((key, value) => int.parse(value) > 2000);
 
                       sortedKeys = distance.keys.toList(growable: false)
@@ -341,104 +370,247 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
 
                       sortedMap = new LinkedHashMap.fromIterable(sortedKeys,
                           key: (k) => k, value: (k) => distance[k]);
-
-                      print(sortedKeys);
-                      print(sortedMap);
                     }
 
                     fromUserToMarket = sortedMap.values.toList();
                   }
 
-                  return InkWell(
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Row(
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.only(right: 10),
-                              ),
-                              Container(
-                                child: Image.network(
-                                  menuCode[position].placeUrl,
-                                  fit: BoxFit.fill,
-                                  width: 40.0,
-                                  height: 40.0,
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(right: 20),
-                              ),
-                              Container(
-                                width: MediaQuery.of(context).size.width - 110,
-                                child: Column(
-                                  //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text(
-                                      menuCode[position].placeName,
-                                      style: TextStyle(fontSize: 18.0),
+                  // DateTime now = DateTime.now();
+
+                  // String startHour, startMin, endHour, endMin;
+                  // TimeOfDay startTime, endTime;
+                  // if (now.weekday == 6 || now.weekday == 7) {
+                  //   startHour =
+                  //       menuCode[position].weekBeginTime.substring(0, 2);
+                  //   startMin = menuCode[position].weekBeginTime.substring(2, 4);
+                  //   endHour = menuCode[position].weekEndTime.substring(0, 2);
+                  //   endMin = menuCode[position].weekEndTime.substring(2, 4);
+
+                  //   startTime = TimeOfDay(
+                  //       hour: int.parse(startHour),
+                  //       minute: int.parse(startMin));
+                  //   endTime = TimeOfDay(
+                  //       hour: int.parse(endHour), minute: int.parse(endMin));
+                  // } else {
+                  //   startHour = menuCode[position].bsnBeginTime.substring(0, 2);
+                  //   startMin = menuCode[position].bsnBeginTime.substring(2, 4);
+                  //   endHour = menuCode[position].bsnEndTime.substring(0, 2);
+                  //   endMin = menuCode[position].bsnEndTime.substring(2, 4);
+
+                  //   startTime = TimeOfDay(
+                  //       hour: int.parse(startHour),
+                  //       minute: int.parse(startMin));
+                  //   endTime = TimeOfDay(
+                  //       hour: int.parse(endHour), minute: int.parse(endMin));
+                  // }
+                  // openingShop(startTime, endTime);
+                  print(opening);
+                  return opening == true
+                      ? InkWell(
+                          child: Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Row(
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.only(right: 10),
+                                  ),
+                                  Container(
+                                    child: Image.network(
+                                      'http://192.168.0.47:8080/${menuCode[position].fileUrl}',
+                                      fit: BoxFit.fill,
+                                      width: 40.0,
+                                      height: 40.0,
                                     ),
-                                    Row(
-                                      verticalDirection: VerticalDirection.down,
-                                      children: [
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(right: 20),
+                                  ),
+                                  Container(
+                                    width:
+                                        MediaQuery.of(context).size.width - 110,
+                                    child: Column(
+                                      //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: <Widget>[
                                         Text(
-                                          menuCode[position].addressName,
-                                          style: TextStyle(fontSize: 10.0),
+                                          menuCode[position].placeName,
+                                          style: TextStyle(fontSize: 18.0),
                                         ),
-                                        Padding(
-                                          padding: EdgeInsets.only(
-                                              left: 5, right: 5),
-                                        ),
-                                        ClipOval(
-                                          child: Material(
-                                            color: Colors.green,
-                                            child: InkWell(
-                                              onTap: () {},
-                                              child: SvgPicture.asset(
-                                                "assets/svg/coupon.svg",
-                                                fit: BoxFit.fill,
-                                                width: 20,
-                                                height: 20,
+                                        Row(
+                                          verticalDirection:
+                                              VerticalDirection.down,
+                                          children: [
+                                            Text(
+                                              menuCode[position].address,
+                                              style: TextStyle(fontSize: 10.0),
+                                            ),
+                                            Padding(
+                                              padding: EdgeInsets.only(
+                                                  left: 5, right: 5),
+                                            ),
+                                            ClipOval(
+                                              child: Material(
+                                                color: Colors.green,
+                                                child: InkWell(
+                                                  onTap: () {},
+                                                  child: SvgPicture.asset(
+                                                    "assets/svg/coupon.svg",
+                                                    fit: BoxFit.fill,
+                                                    width: 20,
+                                                    height: 20,
+                                                  ),
+                                                ),
                                               ),
                                             ),
-                                          ),
+                                            Spacer(),
+                                            Image.asset(
+                                              'assets/img/location.png',
+                                              width: 20.0,
+                                              height: 20.0,
+                                            ),
+                                            Padding(
+                                              padding:
+                                                  EdgeInsets.only(right: 3.0),
+                                            ),
+                                            Text(fromUserToMarket == null
+                                                ? alone.length > 3
+                                                    ? '${(int.parse(alone) * 0.001).toStringAsFixed(1)}km'
+                                                    : '${alone}m'
+                                                : fromUserToMarket[position]
+                                                            .length >
+                                                        3
+                                                    ? '${(int.parse(fromUserToMarket[position]) * 0.001).toStringAsFixed(1)}km'
+                                                    : '${fromUserToMarket[position]}m'),
+                                          ],
                                         ),
-                                        Spacer(),
-                                        Image.asset(
-                                          'assets/img/location.png',
-                                          width: 20.0,
-                                          height: 20.0,
-                                        ),
-                                        Padding(
-                                          padding: EdgeInsets.only(right: 3.0),
-                                        ),
-                                        Text(fromUserToMarket == null
-                                            ? alone.length > 3
-                                                ? '${(int.parse(alone) * 0.001).toStringAsFixed(1)}km'
-                                                : '${alone}m'
-                                            : fromUserToMarket[position]
-                                                        .length >
-                                                    3
-                                                ? '${(int.parse(fromUserToMarket[position]) * 0.001).toStringAsFixed(1)}km'
-                                                : '${fromUserToMarket[position]}m'),
                                       ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          onTap: () {
+                            setState(() {
+                              category = menuCode[position].placeName;
+                              print(category);
+                              _handleURLButtonPress(
+                                  context,
+                                  '${webviewDefault}/shopTmplatView.do',
+                                  category);
+                            });
+                          })
+                      : Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.only(right: 10),
+                                ),
+                                Stack(
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: EdgeInsets.only(top: 10.0),
+                                      child: Align(
+                                        alignment: Alignment.center,
+                                        child: Text("준비중",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontFamily: 'nanumB',
+                                            )),
+                                      ),
+                                    ),
+                                    Container(
+                                      child: Image.network(
+                                        'http://192.168.0.47:8080/${menuCode[position].fileUrl}',
+                                        fit: BoxFit.fill,
+                                        width: 40.0,
+                                        height: 40.0,
+                                      ),
                                     ),
                                   ],
                                 ),
-                              ),
-                            ],
+                                Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                ),
+                                Container(
+                                  width:
+                                      MediaQuery.of(context).size.width - 130,
+                                  child: Column(
+                                    //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Text(
+                                        menuCode[position].placeName,
+                                        style: TextStyle(
+                                            fontSize: 18.0,
+                                            color: Colors.grey[500]),
+                                      ),
+                                      Row(
+                                        verticalDirection:
+                                            VerticalDirection.down,
+                                        children: [
+                                          Text(
+                                            menuCode[position].address,
+                                            style: TextStyle(
+                                                fontSize: 10.0,
+                                                color: Colors.grey[500]),
+                                          ),
+                                          Padding(
+                                            padding: EdgeInsets.only(
+                                                left: 5, right: 5),
+                                          ),
+                                          ClipOval(
+                                            child: Material(
+                                              color: Colors.green,
+                                              child: InkWell(
+                                                onTap: () {},
+                                                child: SvgPicture.asset(
+                                                  "assets/svg/coupon.svg",
+                                                  fit: BoxFit.fill,
+                                                  width: 20,
+                                                  height: 20,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Spacer(),
+                                          Image.asset(
+                                            'assets/img/location.png',
+                                            width: 20.0,
+                                            height: 20.0,
+                                          ),
+                                          Padding(
+                                            padding:
+                                                EdgeInsets.only(right: 3.0),
+                                          ),
+                                          Text(
+                                            fromUserToMarket == null
+                                                ? alone.length > 3
+                                                    ? '${(int.parse(alone) * 0.001).toStringAsFixed(1)}km'
+                                                    : '${alone}m'
+                                                : fromUserToMarket[position]
+                                                            .length >
+                                                        3
+                                                    ? '${(int.parse(fromUserToMarket[position]) * 0.001).toStringAsFixed(1)}km'
+                                                    : '${fromUserToMarket[position]}m',
+                                            style: TextStyle(
+                                                color: Colors.grey[500]),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ),
-                      onTap: () {
-                        setState(() {
-                          category = menuCode[position].placeName;
-                          print(category);
-                          _handleURLButtonPress(context,
-                              '${webviewDefault}/shopTmplatView.do', category);
-                        });
-                      });
+                        );
                 },
               ),
             ]);
@@ -509,12 +681,12 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
                           color: Colors.white70,
                         ))),
                         labelStyle: TextStyle(
-                          fontSize: 15.5,
+                          fontSize: 18.5,
                           fontWeight: FontWeight.w800,
                           fontFamily: 'nanumB',
                         ),
                         unselectedLabelStyle: TextStyle(
-                          fontSize: 10.5,
+                          fontSize: 15.5,
                           fontWeight: FontWeight.w500,
                           fontFamily: 'nanumR',
                         ),

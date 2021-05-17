@@ -172,10 +172,19 @@ class _ExtraLoginState extends State<ExtraLogin> {
     setState(() {
       if (marketing == true) {
         prefs.setString("marketing", "Y");
+        prefs.setString("appAgreeService", "Y");
+        prefs.setString("appAgreePrivacy", "Y");
+        prefs.setString("appPushToken", "Y");
+        prefs.setString("appAgreePush", "Y");
+
         firebaseCloudMessagingListener();
       } else {
         prefs.setString("marketing", "N");
         prefs.setString("userToken", '');
+        prefs.setString("appAgreeService", "Y");
+        prefs.setString("appAgreePrivacy", "Y");
+        prefs.setString("appPushToken", "N");
+        prefs.setString("appAgreePush", "N");
       }
     });
     if (allAgree == true ||
@@ -494,7 +503,7 @@ class _ExtraLoginState extends State<ExtraLogin> {
                   onTap: anythingDetail,
                   child: Padding(
                     padding: const EdgeInsets.only(left: 14.0),
-                    child: Text("not yet which story goes on[필수]  ▼"),
+                    child: Text("정보 수집 이용 동의[필수]  ▼"),
                   )),
               FlatButton(
                 child: Icon(

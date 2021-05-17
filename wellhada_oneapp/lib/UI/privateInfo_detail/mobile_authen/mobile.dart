@@ -53,7 +53,6 @@ class _LoginScreenState extends State<LoginScreen> {
           await _auth.signInWithCredential(phoneAuthCredential);
 
       setState(() {
-        print("2");
         showLoading = false;
       });
 
@@ -65,6 +64,9 @@ class _LoginScreenState extends State<LoginScreen> {
           prefs.setString('userName', model.email);
           prefs.setString("userPoint", '0');
           prefs.setInt('cookie', 1);
+          prefs.setString('userEmail', model.email);
+          prefs.setString('userId', model.email);
+          prefs.setString('userPassword', model.password);
         });
         Navigator.pushReplacementNamed(
           context,

@@ -11,10 +11,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/UI/main/home_detail/webview.dart';
-
+import 'dart:math' show cos, sqrt, asin;
 import 'package:wellhada_oneapp/listitem/shop/shopInfoListItem.dart'
     as shopInfoListItem;
-
+import 'package:slide_popup_dialog/slide_popup_dialog.dart' as slideDialog;
 import 'package:wellhada_oneapp/model/map/map_model.dart';
 
 class GoogleMapUI extends StatefulWidget {
@@ -38,9 +38,9 @@ class _Google1MapUIState extends State<GoogleMapUI>
 
   Uint8List everyIcon, wellhadaIcon;
   Map<String, Uint8List> iconSet = new Map();
-  Map<String, Uint8List> wellhadaIconSet = new Map();
+  Map<int, Uint8List> wellhadaIconSet = new Map();
   // button click
-  int category;
+  String category;
   String webviewDefault = 'http://192.168.0.47:8080/usermngr';
   // contanier boolean
   bool itemSelected;
@@ -54,12 +54,24 @@ class _Google1MapUIState extends State<GoogleMapUI>
   List shopCategory;
   //googlemap marker icon
   bool favorite = false;
+  LatLngBounds latLngBounds;
+  List<Marker> nullMark = [];
+  var placeName,
+      shopSeq,
+      phone,
+      distance,
+      image,
+      beginWeekDate,
+      endWeekDate,
+      beginWeekendDate,
+      endWeekendDate;
+  bool opening;
   @override
   void initState() {
     super.initState();
     //getShowAppBar();
     //_sendLocation();
-    category = 18;
+    category = '18';
     itemSelected = false;
     getShop();
     _categoryFuture = getShopCategory();
@@ -102,6 +114,18 @@ class _Google1MapUIState extends State<GoogleMapUI>
   //   //_currentLocation = Provider.of<LatLng>(context, listen: true);
   //   //distance(geoPos.latitude, geoPos.longitude);
   // }
+  openingShop(startTime, endTime) async {
+    setState(() {
+      DateTime now = DateTime.now();
+
+      if (startTime.hour < now.hour && now.hour < endTime.hour) {
+        if (startTime.minute < now.minute && now.minute < endTime.minute) {
+          opening = true;
+        }
+      }
+      opening = false;
+    });
+  }
 
   void _handleURLButtonPress(
       BuildContext context, String url, String placeName) {
@@ -137,13 +161,39 @@ class _Google1MapUIState extends State<GoogleMapUI>
   }
 
   void getShop() async {
-    final entireShopList =
-        await shopInfoListItem.getShopInfoCategoryListEntire();
+    final entireShopList = await shopInfoListItem.getShopListEntire();
 
     for (int i = 0; i < entireShopList.list.length; i++) {
       wellhadaIcon =
           await getBytesFromCanvas(200, 100, entireShopList.list[i].placeName);
-      wellhadaIconSet[entireShopList.list[i].id] = wellhadaIcon;
+      wellhadaIconSet[entireShopList.list[i].shopSeq] = wellhadaIcon;
+
+      DateTime now = DateTime.now();
+
+      String startHour, startMin, endHour, endMin;
+      TimeOfDay startTime, endTime;
+      if (now.weekday == 6 || now.weekday == 7) {
+        startHour = entireShopList.list[i].weekBeginTime.substring(0, 2);
+        startMin = entireShopList.list[i].weekBeginTime.substring(2, 4);
+        endHour = entireShopList.list[i].weekEndTime.substring(0, 2);
+        endMin = entireShopList.list[i].weekEndTime.substring(2, 4);
+
+        startTime =
+            TimeOfDay(hour: int.parse(startHour), minute: int.parse(startMin));
+        endTime =
+            TimeOfDay(hour: int.parse(endHour), minute: int.parse(endMin));
+      } else {
+        startHour = entireShopList.list[i].bsnBeginTime.substring(0, 2);
+        startMin = entireShopList.list[i].bsnBeginTime.substring(2, 4);
+        endHour = entireShopList.list[i].bsnEndTime.substring(0, 2);
+        endMin = entireShopList.list[i].bsnEndTime.substring(2, 4);
+
+        startTime =
+            TimeOfDay(hour: int.parse(startHour), minute: int.parse(startMin));
+        endTime =
+            TimeOfDay(hour: int.parse(endHour), minute: int.parse(endMin));
+      }
+      openingShop(startTime, endTime);
     }
 
     setState(() {
@@ -268,98 +318,211 @@ class _Google1MapUIState extends State<GoogleMapUI>
         });
   }
 
-  Widget _container() {
-    return Material(
-      child: Container(
-        height: MediaQuery.of(context).size.height * 0.12,
-        width: MediaQuery.of(context).size.width * 0.75,
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.black),
-          borderRadius: BorderRadius.all(Radius.circular(25.0)),
-        ),
-        child: InkWell(
-            onTap: () {
-              setState(() {
-                itemSelected = false;
-                _handleURLButtonPress(context,
-                    '${webviewDefault}/shopTmplatView.do', model.placeName);
-              });
-            },
-            child: Row(
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(left: 13.0),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10, top: 8),
-                      child: Text(
-                          model.placeName.length > 15
-                              ? "${model.placeName.substring(0, 6)}..."
-                              : "${model.placeName}",
-                          style: TextStyle(
-                              fontFamily: 'nanumB',
-                              fontWeight: FontWeight.w900,
-                              fontSize: 20.0,
-                              color: Hexcolor('#333333'))),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(model.phone,
-                          style: TextStyle(
-                              fontFamily: 'nanumR',
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13.0,
-                              color: Hexcolor('#333333'))),
-                    ),
+  void _showShopListDialog(
+      String distance,
+      String pic,
+      String placeName,
+      String shopDc,
+      String beginWeek,
+      String endWeek,
+      String beginWeekend,
+      String endWeekend) {
+    var a = '${beginWeek.substring(0, 2)}시 ${beginWeek.substring(2, 4)}분 ~';
+    var b = ' ${endWeek.substring(0, 2)}시 ${endWeek.substring(2, 4)}분까지';
+    var c =
+        '${beginWeekend.substring(0, 2)}시 ${beginWeekend.substring(2, 4)}분 ~';
+    var d = ' ${endWeekend.substring(0, 2)}시 ${endWeekend.substring(2, 4)}분까지';
+
+    slideDialog.showSlideDialog(
+      context: context,
+      child: Expanded(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                child: Column(
+                  children: <Widget>[
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      textBaseline: TextBaseline.alphabetic,
                       children: [
-                        Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: ClipOval(
-                              child: Material(
-                                color: Colors.green,
-                                child: SvgPicture.asset(
-                                  "assets/svg/coupon.svg",
-                                  fit: BoxFit.fill,
-                                  width: 20,
-                                  height: 18,
+                        Spacer(),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: 10.0, right: 5),
+                            child: Text(
+                              "평일:",
+                              style: TextStyle(
+                                fontFamily: "nanumB",
+                                fontWeight: FontWeight.w900,
+                                fontSize: 13.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Align(
+                            alignment: Alignment.centerRight,
+                            child: Padding(
+                              padding: EdgeInsets.only(bottom: 10.0, right: 5),
+                              child: Text(
+                                a + b,
+                                style: TextStyle(
+                                  fontFamily: "nanumR",
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 11.0,
                                 ),
                               ),
                             )),
                         Padding(
-                          padding: const EdgeInsets.only(top: 8, left: 10),
-                          child: Text(
-                              model.distance.length > 3
-                                  ? '${(int.parse(model.distance) * 0.001).toStringAsFixed(1)}km'
-                                  : '${model.distance}m',
-                              style: TextStyle(
-                                  fontFamily: 'nanumR',
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 13.0,
-                                  color: Hexcolor('#333333'))),
-                        ),
+                          padding: EdgeInsets.only(right: 5),
+                        )
                       ],
                     ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Spacer(),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: 10.0, right: 5),
+                            child: Text(
+                              "주말:",
+                              style: TextStyle(
+                                fontFamily: "nanumB",
+                                fontWeight: FontWeight.w900,
+                                fontSize: 13.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Align(
+                            alignment: Alignment.centerRight,
+                            child: Padding(
+                              padding: EdgeInsets.only(bottom: 10.0, right: 5),
+                              child: Text(
+                                c + d,
+                                style: TextStyle(
+                                  fontFamily: "nanumR",
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 11.0,
+                                ),
+                              ),
+                            )),
+                        Padding(
+                          padding: EdgeInsets.only(right: 5),
+                        )
+                      ],
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(left: 20.0, bottom: 5.0),
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Padding(
+                            padding: EdgeInsets.only(left: 15),
+                            child: Text(
+                              '${placeName}',
+                              style: TextStyle(
+                                fontFamily: "nanumB",
+                                fontWeight: FontWeight.w900,
+                                fontSize: 26.0,
+                              ),
+                            )),
+                        Spacer(),
+                        Padding(
+                          padding: EdgeInsets.only(right: 18),
+                          child: Text(
+                            distance.length > 3
+                                ? '${(int.parse(distance) * 0.001).toStringAsFixed(1)}km'
+                                : '${distance}m',
+                            // '${distance}m',
+                            style: TextStyle(
+                              fontFamily: "nanumB",
+                              fontWeight: FontWeight.w700,
+                              fontSize: 17.5,
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(left: 12.0, bottom: 10.0),
+                    ),
+                    Padding(
+                        padding: const EdgeInsets.only(left: 5.0, right: 5),
+                        child: Container(
+                          padding: EdgeInsets.only(top: 5),
+                          decoration: BoxDecoration(border: Border.all()),
+                          width: MediaQuery.of(context).size.width * 0.8,
+                          height: MediaQuery.of(context).size.height * 0.3,
+                          child: Image.network(
+                            pic,
+                            width: MediaQuery.of(context).size.width * 0.8,
+                            height: MediaQuery.of(context).size.height * 0.3,
+                            fit: BoxFit.fitWidth,
+                          ),
+                        )),
+
+                    Container(
+                      padding: EdgeInsets.only(left: 20.0, bottom: 10.0),
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(left: 15, top: 15),
+                        ),
+                        Padding(
+                            padding: EdgeInsets.only(left: 8),
+                            child: Container(
+                              width: MediaQuery.of(context).size.width * 0.9,
+                              child: Text(
+                                shopDc,
+                                //'11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111',
+                                maxLines: 5,
+                                style: TextStyle(
+                                  fontFamily: "nanumR",
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            )),
+                      ],
+                    ),
+                    // Padding(
+                    //     padding: EdgeInsets.only(bottom: 15, left: 15),
+                    //     child: Align(
+                    //       alignment: Alignment.bottomRight,
+                    //       child: FlatButton(
+                    //         color: Colors.black,
+                    //         onPressed: () {
+                    //           Navigator.of(context).pop();
+                    //         },
+                    //         child: Text('확인',
+                    //             style: TextStyle(
+                    //               fontFamily: "nanumR",
+                    //               fontSize: 13,
+                    //               fontWeight: FontWeight.w900,
+                    //             )),
+                    //         textColor: Colors.black,
+                    //       ),
+                    //     )),
                   ],
                 ),
-                Expanded(
-                    child: Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.star,
-                      color:
-                          favorite == true ? Colors.red[400] : Colors.grey[300],
-                    ),
-                    onPressed: favoriteMethod,
-                  ),
-                ))
-              ],
-            )),
+              ),
+            ],
+          ),
+        ),
       ),
+      barrierColor: Colors.white.withOpacity(0.7),
+      pillColor: Colors.amberAccent,
+      backgroundColor: Colors.white,
     );
   }
 
@@ -371,28 +534,16 @@ class _Google1MapUIState extends State<GoogleMapUI>
     });
   }
 
-  // List<Marker> selectMarker(List<dynamic> shopInfoList) {
-  //   return shopInfoList
-  //       .where((element) => element.categoryGroupCode == category)
-  //       .map((element) {
-  //     return Marker(
-  //         markerId: MarkerId(element.id),
-  //         position: LatLng(double.parse(element.y), double.parse(element.x)),
-  //         icon: BitmapDescriptor.fromBytes(iconSet[element.id]),
-  //         onTap: () {
-  //           setState(() {
-  //             itemSelected = true;
-  //             model.id = element.id;
-  //             model.distance = element.distance;
-  //             model.placeName = element.placeName;
-  //             model.phone = element.phone;
-  //           });
-  //         });
-  //   }).toList();
-  // }
+  String _coordinateDistance(lat1, lon1, lat2, lon2) {
+    var p = 0.017453292519943295;
+    var c = cos;
+    var a = 0.5 -
+        c((lat2 - lat1) * p) / 2 +
+        c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
 
-  LatLngBounds latLngBounds;
-  List<Marker> nullMark = [];
+    return ((12742 * asin(sqrt(a)) * 1000)).toStringAsFixed(0);
+  }
+
   List<Marker> selectWellhadaMarker() {
     try {
       getCenter().then((result) {
@@ -402,29 +553,66 @@ class _Google1MapUIState extends State<GoogleMapUI>
       }).catchError((error) {
         print(error);
       });
+
       return shopInfoList
           .where((element) =>
               element.categoryGroupCode == category &&
-              latLngBounds.northeast.latitude > double.parse(element.y) &&
-              latLngBounds.northeast.longitude > double.parse(element.x) &&
-              latLngBounds.southwest.latitude < double.parse(element.y) &&
-              latLngBounds.southwest.longitude < double.parse(element.x) &&
-              element.wellhadaShop == "Y")
+              latLngBounds.northeast.latitude > element.latitude &&
+              latLngBounds.northeast.longitude > element.longtitude &&
+              latLngBounds.southwest.latitude < element.latitude &&
+              latLngBounds.southwest.longitude < element.longtitude)
           .map((element) {
-        return Marker(
-            markerId: MarkerId(element.id),
-            position: LatLng(double.parse(element.y), double.parse(element.x)),
-            icon: BitmapDescriptor.fromBytes(wellhadaIconSet[element.id]),
-            //wellhadaIconSet[element['id']
-            onTap: () {
-              setState(() {
-                itemSelected = true;
-                model.id = element.id;
-                model.distance = element.distance;
-                model.placeName = element.placeName;
-                model.phone = element.phone;
-              });
-            });
+        return opening == true
+            ? Marker(
+                markerId: MarkerId(element.shopSeq.toString()),
+                position: LatLng(element.latitude, element.longtitude),
+                icon: BitmapDescriptor.fromBytes(
+                    wellhadaIconSet[element.shopSeq]),
+                //wellhadaIconSet[element['id']
+                onTap: () {
+                  setState(() {
+                    //itemSelected = true;
+
+                    distance = _coordinateDistance(
+                        _currentLocation.latitude,
+                        _currentLocation.longitude,
+                        element.latitude,
+                        element.longtitude);
+
+                    _showShopListDialog(
+                        distance,
+                        element.fileUrl,
+                        element.placeName,
+                        element.shopDc,
+                        element.bsnBeginTime,
+                        element.bsnEndTime,
+                        element.weekBeginTime,
+                        element.weekEndTime);
+                  });
+                })
+            : Marker(
+                markerId: MarkerId(element.shopSeq.toString()),
+                position: LatLng(element.latitude, element.longtitude),
+                icon: BitmapDescriptor.fromBytes(
+                    wellhadaIconSet[element.shopSeq]),
+                //wellhadaIconSet[element['id']
+                onTap: () {
+                  setState(() {
+                    //itemSelected = true;
+
+                    showDialog(
+                        context: context,
+                        builder: (_) => CupertinoAlertDialog(
+                              content: Text("영업 시간이 아닙니다"),
+                              actions: <Widget>[
+                                CupertinoDialogAction(
+                                  child: Text('확인'),
+                                  onPressed: () => Navigator.of(context).pop(),
+                                ),
+                              ],
+                            ));
+                  });
+                });
       }).toList();
     } catch (e) {
       return nullMark;
@@ -483,7 +671,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
                       Container(
                         //height: MediaQuery.of(context).size.height * 0.5,
                         child: _currentLocation == null
-                            ? CupertinoActivityIndicator()
+                            ? CupertinoAlertDialog()
                             : GoogleMap(
                                 initialCameraPosition: CameraPosition(
                                   target: _currentLocation,
@@ -495,7 +683,8 @@ class _Google1MapUIState extends State<GoogleMapUI>
                                 myLocationEnabled: true,
                                 onMapCreated: (GoogleMapController controller) {
                                   _controller = controller;
-                                  getCenter();
+                                  if (_controller != null && controller != null)
+                                    getCenter();
                                 },
                                 onCameraMove: (position) {
                                   getCenter();
@@ -513,11 +702,6 @@ class _Google1MapUIState extends State<GoogleMapUI>
                           backgroundColor: Colors.white,
                         ),
                       ),
-                      Positioned(
-                          bottom: 0,
-                          width: MediaQuery.of(context).size.width,
-                          child:
-                              itemSelected == true ? _container() : Text("")),
                     ],
                   ),
                 ),

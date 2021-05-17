@@ -31,6 +31,11 @@ class _BottomNavState extends State<BottomNav> {
   ];
 
   @override
+  initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () {},

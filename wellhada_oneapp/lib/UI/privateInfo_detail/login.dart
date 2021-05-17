@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
@@ -6,6 +7,7 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:kakao_flutter_sdk/auth.dart';
 import 'package:kakao_flutter_sdk/user.dart';
 import 'package:kakao_flutter_sdk/common.dart';
+import 'package:wellhada_oneapp/UI/main/bottom_nav.dart';
 import 'package:wellhada_oneapp/UI/privateInfo_detail/email_login/extraLogin.dart';
 import 'email_login/email.dart';
 import 'package:path_provider/path_provider.dart';
@@ -72,23 +74,37 @@ class _LOGINState extends State<LOGIN> {
 
   checkEmail() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    userChk = '01';
+
+    print(userId.text);
+    final loginData =
+        await user.loginUser(userId.text, userPassword.text, "Y", "E", "Y");
 
     setState(() {
-      email = prefs.getString("userEmail");
-      password = prefs.getString("password");
-      prefs.setString("userChk", '01');
+      print("login data message ==============" + loginData.status);
     });
-    var a = await user.getUser(userId.text, userPassword.text);
 
-    print(a.accessToken);
-    print(a.cnt);
-    print(a.status);
+    if (loginData.status == "00") {
+      final userData = await user.getUserInfoDetailList(userId.text);
 
-    if (userChk == '01' && userId == email && userPassword == password) {
-      Navigator.pushNamed(context, '/BottomNav');
+      setState(() {
+        print(userData.userList.userEmail);
+      });
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => BottomNav()),
+      );
     } else {
-      print("z");
+      showDialog(
+          context: context,
+          builder: (_) => CupertinoAlertDialog(
+                content: Text("다시 한번 확인 해주세요"),
+                actions: <Widget>[
+                  CupertinoDialogAction(
+                    child: Text('확인'),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ));
     }
   }
 

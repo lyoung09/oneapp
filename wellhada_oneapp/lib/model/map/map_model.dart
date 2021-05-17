@@ -16,6 +16,7 @@ class MapModel {
   String id;
   String wellhadaShop;
   String category;
+  String shopSeq;
   MapModel(
       {this.placeUrl,
       this.placeName,
@@ -30,7 +31,8 @@ class MapModel {
       this.addressName,
       this.id,
       this.wellhadaShop,
-      this.category});
+      this.category,
+      this.shopSeq});
 }
 
 class ShopCategoryList {

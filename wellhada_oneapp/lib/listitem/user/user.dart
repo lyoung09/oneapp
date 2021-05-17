@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:json_annotation/json_annotation.dart';
 
@@ -622,24 +620,91 @@ Future<MyReview> getMyReviewEntire() async {
   }
 }
 
-Future<Status> insertUser(
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+////////////////실제 서버///////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+////////////////회원 가입///////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+
+class Insert {
+  final String status;
+  final int resultCount;
+
+  Insert(
+    this.status,
+    this.resultCount,
+  );
+  // Status.fromJson(Map<String,dynamic> json):STATUS:json['STATUS'],resultCount:json['resultCount'];
+
+  Insert.fromJson(Map<String, dynamic> json)
+      : status = json['STATUS'],
+        resultCount = json['resultCount'];
+
+  Map<String, dynamic> toJson() => {
+        'STATUS': status,
+        'resultCount': resultCount,
+      };
+}
+
+Future<Insert> insertUser(
+  String userChk,
   String userId,
   String userPassword,
+  String email,
+  String userPhoneNumber,
+  String userName,
+  String gender,
+  String birthdayJson,
+  String marketing,
+  String appPushToken,
+  String appAgreeService,
+  String appAgreePrivacy,
+  String appAgreePush,
 ) async {
   var bodyParam = new Map();
+  bodyParam['userChk'] = userChk;
   bodyParam['userId'] = userId;
   bodyParam['userPassword'] = userPassword;
-
+  bodyParam['userEmail'] = email;
+  bodyParam['userPhoneNumber'] = userPhoneNumber;
+  bodyParam['userName'] = userName;
+  bodyParam['gender'] = gender == null ? null : gender;
+  bodyParam['birthdayJson'] = birthdayJson == null ? null : birthdayJson;
+  bodyParam['marketing'] = marketing;
+  bodyParam['appPushToken'] = appPushToken;
+  bodyParam['appAgreeService'] = appAgreeService;
+  bodyParam['appAgreePrivacy'] = appAgreePrivacy;
+  bodyParam['appAgreePush'] = appAgreePush;
+  print(bodyParam);
   http.Response response = await http.post(
-    Uri.encodeFull('http://192.168.0.47:8080/userinfo/userlogin.ajax'),
+    Uri.encodeFull('http://192.168.0.47:8080/insertUser'),
     headers: {"Accept": "application/json"},
     body: bodyParam,
   );
 
   if (response.statusCode == 200) {
-    print('access token is -> ${json.decode(response.body)['access_token']}');
-    print(Status.fromJson(json.decode(response.body)));
-    return json.decode(response.body);
+    return Insert.fromJson(json.decode(response.body));
   } else {
     throw HttpException(
       'Unexpected status code ${response.statusCode}:'
@@ -648,6 +713,12 @@ Future<Status> insertUser(
     );
   }
 }
+
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+////////////////로그인///////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
 
 @JsonSerializable()
 class Status {
@@ -672,81 +743,63 @@ class Status {
       };
 }
 
-class ItemList {
-  ItemList({
+class UserItem {
+  UserItem({
     this.userID,
     this.userPassword,
     this.idIntre,
+    this.userChk,
+    this.limitYn,
   });
   final String userID;
   final String userPassword;
   final String idIntre;
+  final String userChk;
+  final String limitYn;
 
-  factory ItemList.fromJson(Map<String, dynamic> json) =>
-      _$ItemListFromJson(json);
-  Map<String, dynamic> toJson() => _$ItemListToJson(this);
+  factory UserItem.fromJson(Map<String, dynamic> json) =>
+      _$UserItemFromJson(json);
+  Map<String, dynamic> toJson() => _$UserItemToJson(this);
 }
 
-ItemList _$ItemListFromJson(Map<String, dynamic> json) {
-  return ItemList(
+UserItem _$UserItemFromJson(Map<String, dynamic> json) {
+  return UserItem(
     userID: json['userId'] as String,
     userPassword: json['userPassword'] as String,
     idIntre: json['id_intre'] as String,
+    limitYn: json['limitYn'] as String,
+    userChk: json['userChk'] as String,
   );
 }
 
-Map<String, dynamic> _$ItemListToJson(ItemList instance) => <String, dynamic>{
-      'UID': instance.userID,
+Map<String, dynamic> _$UserItemToJson(UserItem instance) => <String, dynamic>{
+      'userId': instance.userID,
       'userPassword': instance.userPassword,
       'id_intre': instance.idIntre,
+      'limitYn': instance.limitYn,
+      'userChk': instance.userChk,
     };
 
-@JsonSerializable()
-class UserItem {
-  UserItem({
-    this.status,
-    this.accessToken,
-    this.cnt,
-  });
-  final String status;
-  final String accessToken;
-  final String cnt;
-
-  // factory UserItem.fromJson(Map<String, dynamic> json) =>
-  //     _$UserItemFromJson(json);
-  // Map<String, dynamic> toJson() => _$UserItemToJson(this);
-
-}
-
-// UserItem _$UserItemFromJson(Map<String, dynamic> json) {
-//   return UserItem(
-//     LIST: (json['LIST'] as List)
-//         ?.map((e) =>
-//             e == null ? null : ItemList.fromJson(e as Map<String, dynamic>))
-//         ?.toList(),
-// //      meta: (json['meta'] as List)
-// //          ?.map((e) =>
-// //      e == null ? null : Meta.fromJson(e as Map<String, dynamic>))
-// //          ?.toList()
-//   );
-// }
-
-// Map<String, dynamic> _$UserItemToJson(UserItem instance) =>
-//     <String, dynamic>{'documents': instance.LIST};
-
-Future<Status> getUser(String user_Email, String user_password) async {
+Future<Status> loginUser(String userEmail, String userPassword, String idIntre,
+    String userChk, String limitYn) async {
   var bodyParam = new Map();
-  bodyParam['userId'] = user_Email;
-  bodyParam['userPassword'] = user_password;
+
+  bodyParam['userId'] = userEmail;
+  bodyParam['userPassword'] = userPassword;
+  bodyParam['id_intre'] = idIntre;
+  bodyParam['limitYn'] = limitYn;
+  bodyParam['userChk'] = userChk;
 
   http.Response response = await http.post(
+    //Uri.encodeFull('http://hndsolution.iptime.org:8080/login'),
     Uri.encodeFull('http://192.168.0.47:8080/login'),
+
     headers: {"Accept": "application/json"},
     body: bodyParam,
   );
 
   if (response.statusCode == 200) {
-    print(Status.fromJson(json.decode(response.body)).status);
+    print(bodyParam);
     return Status.fromJson(json.decode(response.body));
   } else {
     throw HttpException(
@@ -756,28 +809,202 @@ Future<Status> getUser(String user_Email, String user_password) async {
     );
   }
 }
-// Future<Status> getUser(
-//   String userId,
-//   String userPassword,
-//   String idIntre,
-// ) async {
-//   var bodyParam = new Map();
-//   bodyParam['userId'] = userId;
-//   bodyParam['userPassword'] = userPassword;
-//   bodyParam['id_intre'] = idIntre;
-//   http.Response response = await http.post(
-//     Uri.encodeFull('http://192.168.0.47:8080/login'),
-//     headers: {"Accept": "application/json"},
-//     body: bodyParam,
-//   );
 
-//   if (response.statusCode == 200) {
-//     return Status.fromJson(json.decode(response.body));
-//   } else {
-//     throw HttpException(
-//       'Unexpected status code ${response.statusCode}:'
-//       ' ${response.reasonPhrase}',
-//       //uri: Uri.parse(query)
-//     );
-//   }
-// }
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+////////////////회원 정보 조회//////////////////
+////////////////get user info//////////////////
+///////////////////////////////////////////////
+
+class UserInfo {
+  String status;
+  int cnt;
+  UserInfoDetail userList;
+  final List<UserInfoDetail> list;
+
+  UserInfo({this.status, this.cnt, this.list, this.userList});
+
+  factory UserInfo.fromJson(Map<String, dynamic> json) => UserInfo(
+        status: json["STATUS"],
+        userList: UserInfoDetail.fromJson(json["LIST"]),
+        cnt: json["CNT"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "status": status,
+        "cnt": cnt,
+        "list": userList.toJson(),
+      };
+
+  factory UserInfo.fromJsonMap(Map<String, dynamic> json) =>
+      _$UserInfoItemFromJsonMap(json);
+
+  Map<String, dynamic> toJsonMap() => _$UserInfoItemToJsonMap(this);
+}
+
+UserInfo _$UserInfoItemFromJsonMap(Map<String, dynamic> json) {
+  return UserInfo(
+    list: (json['LIST'] as List)
+        ?.map((e) => e == null
+            ? null
+            : UserInfoDetail.fromJsonMap(e as Map<String, dynamic>))
+        ?.toList(),
+  );
+}
+
+Map<String, dynamic> _$UserInfoItemToJsonMap(UserInfo instance) =>
+    <String, dynamic>{'documents': instance.list};
+
+class UserInfoDetail {
+  String userEmail;
+  String userId;
+  String userName;
+  String userPhoneNumber;
+  String appAgreeMarketing;
+  String userCheck;
+
+  UserInfoDetail({
+    this.userEmail,
+    this.userId,
+    this.userName,
+    this.userPhoneNumber,
+    this.appAgreeMarketing,
+    this.userCheck,
+  });
+  factory UserInfoDetail.fromJson(Map<String, dynamic> json) => UserInfoDetail(
+        userEmail: json["USER_EMAIL"],
+        userId: json["USER_ID"],
+        userName: json["USER_NAME"],
+        userPhoneNumber: json['USER_PHONE_NUMBER'],
+        appAgreeMarketing: json["APP_AGREE_MARKETING_YN"],
+        userCheck: json["USER_CHECK"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "USER_EMAIL": userEmail,
+        "USER_ID": userId,
+        "USER_NAME": userName,
+        "USER_PHONE_NUMBER": userPhoneNumber,
+        "APP_AGREE_MARKETING_YN": appAgreeMarketing,
+        "USER_CHECK": userCheck,
+      };
+  factory UserInfoDetail.fromJsonMap(Map<String, dynamic> json) =>
+      _$UserInfoDetailFromJsonMap(json);
+  Map<String, dynamic> toJsonMap() => _$UserInfoDetailToJsonMap(this);
+}
+
+UserInfoDetail _$UserInfoDetailFromJsonMap(Map<String, dynamic> json) {
+  return UserInfoDetail(
+    userEmail: json['USER_EMAIL'] as String,
+    userId: json['USER_ID'] as String,
+    userName: json['USER_NAME'] as String,
+    userPhoneNumber: json['USER_PHONE_NUMBER'] as String,
+    appAgreeMarketing: json['APP_AGREE_MARKETING_YN'] as String,
+    userCheck: json['USER_CHECK'] as String,
+  );
+}
+
+Map<String, dynamic> _$UserInfoDetailToJsonMap(UserInfoDetail instance) =>
+    <String, dynamic>{
+      'USER_EMAIL': instance.userEmail,
+      'USER_ID': instance.userId,
+      'USER_NAME': instance.userName,
+      'USER_PHONE_NUMBER': instance.userPhoneNumber,
+      'APP_AGREE_MARKETING_YN': instance.appAgreeMarketing,
+      'USER_CHECK': instance.userCheck,
+    };
+
+Future<UserInfo> getUserInfoDetailList(String userEmail) async {
+  var bodyParam = new Map();
+  bodyParam['userId'] = userEmail;
+
+  http.Response response = await http.post(
+    //Uri.encodeFull('http://hndsolution.iptime.org:8080/getUserInfo'),
+    Uri.encodeFull('http://192.168.0.47:8080/getUserInfo'),
+    headers: {"Accept": "application/json"},
+    body: bodyParam,
+  );
+
+  if (200 == response.statusCode) {
+    print(response.body);
+    return UserInfo.fromJsonMap(json.decode(response.body));
+  } else {
+    return json.decode(response.body);
+  }
+}
+
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+////////////////회원 정보 수정//////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+@JsonSerializable()
+class UpdateUser {
+  final String status;
+  final int cnt;
+
+  UpdateUser(this.status, this.cnt);
+
+  UpdateUser.fromJson(Map<String, dynamic> json)
+      : status = json['STATUS'],
+        cnt = json['CNT'];
+
+  Map<String, dynamic> toJson() => {
+        "STATUS": status,
+        "CNT": cnt,
+      };
+}
+
+Future<UpdateUser> updateUser(
+  String userId,
+  String userPassword,
+  String userProfile,
+  String userEmail,
+  String userName,
+  String userPhoneNumber,
+  String birthdayJson,
+  String gender,
+) async {
+  var bodyParam = new Map();
+
+  bodyParam["userPhoneNumber"] = userPhoneNumber;
+
+  bodyParam["userEmail"] = userEmail;
+
+  bodyParam['userPassword'] = userPassword;
+  bodyParam["gender"] = gender;
+  bodyParam["userId"] = userId;
+  bodyParam["userName"] = userName;
+  bodyParam["user_profile"] = userProfile;
+  bodyParam["birthdayJson"] = birthdayJson;
+
+  http.Response response = await http.post(
+    //Uri.encodeFull('http://hndsolution.iptime.org:8080/updateUserInfo'),
+    Uri.encodeFull('http://192.168.0.47:8080/updateUserInfo'),
+
+    headers: {"Accept": "application/json"},
+    body: bodyParam,
+  );
+
+  if (response.statusCode == 200) {
+    return UpdateUser.fromJson(json.decode(response.body));
+  } else {
+    throw HttpException(
+      'Unexpected status code ${response.statusCode}:'
+      ' ${response.reasonPhrase}',
+      //uri: Uri.parse(query)
+    );
+  }
+}
+
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+////////////////회원 탈퇴///////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+////////////////로그아웃//////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////

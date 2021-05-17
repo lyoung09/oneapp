@@ -13,7 +13,7 @@ import 'package:wellhada_oneapp/UI/privateInfo_detail/user/notify.dart';
 import 'package:wellhada_oneapp/UI/privateInfo_detail/user/point.dart';
 import 'package:wellhada_oneapp/UI/privateInfo_detail/user/proposingShop.dart';
 import 'package:wellhada_oneapp/UI/privateInfo_detail/user/updateUser.dart';
-
+import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
 import 'package:wellhada_oneapp/model/menu/drawer_detail/qr_34.dart';
 
 import '../home_screen.dart';
@@ -83,6 +83,8 @@ class _PriavateInfoState extends State<PriavateInfo> {
   void userCheck() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
+      var password;
+
       setState(() {
         userEmail = prefs.getString("userEmail");
         userName = prefs.getString("userName");
@@ -91,6 +93,7 @@ class _PriavateInfoState extends State<PriavateInfo> {
         userChk = prefs.getString("userChk");
         cookie = prefs.getInt("cookie");
         userPoint = prefs.getString("userPoint");
+        password = prefs.getString("password");
         //userProfile = uriUserProfile.toString();
       });
     } catch (e) {

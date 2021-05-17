@@ -9,7 +9,7 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:kakao_flutter_sdk/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/UI/privateInfo_detail/mobile_authen/mobile.dart';
-
+import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
 import 'package:wellhada_oneapp/model/login/certification_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';

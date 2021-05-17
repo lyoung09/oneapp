@@ -35,23 +35,16 @@ class _EmailState extends State<Email> {
     });
   }
 
-  void verificationPassword(String value) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    //await user.insertUser(model.email, model.password);
-
-    setState(() {
-      if (value == passwordCheck) {
-        prefs.setString('userEmail', model.email);
-      }
-    });
-    // Navigator.push(
-    //     context,
-    //     MaterialPageRoute(
-    //         builder: (context) => Mobil_authen(model: this.model)));
+  verificationPassword(String value) async {
     Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) => LoginScreen(model: this.model)));
+
+    // Navigator.push(
+    //     context,
+    //     MaterialPageRoute(
+    //         builder: (context) => Mobil_authen(model: this.model)));
   }
 
   Widget email() {
@@ -63,10 +56,10 @@ class _EmailState extends State<Email> {
         child: Column(
           children: <Widget>[
             Column(children: <Widget>[
-              Container(
-                child: Text("Email"),
-                alignment: Alignment.topLeft,
-              ),
+              // Container(
+              //   child: Text("Email"),
+              //   alignment: Alignment.topLeft,
+              // ),
               Container(
                 alignment: Alignment.center,
 
@@ -167,10 +160,10 @@ class _EmailState extends State<Email> {
         child: Column(
           children: <Widget>[
             Column(children: <Widget>[
-              Container(
-                child: Text("비밀번호"),
-                alignment: Alignment.topLeft,
-              ),
+              // Container(
+              //   child: Text("비밀번호"),
+              //   alignment: Alignment.topLeft,
+              // ),
               Container(
                 alignment: Alignment.center,
                 //         decoration: BoxDecoration(
@@ -262,10 +255,10 @@ class _EmailState extends State<Email> {
         child: Column(
           children: <Widget>[
             Column(children: <Widget>[
-              Container(
-                child: Text("비밀번호 확인"),
-                alignment: Alignment.topLeft,
-              ),
+              // Container(
+              //   child: Text("비밀번호 확인"),
+              //   alignment: Alignment.topLeft,
+              // ),
               Container(
                 alignment: Alignment.center,
 
