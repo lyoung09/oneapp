@@ -4,7 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:getwidget/getwidget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/UI/main/home_detail/webview.dart';
+import 'package:wellhada_oneapp/UI/privateInfo_detail/login.dart';
 import 'package:wellhada_oneapp/UI/usageHistory_detail/my_review.dart';
 import 'package:wellhada_oneapp/UI/usageHistory_detail/review.dart';
 import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
@@ -19,12 +21,38 @@ class UsageHistory extends StatefulWidget {
 
 class _UsageHistoryState extends State<UsageHistory> {
   String webviewDefault = 'http://192.168.0.47:8080/usermngr';
-  var userId = "112";
+  var userId;
   String date, year, month, day;
   int _value = 1;
+
   @override
   initState() {
     super.initState();
+    check();
+  }
+
+  @override
+  void didChangeDependencies() {
+    check();
+
+    super.didChangeDependencies();
+  }
+
+  void check() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      setState(() {
+        userId = prefs.getString("userKey");
+      });
+      if (userId != null) {
+        print('userKey :${userId}');
+
+        print(userId);
+      }
+      if (userId == null || userId == "") {}
+    } catch (e) {
+      print(e);
+    }
   }
 
   void _showIncludePicutreDialog(
@@ -369,12 +397,14 @@ class _UsageHistoryState extends State<UsageHistory> {
         .push(MaterialPageRoute(builder: (context) => new MyReview()));
   }
 
-  void _handleURLButtonPress(
-      BuildContext context, String url, String placeName) {
+  var userPassword;
+  void _handleURLButtonPress(BuildContext context, String url, String placeName,
+      int userSeq, String userId) {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => WebViewContainer(url, placeName)));
+            builder: (context) =>
+                WebViewContainer(placeName, userSeq, userId, userPassword)));
 
     // Navigator.pushNamed(context, '/webview');
   }
@@ -434,7 +464,9 @@ class _UsageHistoryState extends State<UsageHistory> {
                               _handleURLButtonPress(
                                   context,
                                   '${webviewDefault}/shopTmplatView.do',
-                                  reviewInfoList[position]['place_name']);
+                                  reviewInfoList[position]['place_name'],
+                                  12,
+                                  userId);
                             });
                           },
                           child: Image.network(
@@ -465,7 +497,9 @@ class _UsageHistoryState extends State<UsageHistory> {
                                     _handleURLButtonPress(
                                         context,
                                         '${webviewDefault}/shopTmplatView.do',
-                                        reviewInfoList[position]['place_name']);
+                                        reviewInfoList[position]['place_name'],
+                                        12,
+                                        userId);
                                   });
                                 },
                                 child: reviewInfoList[position]['place_name']
@@ -719,7 +753,137 @@ class _UsageHistoryState extends State<UsageHistory> {
               if (!snapshot.hasData) {
                 return Center(child: CupertinoActivityIndicator());
               }
-
+              if (!snapshot.hasData && (userId == null || userId == "")) {
+                return Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(top: 20, bottom: 20),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 12.0),
+                      child: Container(
+                          child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: <Widget>[
+                            Spacer(),
+                            Text(
+                              "",
+                              style: TextStyle(
+                                // color: _colorText,
+                                fontSize: 23.0,
+                                fontFamily: 'nanumB',
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )),
+                    ),
+                    Padding(
+                      child: Divider(
+                        color: Colors.black,
+                        thickness: 3,
+                      ),
+                      padding: EdgeInsets.only(bottom: 40),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Container(
+                          child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: <Widget>[
+                            Text("",
+                                style: TextStyle(
+                                  // color: _colorText,
+                                  fontSize: 20.0,
+                                  fontFamily: 'nanumR',
+                                  fontWeight: FontWeight.w800,
+                                )),
+                            Text("",
+                                style: TextStyle(
+                                  // color: _colorText,
+                                  fontSize: 18.0,
+                                  fontFamily: 'nanumR',
+                                  fontWeight: FontWeight.w800,
+                                )),
+                          ],
+                        ),
+                      )),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 20.0, bottom: 20),
+                    ),
+                    Container(
+                        padding: const EdgeInsets.only(left: 12.0, bottom: 20),
+                        child: Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              "로그인을 하시면",
+                              style: TextStyle(
+                                // color: _colorText,
+                                fontSize: 16.0,
+                                fontFamily: 'nanumR',
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ))),
+                    Container(
+                        padding: const EdgeInsets.only(left: 12.0, bottom: 3),
+                        child: Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              " 이용내역을 확인하실수 있습니다.",
+                              style: TextStyle(
+                                // color: _colorText,
+                                fontSize: 16.0,
+                                fontFamily: 'nanumR',
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ))),
+                    Padding(
+                      padding: EdgeInsets.only(top: 20.0, bottom: 20),
+                    ),
+                    Container(
+                      height: 50.0,
+                      margin: EdgeInsets.all(10),
+                      child: RaisedButton(
+                        //onPressed: moveLogin,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(50.0)),
+                        padding: EdgeInsets.all(0.0),
+                        child: Ink(
+                          decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Color(0xff374ABE), Color(0xff64B6FF)],
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                              ),
+                              borderRadius: BorderRadius.circular(20.0)),
+                          child: Container(
+                            constraints: BoxConstraints(
+                                maxWidth: 200.0, minHeight: 30.0),
+                            alignment: Alignment.center,
+                            child: Text(
+                              "로그인",
+                              textAlign: TextAlign.center,
+                              style:
+                                  TextStyle(color: Colors.black, fontSize: 18),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 20.0, bottom: 20),
+                    ),
+                  ],
+                );
+              }
               Map<String, dynamic> reviewInfo = snapshot.data;
               List<dynamic> reviewInfoList = reviewInfo["LIST"];
 

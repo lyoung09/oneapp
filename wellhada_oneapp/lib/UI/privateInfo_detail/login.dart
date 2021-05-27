@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
@@ -9,15 +12,18 @@ import 'package:kakao_flutter_sdk/user.dart';
 import 'package:kakao_flutter_sdk/common.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_nav.dart';
 import 'package:wellhada_oneapp/UI/privateInfo_detail/email_login/extraLogin.dart';
-import 'email_login/email.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
-import 'package:http/http.dart' as http;
+
 import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
+import 'package:wellhada_oneapp/model/login/userData.dart';
+import 'package:wellhada_oneapp/notification/custom_notification.dart';
 
 class LOGIN extends StatefulWidget {
+  var number;
+
+  LOGIN({this.number});
+
   @override
-  _LOGINState createState() => _LOGINState();
+  _LOGINState createState() => _LOGINState(number: number);
 }
 
 class _LOGINState extends State<LOGIN> {
@@ -42,10 +48,19 @@ class _LOGINState extends State<LOGIN> {
   final _formKey2 = GlobalKey<FormState>();
   var uriUserProfile;
   String userProfile = '';
+  var number;
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  String _messagingTitle = "";
+  StreamSubscription iosSubscription;
+  _LOGINState({this.number});
+
   @override
   void initState() {
     super.initState();
+    firebaseCloudMessagingListener();
     _initKakaoTalkInstalled();
+
+    number == null ? number = 0 : number = number;
   }
 
   @override
@@ -60,39 +75,124 @@ class _LOGINState extends State<LOGIN> {
     });
   }
 
-  // Future<void> _initData() async {
-  //   prefs = await SharedPreferences.getInstance();
-  //   setState(() {
-  //     appId = prefs.getString("appId");
-  //     screenSeq = prefs.getString("screenSeq");
-  //     if (prefs.getString("limitYn") == "Y") {
-  //       checkId = true;
-  //       userId = TextEditingController(text: '${prefs.getString("userId")}');
-  //     }
-  //   });
-  // }
+  firebaseCloudMessagingListener() async {
+    if (Platform.isIOS) {
+      _firebaseMessaging.requestNotificationPermissions(
+          const IosNotificationSettings(
+              sound: true, badge: true, alert: true, provisional: true));
 
+      iosSubscription =
+          _firebaseMessaging.onIosSettingsRegistered.listen((data) {
+        //_saveDeviceToken();
+      });
+      _firebaseMessaging
+          .requestNotificationPermissions(IosNotificationSettings());
+    } else {
+      // _firebaseMessaging.getToken().then((token) {
+      //   print('token:' + token);
+      // });
+      //_saveDeviceToken();
+    }
+
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        _messagingTitle = message['notification']['title'].toString();
+        if (_messagingTitle.endsWith("null")) {
+          _messagingTitle = "";
+        }
+        showOverlayNotification((context) {
+          return MessageNotification(
+            title: _messagingTitle,
+            message: message['notification']['body'],
+            onReply: () {
+              OverlaySupportEntry.of(context).dismiss();
+              //toast('you checked this message');
+            },
+          );
+        }, duration: Duration(milliseconds: 4000));
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print("onLaunch: $message");
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print("onResume: $message");
+      },
+    );
+    _firebaseMessaging.requestNotificationPermissions(
+        const IosNotificationSettings(sound: true, badge: true, alert: true));
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+    });
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+    });
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    _firebaseMessaging.getToken().then((String token) {
+      assert(token != null);
+      print("Push Messaging token: $token");
+      setState(() {
+        prefs.setString("userToken", "$token");
+        userToken = token;
+        //_homeScreenText = "Push Messaging token: $token";
+      });
+    });
+  }
+
+  var userToken;
   checkEmail() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    print(userId.text);
-    final loginData =
-        await user.loginUser(userId.text, userPassword.text, "Y", "E", "Y");
-
-    setState(() {
-      print("login data message ==============" + loginData.status);
-    });
+    final loginData = await user.loginUser(
+        userId.text, userPassword.text, "Y", "E", userToken);
 
     if (loginData.status == "00") {
-      final userData = await user.getUserInfoDetailList(userId.text);
-
+      final userData = await user.getUserInfomation(userId.text);
+      print(userData.userId);
       setState(() {
-        print(userData.userList.userEmail);
+        prefs.setBool('login', true);
+        prefs.setString("userKey", userId.text);
+        prefs.setString("userPasswordGoweb", userPassword.text);
+
+        prefs.setString("marketing", userData.appAgreeMarketing);
+        prefs.setString("userProfile", userData.kakaoProfil);
+        prefs.setString("userEmail", userData.userEmail);
+        prefs.setString("userId", userData.userId);
+        prefs.setString("userName", userData.userName);
+        prefs.setString("userChk", userData.userCheck);
+        prefs.setString("userPhone", userData.userPhoneNumber);
+        prefs.setString("userToken", userToken);
       });
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => BottomNav()),
-      );
+
+      showDialog(
+          context: context,
+          builder: (_) => CupertinoAlertDialog(
+                content: Text("로그인 되었습니다"),
+                actions: <Widget>[
+                  CupertinoDialogAction(
+                    child: Text('확인'),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => BottomNav(
+                                number: number,
+                              )),
+                    ),
+                  ),
+                ],
+              ));
+    } else if (loginData.status == "10") {
+      showDialog(
+          context: context,
+          builder: (_) => CupertinoAlertDialog(
+                content: Text("아이디 비밀번호를 다시 확인해주세요!"),
+                actions: <Widget>[
+                  CupertinoDialogAction(
+                    child: Text('확인'),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ));
     } else {
       showDialog(
           context: context,
@@ -133,25 +233,53 @@ class _LOGINState extends State<LOGIN> {
       var token = await AuthApi.instance.issueAccessToken(authCode);
       String kakaoAccessToken = token.accessToken;
       AccessTokenStore.instance.toStore(token);
-      final User user = await UserApi.instance.me();
-
+      final User userKakao = await UserApi.instance.me();
+      print(kakaoAccessToken);
       setState(() {
-        _kakaoEmail = user.kakaoAccount.email;
-        uriUserProfile = user.kakaoAccount.profile.profileImageUrl;
+        _kakaoEmail = userKakao.kakaoAccount.email;
+        uriUserProfile = userKakao.kakaoAccount.profile.profileImageUrl;
 
         userProfile = uriUserProfile.toString();
       });
-      prefs.setString("marketing", "N");
-      prefs.setString("userProfile", userProfile);
-      prefs.setString("userEmail", _kakaoEmail);
-      prefs.setString("userName", user.kakaoAccount.profile.nickname);
-      prefs.setString("userChk", '00');
-      prefs.setString("userPhone", '');
-      prefs.setString("userPoint", '0');
 
-      prefs.setInt("cookie", 0);
-      Navigator.pushNamed(context, '/last_selection');
-      //userInfo(kakaoAccessToken);
+      final userData = await user.getUserInfomation(_kakaoEmail);
+
+      if (userData.userId != null) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        setState(() {
+          prefs.setString("userKey", _kakaoEmail);
+          prefs.setString("userPasswordGoweb", kakaoAccessToken);
+          prefs.setBool('login', true);
+          prefs.setString("marketing", userData.appAgreeMarketing);
+          prefs.setString("userProfile", userData.kakaoProfil);
+          prefs.setString("userEmail", userData.userEmail);
+          prefs.setString("userId", userData.userId);
+          prefs.setString("userName", userData.userName);
+          prefs.setString("userChk", userData.userCheck);
+          prefs.setString("userPhone", userData.userPhoneNumber);
+          prefs.setString("userPhone", userData.userToken);
+
+          // prefs.setInt("cookie", 00);
+        });
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => new BottomNav(number: number)));
+      } else {
+        prefs.setString("marketing", "N");
+        prefs.setString("userProfile", userProfile);
+        prefs.setString("userEmail", _kakaoEmail);
+        prefs.setString("userId", _kakaoEmail);
+
+        prefs.setString(
+            "userName",
+            userKakao.kakaoAccount.profile.nickname == null
+                ? _kakaoEmail
+                : userKakao.kakaoAccount.profile.nickname);
+        prefs.setString("userChk", '00');
+        prefs.setString("userPhone", '');
+
+        prefs.setInt("cookie", 00);
+        Navigator.pushNamed(context, '/last_selection');
+      } //userInfo(kakaoAccessToken);
     } catch (e) {
       print("error on issuing access token: $e");
     }
@@ -171,7 +299,6 @@ class _LOGINState extends State<LOGIN> {
 
   @override
   Widget build(BuildContext context) {
-    KakaoContext.clientId = "be0c4a7d667d7766083ba8dcdf6048df";
     isKakaoTalkInstalled();
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
@@ -179,6 +306,7 @@ class _LOGINState extends State<LOGIN> {
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: Colors.black,
+        automaticallyImplyLeading: false,
         title: Text(
           "#STORY",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),

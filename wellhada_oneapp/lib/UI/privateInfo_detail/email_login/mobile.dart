@@ -6,8 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wellhada_oneapp/UI/main/bottom_nav.dart';
-import 'package:wellhada_oneapp/model/login/user.dart';
+import 'package:wellhada_oneapp/model/login/userData.dart';
 
 enum MobileVerificationState {
   SHOW_MOBILE_FORM_STATE,
@@ -59,14 +58,13 @@ class _LoginScreenState extends State<LoginScreen> {
       if (authCredential?.user != null) {
         setState(() {
           prefs.setString('userPhone', '${phoneController.text}');
-          prefs.setString('userProfile', null);
+          prefs.setString('userProfile', "");
           prefs.setString('userChk', '01');
           prefs.setString('userName', model.email);
-          prefs.setString("userPoint", '0');
           prefs.setInt('cookie', 1);
           prefs.setString('userEmail', model.email);
           prefs.setString('userId', model.email);
-          prefs.setString('userPassword', model.password);
+          prefs.setString('userPasswordGoweb', model.password);
         });
         Navigator.pushReplacementNamed(
           context,
@@ -82,6 +80,8 @@ class _LoginScreenState extends State<LoginScreen> {
       print(e.message);
       if (Platform.isAndroid) {
         switch (e.message) {
+          case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ TOO_SHORT ]':
+          case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ TOO_LONG ]':
           case 'The sms verification code used to create the phone auth credential is invalid. Please resend the verification code sms and be sure use the verification code provided by the user.':
             errorType = " SMS 확인 코드가 잘못되었습니다";
             break;
@@ -161,6 +161,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     print(verificationFailed.message);
                     if (Platform.isAndroid) {
                       switch (verificationFailed.message) {
+                        case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ TOO_LONG ]':
+                        case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ TOO_SHORT ]':
                         case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ Invalid format. ]':
                           errorType = " 정확한 번호를 적어주세요";
                           break;

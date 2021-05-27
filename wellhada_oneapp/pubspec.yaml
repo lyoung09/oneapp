@@ -66,6 +66,7 @@ dependencies:
   firebase_auth: ^0.18.4+1
   getwidget: ^1.2.2
   slide_popup_dialog: ^0.0.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -91,6 +92,7 @@ flutter:
     - assets/svg/location.svg   
     - assets/svg/home.svg   
     - assets/svg/map.svg   
+    - assets/svg/appicon.svg   
     - assets/svg/user.svg   
     - assets/svg/star.svg   
     - assets/svg/defaultUser.svg   

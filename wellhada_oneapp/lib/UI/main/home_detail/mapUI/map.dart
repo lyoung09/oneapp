@@ -16,6 +16,8 @@ import 'package:wellhada_oneapp/listitem/shop/shopInfoListItem.dart'
     as shopInfoListItem;
 import 'package:slide_popup_dialog/slide_popup_dialog.dart' as slideDialog;
 import 'package:wellhada_oneapp/model/map/map_model.dart';
+import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
+import 'package:wellhada_oneapp/listitem/shop/web.dart' as webLogin;
 
 class GoogleMapUI extends StatefulWidget {
   @override
@@ -66,6 +68,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
       beginWeekendDate,
       endWeekendDate;
   bool opening;
+  var userChk, userKey, userId, userPassword;
   @override
   void initState() {
     super.initState();
@@ -75,6 +78,32 @@ class _Google1MapUIState extends State<GoogleMapUI>
     itemSelected = false;
     getShop();
     _categoryFuture = getShopCategory();
+    check();
+  }
+
+  void check() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      setState(() {
+        userKey = prefs.getString("userKey") ?? prefs.getString("userToken");
+        userPassword = prefs.getString("userPasswordGoweb");
+        userChk = prefs.getString("userChk") ?? "O";
+
+        if (userChk == "01") {
+          userChk = "E";
+        }
+        if (userChk == "00") {
+          userChk = "K";
+        }
+        prefs.setString("userChk", userChk);
+      });
+    } catch (e) {
+      print(e);
+    }
+    // setState(() {
+    //   userChk = userData.userCheck;
+    // });
+    // if (userChk != 'O') userDefault();
   }
 
   @override
@@ -120,19 +149,28 @@ class _Google1MapUIState extends State<GoogleMapUI>
 
       if (startTime.hour < now.hour && now.hour < endTime.hour) {
         if (startTime.minute < now.minute && now.minute < endTime.minute) {
-          opening = true;
+          opening = false;
         }
       }
-      opening = false;
+      opening = true;
     });
   }
 
-  void _handleURLButtonPress(
-      BuildContext context, String url, String placeName) {
+  userDataCheck(category, shopSeq) async {
+    print('${category} ,${shopSeq}');
+    final webLoginData = await webLogin.loginWebUser(userKey, userPassword);
+
+    _handleURLButtonPress(context, '${webviewDefault}/shopTmplatView.do',
+        category, shopSeq, userKey);
+  }
+
+  void _handleURLButtonPress(BuildContext context, String url, String placeName,
+      int shopSeq, String userId) {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => WebViewContainer(url, placeName)));
+            builder: (context) =>
+                WebViewContainer(placeName, shopSeq, userId, userPassword)));
 
     // Navigator.pushNamed(context, '/webview');
   }
@@ -326,7 +364,8 @@ class _Google1MapUIState extends State<GoogleMapUI>
       String beginWeek,
       String endWeek,
       String beginWeekend,
-      String endWeekend) {
+      String endWeekend,
+      int shopSeq) {
     var a = '${beginWeek.substring(0, 2)}시 ${beginWeek.substring(2, 4)}분 ~';
     var b = ' ${endWeek.substring(0, 2)}시 ${endWeek.substring(2, 4)}분까지';
     var c =
@@ -340,180 +379,189 @@ class _Google1MapUIState extends State<GoogleMapUI>
           child: Column(
             children: [
               Container(
-                child: Column(
-                  children: <Widget>[
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Spacer(),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Padding(
-                            padding: EdgeInsets.only(bottom: 10.0, right: 5),
-                            child: Text(
-                              "평일:",
-                              style: TextStyle(
-                                fontFamily: "nanumB",
-                                fontWeight: FontWeight.w900,
-                                fontSize: 13.0,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Align(
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      userDataCheck(placeName, shopSeq);
+                    });
+                  },
+                  child: Column(
+                    children: <Widget>[
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Spacer(),
+                          Align(
                             alignment: Alignment.centerRight,
                             child: Padding(
                               padding: EdgeInsets.only(bottom: 10.0, right: 5),
                               child: Text(
-                                a + b,
+                                "평일:",
                                 style: TextStyle(
-                                  fontFamily: "nanumR",
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 11.0,
+                                  fontFamily: "nanumB",
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 13.0,
                                 ),
-                              ),
-                            )),
-                        Padding(
-                          padding: EdgeInsets.only(right: 5),
-                        )
-                      ],
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Spacer(),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Padding(
-                            padding: EdgeInsets.only(bottom: 10.0, right: 5),
-                            child: Text(
-                              "주말:",
-                              style: TextStyle(
-                                fontFamily: "nanumB",
-                                fontWeight: FontWeight.w900,
-                                fontSize: 13.0,
                               ),
                             ),
                           ),
-                        ),
-                        Align(
+                          Align(
+                              alignment: Alignment.centerRight,
+                              child: Padding(
+                                padding:
+                                    EdgeInsets.only(bottom: 10.0, right: 5),
+                                child: Text(
+                                  a + b,
+                                  style: TextStyle(
+                                    fontFamily: "nanumR",
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 11.0,
+                                  ),
+                                ),
+                              )),
+                          Padding(
+                            padding: EdgeInsets.only(right: 5),
+                          )
+                        ],
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Spacer(),
+                          Align(
                             alignment: Alignment.centerRight,
                             child: Padding(
                               padding: EdgeInsets.only(bottom: 10.0, right: 5),
                               child: Text(
-                                c + d,
+                                "주말:",
                                 style: TextStyle(
-                                  fontFamily: "nanumR",
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 11.0,
+                                  fontFamily: "nanumB",
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 13.0,
                                 ),
                               ),
-                            )),
-                        Padding(
-                          padding: EdgeInsets.only(right: 5),
-                        )
-                      ],
-                    ),
-                    Container(
-                      padding: EdgeInsets.only(left: 20.0, bottom: 5.0),
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Padding(
-                            padding: EdgeInsets.only(left: 15),
-                            child: Text(
-                              '${placeName}',
-                              style: TextStyle(
-                                fontFamily: "nanumB",
-                                fontWeight: FontWeight.w900,
-                                fontSize: 26.0,
-                              ),
-                            )),
-                        Spacer(),
-                        Padding(
-                          padding: EdgeInsets.only(right: 18),
-                          child: Text(
-                            distance.length > 3
-                                ? '${(int.parse(distance) * 0.001).toStringAsFixed(1)}km'
-                                : '${distance}m',
-                            // '${distance}m',
-                            style: TextStyle(
-                              fontFamily: "nanumB",
-                              fontWeight: FontWeight.w700,
-                              fontSize: 17.5,
                             ),
                           ),
-                        )
-                      ],
-                    ),
-                    Container(
-                      padding: EdgeInsets.only(left: 12.0, bottom: 10.0),
-                    ),
-                    Padding(
-                        padding: const EdgeInsets.only(left: 5.0, right: 5),
-                        child: Container(
-                          padding: EdgeInsets.only(top: 5),
-                          decoration: BoxDecoration(border: Border.all()),
-                          width: MediaQuery.of(context).size.width * 0.8,
-                          height: MediaQuery.of(context).size.height * 0.3,
-                          child: Image.network(
-                            pic,
+                          Align(
+                              alignment: Alignment.centerRight,
+                              child: Padding(
+                                padding:
+                                    EdgeInsets.only(bottom: 10.0, right: 5),
+                                child: Text(
+                                  c + d,
+                                  style: TextStyle(
+                                    fontFamily: "nanumR",
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 11.0,
+                                  ),
+                                ),
+                              )),
+                          Padding(
+                            padding: EdgeInsets.only(right: 5),
+                          )
+                        ],
+                      ),
+                      Container(
+                        padding: EdgeInsets.only(left: 20.0, bottom: 5.0),
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Padding(
+                              padding: EdgeInsets.only(left: 15),
+                              child: Text(
+                                '${placeName}',
+                                style: TextStyle(
+                                  fontFamily: "nanumB",
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 26.0,
+                                ),
+                              )),
+                          Spacer(),
+                          Padding(
+                            padding: EdgeInsets.only(right: 18),
+                            child: Text(
+                              distance.length > 3
+                                  ? '${(int.parse(distance) * 0.001).toStringAsFixed(1)}km'
+                                  : '${distance}m',
+                              // '${distance}m',
+                              style: TextStyle(
+                                fontFamily: "nanumB",
+                                fontWeight: FontWeight.w700,
+                                fontSize: 17.5,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                      Container(
+                        padding: EdgeInsets.only(left: 12.0, bottom: 10.0),
+                      ),
+                      Padding(
+                          padding: const EdgeInsets.only(left: 5.0, right: 5),
+                          child: Container(
+                            padding: EdgeInsets.only(top: 5),
+                            decoration: BoxDecoration(border: Border.all()),
                             width: MediaQuery.of(context).size.width * 0.8,
                             height: MediaQuery.of(context).size.height * 0.3,
-                            fit: BoxFit.fitWidth,
-                          ),
-                        )),
+                            child: Image.network(
+                              'http://192.168.0.47:8080${pic}',
+                              width: MediaQuery.of(context).size.width * 0.8,
+                              height: MediaQuery.of(context).size.height * 0.3,
+                              fit: BoxFit.fitWidth,
+                            ),
+                          )),
 
-                    Container(
-                      padding: EdgeInsets.only(left: 20.0, bottom: 10.0),
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(left: 15, top: 15),
-                        ),
-                        Padding(
-                            padding: EdgeInsets.only(left: 8),
-                            child: Container(
-                              width: MediaQuery.of(context).size.width * 0.9,
-                              child: Text(
-                                shopDc,
-                                //'11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111',
-                                maxLines: 5,
-                                style: TextStyle(
-                                  fontFamily: "nanumR",
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 18,
+                      Container(
+                        padding: EdgeInsets.only(left: 20.0, bottom: 10.0),
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(left: 15, top: 15),
+                          ),
+                          Padding(
+                              padding: EdgeInsets.only(left: 8),
+                              child: Container(
+                                width: MediaQuery.of(context).size.width * 0.9,
+                                child: Text(
+                                  shopDc,
+                                  //'11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111',
+                                  maxLines: 5,
+                                  style: TextStyle(
+                                    fontFamily: "nanumR",
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 18,
+                                  ),
                                 ),
-                              ),
-                            )),
-                      ],
-                    ),
-                    // Padding(
-                    //     padding: EdgeInsets.only(bottom: 15, left: 15),
-                    //     child: Align(
-                    //       alignment: Alignment.bottomRight,
-                    //       child: FlatButton(
-                    //         color: Colors.black,
-                    //         onPressed: () {
-                    //           Navigator.of(context).pop();
-                    //         },
-                    //         child: Text('확인',
-                    //             style: TextStyle(
-                    //               fontFamily: "nanumR",
-                    //               fontSize: 13,
-                    //               fontWeight: FontWeight.w900,
-                    //             )),
-                    //         textColor: Colors.black,
-                    //       ),
-                    //     )),
-                  ],
+                              )),
+                        ],
+                      ),
+                      // Padding(
+                      //     padding: EdgeInsets.only(bottom: 15, left: 15),
+                      //     child: Align(
+                      //       alignment: Alignment.bottomRight,
+                      //       child: FlatButton(
+                      //         color: Colors.black,
+                      //         onPressed: () {
+                      //           Navigator.of(context).pop();
+                      //         },
+                      //         child: Text('확인',
+                      //             style: TextStyle(
+                      //               fontFamily: "nanumR",
+                      //               fontSize: 13,
+                      //               fontWeight: FontWeight.w900,
+                      //             )),
+                      //         textColor: Colors.black,
+                      //       ),
+                      //     )),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -580,14 +628,16 @@ class _Google1MapUIState extends State<GoogleMapUI>
                         element.longtitude);
 
                     _showShopListDialog(
-                        distance,
-                        element.fileUrl,
-                        element.placeName,
-                        element.shopDc,
-                        element.bsnBeginTime,
-                        element.bsnEndTime,
-                        element.weekBeginTime,
-                        element.weekEndTime);
+                      distance,
+                      element.fileUrl,
+                      element.placeName,
+                      element.shopDc,
+                      element.bsnBeginTime,
+                      element.bsnEndTime,
+                      element.weekBeginTime,
+                      element.weekEndTime,
+                      element.shopSeq,
+                    );
                   });
                 })
             : Marker(
@@ -623,6 +673,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
     LatLngBounds bounds;
     try {
       bounds = await _controller.getVisibleRegion();
+
       return bounds;
     } catch (e) {
       print(e);

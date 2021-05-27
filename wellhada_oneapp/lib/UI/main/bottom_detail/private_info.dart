@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:hexcolor/hexcolor.dart';
 import 'package:kakao_flutter_sdk/all.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/UI/privateInfo_detail/hndSolution.dart';
@@ -16,7 +15,7 @@ import 'package:wellhada_oneapp/UI/privateInfo_detail/user/updateUser.dart';
 import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
 import 'package:wellhada_oneapp/model/menu/drawer_detail/qr_34.dart';
 
-import '../home_screen.dart';
+import 'home_screen.dart';
 
 class PriavateInfo extends StatefulWidget {
   @override
@@ -28,15 +27,17 @@ class _PriavateInfoState extends State<PriavateInfo> {
   var menuColor = '#ffd428';
   var appFontColor = '#333333';
   var menuFontColor = '#333333';
-
-  var userName, userEmail, userPhone;
-  var userChk, userPoint;
+  String userName;
+  var userEmail, userPhone;
+  var userChk;
   var userProfile, cookie;
+  var userId;
+
   @override
   void initState() {
     super.initState();
     check();
-    // userCheck();
+    //userCheck();
     // userEmailCheck();
   }
 
@@ -56,25 +57,31 @@ class _PriavateInfoState extends State<PriavateInfo> {
   void check() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
+
       setState(() {
-        userChk = prefs.getString("userChk");
+        userId = prefs.getString("userKey");
       });
-      if (userChk == '02' || userChk == null)
-        notLoginUser();
-      else
+      if (userId != null) {
         userCheck();
+      } else {
+        notLoginUser();
+      }
+      // if (userChk == '02' || userChk == null)
+      //   notLoginUser();
+      // else
+      //   userCheck();
     } catch (e) {
-      userChk = '02';
+      userChk = 'O';
       print(e);
     }
   }
 
   void notLoginUser() {
     setState(() {
-      userChk = '02';
+      userChk = 'O';
       userEmail = '';
       userName = '';
-      userProfile = '';
+      userProfile = "";
       userPhone = '';
       cookie = '';
     });
@@ -83,18 +90,16 @@ class _PriavateInfoState extends State<PriavateInfo> {
   void userCheck() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      var password;
+      // var password;
+      final userData = await user.getUserInfomation(userId);
 
       setState(() {
-        userEmail = prefs.getString("userEmail");
-        userName = prefs.getString("userName");
-        userProfile = prefs.getString("userProfile");
-        userPhone = prefs.getString("userPhone");
-        userChk = prefs.getString("userChk");
         cookie = prefs.getInt("cookie");
-        userPoint = prefs.getString("userPoint");
-        password = prefs.getString("password");
-        //userProfile = uriUserProfile.toString();
+        print('userData.status==================${userData.status}');
+
+        userName = userData.userName;
+        userChk = userData.userCheck;
+        userProfile = userData.kakaoProfil == null ? "" : userData.kakaoProfil;
       });
     } catch (e) {
       print(e);
@@ -103,7 +108,7 @@ class _PriavateInfoState extends State<PriavateInfo> {
 
   moveLogin() {
     Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => new LOGIN()));
+        .push(MaterialPageRoute(builder: (context) => new LOGIN(number: 3)));
   }
 
   moveHome() {
@@ -126,17 +131,33 @@ class _PriavateInfoState extends State<PriavateInfo> {
         .push(MaterialPageRoute(builder: (context) => new QR_34(1)));
   }
 
+  delete() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    user.getDelete(userId);
+    setState(() {
+      prefs.setString("userKey", null);
+      prefs.setInt("cookie", null);
+      prefs.setString("userPasswordGoweb", null);
+      prefs.setString("userChk", null);
+      prefs.setString("userName", null);
+      prefs.setBool('login', false);
+      userChk = 'O';
+    });
+  }
+
   logOutEmail() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       setState(() {
-        prefs.setString('userEmail', null);
-        prefs.setString('userPhone', null);
-        prefs.setString('userProfile', null);
-        prefs.setString('userName', null);
-        prefs.setString("userChk", '02');
-        prefs.setString("marketing", null);
-        userChk = '02';
+        prefs.setString("userKey", null);
+        prefs.setInt("cookie", null);
+        prefs.setString("userPasswordGoweb", null);
+        prefs.setString("userChk", null);
+        prefs.setString("userName", null);
+
+        prefs.setBool('login', false);
+        userChk = 'O';
       });
     } catch (e) {
       print(e);
@@ -148,13 +169,14 @@ class _PriavateInfoState extends State<PriavateInfo> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
 
       setState(() {
-        prefs.setString('userEmail', null);
-        prefs.setString('userPhone', null);
-        prefs.setString('userProfile', null);
-        prefs.setString('userName', null);
-        prefs.setString("userChk", '02');
-        prefs.setString("marketing", null);
-        userChk = '02';
+        prefs.setString("userKey", null);
+        prefs.setInt("cookie", null);
+        prefs.setString("userPasswordGoweb", null);
+        prefs.setString("userChk", null);
+        prefs.setString("userName", null);
+
+        prefs.setBool('login', false);
+        userChk = 'O';
       });
       var code = await UserApi.instance.logout();
 
@@ -200,8 +222,6 @@ class _PriavateInfoState extends State<PriavateInfo> {
 
   @override
   Widget build(BuildContext context) {
-    check();
-
     var size = MediaQuery.of(context).size;
 
     return Stack(
@@ -236,13 +256,13 @@ class _PriavateInfoState extends State<PriavateInfo> {
               alignment: Alignment.centerLeft,
               child: Padding(
                 padding: const EdgeInsets.only(top: 15.0),
-                child: userChk != '02'
+                child: userChk != 'O'
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Column(
                             children: <Widget>[
-                              userProfile == null
+                              userProfile == null || userProfile == ""
                                   ? Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
@@ -254,10 +274,12 @@ class _PriavateInfoState extends State<PriavateInfo> {
                                                 const EdgeInsets.only(left: 55),
                                             child: Container(
                                               child: Text(
-                                                "${userPoint} P",
+                                                //"${userPoint} P",
+                                                "",
                                                 style: TextStyle(
                                                   // color: _colorText,
-                                                  fontSize: 25.0,
+                                                  fontSize: 0.0,
+                                                  //25
                                                   fontFamily: "nanumB",
                                                   fontWeight: FontWeight.w600,
                                                 ),
@@ -301,10 +323,13 @@ class _PriavateInfoState extends State<PriavateInfo> {
                                                 const EdgeInsets.only(left: 55),
                                             child: Container(
                                               child: Text(
-                                                "${userPoint} P",
+                                                //"${
+                                                //} P",
+                                                "",
                                                 style: TextStyle(
-                                                  // color: _colorText,
-                                                  fontSize: 25.0,
+                                                  color: Colors.transparent,
+                                                  fontSize: 0.0,
+                                                  //25
                                                   fontFamily: "nanumR",
                                                   fontWeight: FontWeight.w600,
                                                 ),
@@ -464,7 +489,7 @@ class _PriavateInfoState extends State<PriavateInfo> {
                           Padding(
                             padding: EdgeInsets.only(bottom: 10.0),
                           ),
-                          userChk == '00'
+                          userChk == 'K'
                               ? FlatButton(
                                   child: Text("로그아웃"),
                                   onPressed: logOutTalk,
@@ -472,7 +497,21 @@ class _PriavateInfoState extends State<PriavateInfo> {
                               : FlatButton(
                                   child: Text("로그아웃"),
                                   onPressed: logOutEmail,
-                                )
+                                ),
+                          Container(
+                            child: Divider(
+                              color: Color.fromRGBO(82, 110, 208, 1.0),
+                            ),
+                            padding: EdgeInsets.only(
+                                left: 20.0, right: 20.0, bottom: 0.0),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(bottom: 10.0),
+                          ),
+                          FlatButton(
+                            child: Text("회원 탈퇴"),
+                            onPressed: delete,
+                          ),
                         ],
                       )
                     : Column(

@@ -1,12 +1,14 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wellhada_oneapp/UI/privateInfo_detail/mobile_authen/mobil_authen.dart';
-import 'package:wellhada_oneapp/UI/privateInfo_detail/mobile_authen/mobile.dart';
-import 'package:wellhada_oneapp/model/login/user.dart';
+
+import 'package:wellhada_oneapp/model/login/userData.dart';
 import 'package:validators/validators.dart' as validator;
 import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
+
+import 'mobile.dart';
 
 class Email extends StatefulWidget {
   @override
@@ -23,9 +25,24 @@ class _EmailState extends State<Email> {
   var passwordCheck;
 
   void checkEmail(String value) async {
-    setState(() {
-      emailId = value;
-    });
+    final userData = await user.getUserInfomation(value);
+    if (userData.userId != null) {
+      showDialog(
+          context: context,
+          builder: (_) => CupertinoAlertDialog(
+                content: Text("중복된 아이디입니다."),
+                actions: <Widget>[
+                  CupertinoDialogAction(
+                    child: Text('확인'),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ));
+    } else {
+      setState(() {
+        emailId = value;
+      });
+    }
   }
 
   void checkPassword(String value) async {
@@ -92,9 +109,10 @@ class _EmailState extends State<Email> {
                         color: Colors.grey[500]),
                   ),
                   validator: (String value) {
-                    if (!validator.isEmail(value)) {
+                    if (!validator.isEmail(value) || value.length < 12) {
                       return '이메일 형태를 맞춰주세요';
                     }
+
                     return null;
                   },
                   onSaved: (String value) {
@@ -106,6 +124,7 @@ class _EmailState extends State<Email> {
                   },
                 ),
               ),
+
               Padding(
                 padding: EdgeInsets.only(bottom: 15.0),
               ),
@@ -197,9 +216,16 @@ class _EmailState extends State<Email> {
                         color: Colors.grey[500]),
                   ),
                   validator: (String value) {
-                    if (value.length < 7) {
-                      return '비밀번호는 7자리 이상이여야 합니다';
+                    if (value.length < 8) {
+                      return '비밀번호는 8자리 이상이여야 합니다';
                     }
+                    if (value.contains(RegExp(r'[0-9]')) == false ||
+                        value.contains(RegExp(r'[a-z]')) == false ||
+                        value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]')) ==
+                            false) {
+                      return "영문자 숫자 그리고 특수문자를 모두 포함해야 합니다";
+                    }
+
                     return null;
                   },
                   onSaved: (String value) {

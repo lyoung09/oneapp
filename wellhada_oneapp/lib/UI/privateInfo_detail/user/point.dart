@@ -25,7 +25,6 @@ class _UsagePointState extends State<UsagePoint> {
 
     final shopList = await user.getUsagePointEntire();
     setState(() {
-      userPoint = prefs.getString("userPoint");
       point = shopList.list;
     });
   }
@@ -213,7 +212,7 @@ class _UsagePointState extends State<UsagePoint> {
                         padding: const EdgeInsets.only(right: 10.0),
                         child: Align(
                           alignment: Alignment.centerRight,
-                          child: Text("${userPoint}p",
+                          child: Text("00p",
                               style: TextStyle(
                                   fontSize: 30.0, fontWeight: FontWeight.w900)),
                         ),

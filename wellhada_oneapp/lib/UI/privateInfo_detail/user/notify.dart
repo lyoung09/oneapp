@@ -9,6 +9,7 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/notification/custom_notification.dart';
+import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
 
 class Notify extends StatefulWidget {
   @override
@@ -21,7 +22,7 @@ class _NotifyState extends State<Notify> {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   String _messagingTitle = "";
   StreamSubscription iosSubscription;
-
+  String userToken;
   @override
   initState() {
     super.initState();
@@ -33,7 +34,9 @@ class _NotifyState extends State<Notify> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     setState(() {
+      userKey = prefs.getString("userKey");
       certain = prefs.getString("marketing");
+      userToken = prefs.getString("userToken");
       if (certain == "Y")
         _switchValue = true;
       else
@@ -41,84 +44,42 @@ class _NotifyState extends State<Notify> {
     });
   }
 
-  firebaseCloudMessagingListener() async {
-    if (Platform.isIOS) {
-      _firebaseMessaging.requestNotificationPermissions(
-          const IosNotificationSettings(
-              sound: true, badge: true, alert: true, provisional: true));
-
-      iosSubscription =
-          _firebaseMessaging.onIosSettingsRegistered.listen((data) {
-        //_saveDeviceToken();
-      });
-      _firebaseMessaging
-          .requestNotificationPermissions(IosNotificationSettings());
-    } else {
-      // _firebaseMessaging.getToken().then((token) {
-      //   print('token:' + token);
-      // });
-      //_saveDeviceToken();
-    }
-
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        _messagingTitle = message['notification']['title'].toString();
-        if (_messagingTitle.endsWith("null")) {
-          _messagingTitle = "";
-        }
-        showOverlayNotification((context) {
-          return MessageNotification(
-            title: _messagingTitle,
-            message: message['notification']['body'],
-            onReply: () {
-              OverlaySupportEntry.of(context).dismiss();
-              //toast('you checked this message');
-            },
-          );
-        }, duration: Duration(milliseconds: 4000));
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        print("onLaunch: $message");
-      },
-      onResume: (Map<String, dynamic> message) async {
-        print("onResume: $message");
-      },
-    );
-    _firebaseMessaging.requestNotificationPermissions(
-        const IosNotificationSettings(sound: true, badge: true, alert: true));
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
-    });
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
-    });
-    SharedPreferences prefs;
-    prefs = await SharedPreferences.getInstance();
-    _firebaseMessaging.getToken().then((String token) {
-      assert(token != null);
-      print("Push Messaging token: $token");
-      setState(() {
-        prefs.setString("userToken", "$token");
-
-        //_homeScreenText = "Push Messaging token: $token";
-      });
-    });
-  }
-
+  var name, phone, birthday, gender, profile, userKey, password;
   sendYN() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    final userData = await user.getUserInfomation(userKey);
     setState(() {
       var x;
       if (_switchValue == true) {
         x = "Y";
-        firebaseCloudMessagingListener();
       } else {
         x = "N";
-        prefs.setString("userToken", '');
       }
+      password = prefs.getString("userPasswordGoweb");
+      name = userData.userName;
+
       prefs.setString("marketing", x);
+      phone = userData.userPhoneNumber;
+      birthday = userData.birthday;
+      gender = userData.gender;
+      profile = userData.kakaoProfil;
+      userToken = userData.userToken;
+    });
+    final updateMarketing = await user.updateUser(
+        userKey,
+        password,
+        phone == null ? "" : phone,
+        name == null ? "" : name,
+        gender == null ? "" : gender,
+        birthday == null ? "" : birthday,
+        prefs.getString("marketing"),
+        profile == null ? "" : profile,
+        userKey,
+        userToken);
+
+    setState(() {
+      print('update =================${updateMarketing.status}');
     });
   }
 

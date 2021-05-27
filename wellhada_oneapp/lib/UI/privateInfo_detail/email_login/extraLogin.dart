@@ -180,7 +180,7 @@ class _ExtraLoginState extends State<ExtraLogin> {
         firebaseCloudMessagingListener();
       } else {
         prefs.setString("marketing", "N");
-        prefs.setString("userToken", '');
+
         prefs.setString("appAgreeService", "Y");
         prefs.setString("appAgreePrivacy", "Y");
         prefs.setString("appPushToken", "N");

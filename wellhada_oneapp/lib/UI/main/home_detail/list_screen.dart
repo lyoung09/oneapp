@@ -11,11 +11,12 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/UI/banner/main_banner.dart';
 import 'package:wellhada_oneapp/UI/main/home_detail/webview.dart';
-
+import 'package:wellhada_oneapp/listitem/shop/web.dart' as webLogin;
 import 'package:wellhada_oneapp/listitem/shop/shopInfoListItem.dart'
     as shopInfoListItem;
 import 'package:hexcolor/hexcolor.dart';
 import 'dart:math' show cos, sqrt, asin;
+import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
 
 class ListScreen extends StatefulWidget {
   @override
@@ -28,7 +29,7 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
   var appFontColor = '#333333';
   var menuFontColor = '#333333';
   String coupon = 'C:\Users\hndso\Desktop\icon_jandi\coupon.svg';
-  var category;
+  var category, shopSeq;
   List shop, shopCategory;
   TabController _tabController;
   bool wellhada, init;
@@ -41,6 +42,8 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
   var lat, lng;
   String webviewDefault = 'http://192.168.0.47:8080/usermngr';
   bool opening;
+  var userChk, userKey, userId;
+  var userPassword;
   // For storing the current position
   @override
   void initState() {
@@ -52,13 +55,41 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
     //   ..addListener(() {
     //     distance = new Map();
     //   });
-
+    check();
     _tabController = new TabController(length: 4, vsync: this)
       ..addListener(() {
         distance = new Map();
       });
 
     super.initState();
+  }
+
+  void check() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      setState(() {
+        // userKey = prefs.getString("userKey") == null
+        //     ? prefs.getString("userToken")
+        //     : prefs.getString("userKey");
+        userKey = prefs.getString("userKey");
+        userPassword = prefs.getString("userPasswordGoweb");
+        userChk = prefs.getString("userChk") ?? "O";
+        if (userChk == "01") {
+          userChk = "E";
+        }
+        if (userChk == "00") {
+          userChk = "K";
+        }
+
+        prefs.setString("userChk", userChk);
+      });
+    } catch (e) {
+      print(e);
+    }
+    // setState(() {
+    //   userChk = userData.userCheck;
+    // });
+    // if (userChk != 'O') userDefault();
   }
 
   @override
@@ -80,12 +111,21 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
     }
   }
 
-  void _handleURLButtonPress(
-      BuildContext context, String url, String placeName) {
+  userDataCheck(category, shopSeq) async {
+    print('${userKey},${userPassword},${userChk}');
+
+    _handleURLButtonPress(context, '${webviewDefault}/shopTmplatView.do',
+        category, shopSeq, userKey);
+  }
+
+  void _handleURLButtonPress(BuildContext context, String url, String placeName,
+      int shopSeq, String userKey) {
+    // userDataCheck();
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => WebViewContainer(url, placeName)));
+            builder: (context) =>
+                WebViewContainer(placeName, shopSeq, userKey, userPassword)));
 
     // Navigator.pushNamed(context, '/webview');
   }
@@ -342,7 +382,7 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
                 shrinkWrap: true,
                 controller: _controller,
                 physics: ClampingScrollPhysics(),
-                itemCount: menuCode == null ? 0 : menuCode.length,
+                itemCount: menuCode.length == null ? 0 : menuCode.length,
                 itemBuilder: (context, position) {
                   var size = MediaQuery.of(context).size;
 
@@ -404,7 +444,8 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
                   //       hour: int.parse(endHour), minute: int.parse(endMin));
                   // }
                   // openingShop(startTime, endTime);
-                  print(opening);
+                  print(
+                      'http://192.168.0.47:8080${menuCode[position].fileUrl}');
                   return opening == true
                       ? InkWell(
                           child: Card(
@@ -417,7 +458,7 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
                                   ),
                                   Container(
                                     child: Image.network(
-                                      'http://192.168.0.47:8080/${menuCode[position].fileUrl}',
+                                      'http://192.168.0.47:8080${menuCode[position].fileUrl}',
                                       fit: BoxFit.fill,
                                       width: 40.0,
                                       height: 40.0,
@@ -495,11 +536,9 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
                           onTap: () {
                             setState(() {
                               category = menuCode[position].placeName;
-                              print(category);
-                              _handleURLButtonPress(
-                                  context,
-                                  '${webviewDefault}/shopTmplatView.do',
-                                  category);
+                              shopSeq = menuCode[position].shopSeq;
+
+                              userDataCheck(category, shopSeq);
                             });
                           })
                       : Card(

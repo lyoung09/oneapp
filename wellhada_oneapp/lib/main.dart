@@ -18,13 +18,11 @@ import 'package:wellhada_oneapp/UI/main/bottom_detail/private_info.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_nav.dart';
 import 'dart:io';
 import 'package:uuid/uuid.dart';
-import 'package:wellhada_oneapp/UI/main/home_screen.dart';
 
 import 'package:geolocator/geolocator.dart';
-import 'UI/privateInfo_detail/lastSelector.dart';
+import 'UI/main/bottom_detail/home_screen.dart';
+import 'UI/privateInfo_detail/email_login/lastSelector.dart';
 import 'UI/privateInfo_detail/login.dart';
-import 'UI/privateInfo_detail/mobile_authen/certification.dart';
-import 'UI/privateInfo_detail/mobile_authen/certification_result.dart';
 
 import 'UI/privateInfo_detail/user/updateUser.dart';
 import 'notification/custom_notification.dart';
@@ -39,6 +37,7 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    KakaoContext.clientId = "be0c4a7d667d7766083ba8dcdf6048df";
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
@@ -54,8 +53,6 @@ class MyApp extends StatelessWidget {
         routes: {
           '/main': (context) => HomeScreen(),
           '/last_selection': (context) => LastSelection(),
-          '/certification': (context) => Certification(),
-          '/certification-result': (context) => CertificationResult(),
           '/login': (context) => LOGIN(),
           '/private_info': (context) => PriavateInfo(),
           '/BottomNav': (context) => BottomNav(),
@@ -153,8 +150,13 @@ class _MyHomePageState extends State<MyHomePage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool _seen = (prefs.getBool('seen') ?? false);
 
+    bool _login = (prefs.getBool('login') ?? false);
+
     if (_seen) {
-      Navigator.pushNamed(context, '/BottomNav');
+      if (_login)
+        Navigator.pushNamed(context, '/BottomNav');
+      else
+        Navigator.pushNamed(context, '/login');
     } else {
       prefs.setBool('seen', true);
       Navigator.pushNamed(context, '/Introduce');

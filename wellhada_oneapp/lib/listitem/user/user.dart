@@ -140,160 +140,6 @@ Future<ShopInfo> getUsagePointEntire() async {
 /////////////////////////////////////////
 /////////////////////////////////////////
 /////////////////////////////////////////
-////////////USERFAVORITE/////////////////
-/////////////////////////////////////////
-/////////////////////////////////////////
-/////////////////////////////////////////
-/////////////////////////////////////////
-/////////////////////////////////////////
-
-class FavoriteInfo {
-  String status;
-  int cnt;
-  Favorite favoriteList;
-  final List<Favorite> list;
-
-  FavoriteInfo({this.status, this.cnt, this.list, this.favoriteList});
-
-  factory FavoriteInfo.fromJson(Map<String, dynamic> json) => FavoriteInfo(
-        status: json["STATUS"],
-        favoriteList: Favorite.fromJson(json["LIST"]),
-        cnt: json["CNT"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "status": status,
-        "cnt": cnt,
-        "list": favoriteList.toJson(),
-      };
-
-  factory FavoriteInfo.fromJsonMap(Map<String, dynamic> json) =>
-      _$FavoriteInfoItemFromJsonMap(json);
-
-  Map<String, dynamic> toJsonMap() => _$FavoriteInfoItemToJsonMap(this);
-}
-
-FavoriteInfo _$FavoriteInfoItemFromJsonMap(Map<String, dynamic> json) {
-  return FavoriteInfo(
-    list: (json['LIST'] as List)
-        ?.map((e) =>
-            e == null ? null : Favorite.fromJsonMap(e as Map<String, dynamic>))
-        ?.toList(),
-//      meta: (json['meta'] as List)
-//          ?.map((e) =>
-//      e == null ? null : Meta.fromJson(e as Map<String, dynamic>))
-//          ?.toList()
-  );
-}
-
-Map<String, dynamic> _$FavoriteInfoItemToJsonMap(FavoriteInfo instance) =>
-    <String, dynamic>{'documents': instance.list};
-
-class Favorite {
-  String placeUrl;
-  String placeName;
-  String roadAddressName;
-  String addressName;
-  String userId;
-  String wellhadaShop;
-  String favorite;
-  String shopId;
-  String phone;
-  Favorite(
-      {this.placeUrl,
-      this.placeName,
-      this.roadAddressName,
-      this.addressName,
-      this.shopId,
-      this.userId,
-      this.favorite,
-      this.wellhadaShop});
-  factory Favorite.fromJson(Map<String, dynamic> json) => Favorite(
-        placeUrl: json["place_url"],
-        roadAddressName: json["road_address_name"],
-        addressName: json["address_name"],
-        placeName: json['place_name'],
-        shopId: json["shopId"],
-        userId: json["userId"],
-        favorite: json["favorite"],
-        wellhadaShop: json["wellhada_shop"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "place_url": placeUrl,
-        "road_address_name": roadAddressName,
-        "place_name": placeName,
-        "address_name": addressName,
-        "shopId": shopId,
-        "userId": userId,
-        "favorite": favorite,
-        "wellhada_shop": wellhadaShop,
-      };
-  factory Favorite.fromJsonMap(Map<String, dynamic> json) =>
-      _$FavoriteFromJsonMap(json);
-  Map<String, dynamic> toJsonMap() => _$FavoriteToJsonMap(this);
-}
-
-Favorite _$FavoriteFromJsonMap(Map<String, dynamic> json) {
-  return Favorite(
-    placeUrl: json['place_url'] as String,
-    placeName: json['place_name'] as String,
-    roadAddressName: json['road_address_name'] as String,
-    addressName: json['address_name'] as String,
-    shopId: json['shopId'] as String,
-    userId: json['userId'] as String,
-    favorite: json['favorite'] as String,
-    wellhadaShop: json['wellhada_shop'] as String,
-  );
-}
-
-Map<String, dynamic> _$FavoriteToJsonMap(Favorite instance) =>
-    <String, dynamic>{
-      'place_url': instance.placeUrl,
-      'place_name': instance.placeName,
-      'road_address_name': instance.roadAddressName,
-      'address_name': instance.addressName,
-      'shopId': instance.shopId,
-      'userId': instance.userId,
-      'favorite': instance.favorite,
-      'wellhada_shop': instance.wellhadaShop,
-    };
-
-Future<Map<String, dynamic>> getFavoriteList() async {
-  final response = await http
-      .get('https://run.mocky.io/v3/937ec6e2-6911-4c2b-91b4-b4880ce776c1');
-
-  if (200 == response.statusCode) {
-    var datauser = json.decode(response.body);
-    return datauser;
-  } else {
-    return json.decode(response.body);
-  }
-}
-
-Future<Favorite> getFavoriteEntire() async {
-  // http.Response response = await http.post(
-  //   Uri.encodeFull('https://wellhada.com/getAppNoticeList'),
-  //   headers: {"Accept": "application/json"},
-  //   body: {'period': 'ALL'},
-  // );
-  final response = await http
-      .get('https://run.mocky.io/v3/937ec6e2-6911-4c2b-91b4-b4880ce776c1');
-
-  if (response.statusCode == 200) {
-    return Favorite.fromJsonMap(json.decode(response.body));
-  } else {
-    throw HttpException(
-      'Unexpected status code ${response.statusCode}:'
-      ' ${response.reasonPhrase}',
-      //uri: Uri.parse(query)
-    );
-  }
-}
-
-/////////////////////////////////////////
-/////////////////////////////////////////
-/////////////////////////////////////////
 ////////////USERREVIEW///////////////////
 /////////////////////////////////////////
 /////////////////////////////////////////
@@ -681,6 +527,7 @@ Future<Insert> insertUser(
   String appAgreeService,
   String appAgreePrivacy,
   String appAgreePush,
+  String usertoken,
 ) async {
   var bodyParam = new Map();
   bodyParam['userChk'] = userChk;
@@ -689,14 +536,15 @@ Future<Insert> insertUser(
   bodyParam['userEmail'] = email;
   bodyParam['userPhoneNumber'] = userPhoneNumber;
   bodyParam['userName'] = userName;
-  bodyParam['gender'] = gender == null ? null : gender;
-  bodyParam['birthdayJson'] = birthdayJson == null ? null : birthdayJson;
+  bodyParam['gender'] = gender == null ? "" : gender;
+  bodyParam['birthday'] = birthdayJson == null ? "" : birthdayJson;
   bodyParam['marketing'] = marketing;
   bodyParam['appPushToken'] = appPushToken;
   bodyParam['appAgreeService'] = appAgreeService;
   bodyParam['appAgreePrivacy'] = appAgreePrivacy;
   bodyParam['appAgreePush'] = appAgreePush;
-  print(bodyParam);
+  bodyParam['userDevice'] = usertoken;
+
   http.Response response = await http.post(
     Uri.encodeFull('http://192.168.0.47:8080/insertUser'),
     headers: {"Accept": "application/json"},
@@ -781,15 +629,15 @@ Map<String, dynamic> _$UserItemToJson(UserItem instance) => <String, dynamic>{
     };
 
 Future<Status> loginUser(String userEmail, String userPassword, String idIntre,
-    String userChk, String limitYn) async {
+    String userChk, String usertoken) async {
   var bodyParam = new Map();
 
   bodyParam['userId'] = userEmail;
   bodyParam['userPassword'] = userPassword;
   bodyParam['id_intre'] = idIntre;
-  bodyParam['limitYn'] = limitYn;
-  bodyParam['userChk'] = userChk;
 
+  bodyParam['userChk'] = userChk;
+  bodyParam['userDevice'] = usertoken;
   http.Response response = await http.post(
     //Uri.encodeFull('http://hndsolution.iptime.org:8080/login'),
     Uri.encodeFull('http://192.168.0.47:8080/login'),
@@ -799,7 +647,6 @@ Future<Status> loginUser(String userEmail, String userPassword, String idIntre,
   );
 
   if (response.statusCode == 200) {
-    print(bodyParam);
     return Status.fromJson(json.decode(response.body));
   } else {
     throw HttpException(
@@ -816,68 +663,191 @@ Future<Status> loginUser(String userEmail, String userPassword, String idIntre,
 ////////////////get user info//////////////////
 ///////////////////////////////////////////////
 
-class UserInfo {
+// class UserInfo {
+//   String status;
+//   int cnt;
+//   UserInfoDetail userList;
+//   final List<UserInfoDetail> list;
+
+//   UserInfo({this.status, this.cnt, this.list, this.userList});
+
+//   factory UserInfo.fromJson(Map<String, dynamic> json) => UserInfo(
+//         status: json["STATUS"],
+//         userList: UserInfoDetail.fromJson(json["LIST"]),
+//         cnt: json["CNT"],
+//       );
+
+//   Map<String, dynamic> toJson() => {
+//         "status": status,
+//         "cnt": cnt,
+//         "list": userList.toJson(),
+//       };
+
+//   factory UserInfo.fromJsonMap(Map<String, dynamic> json) =>
+//       _$UserInfoItemFromJsonMap(json);
+
+//   Map<String, dynamic> toJsonMap() => _$UserInfoItemToJsonMap(this);
+// }
+
+// UserInfo _$UserInfoItemFromJsonMap(Map<String, dynamic> json) {
+//   return UserInfo(
+//     list: (json['LIST'] as List)
+//         ?.map((e) => e == null
+//             ? null
+//             : UserInfoDetail.fromJsonMap(e as Map<String, dynamic>))
+//         ?.toList(),
+//   );
+// }
+
+// Map<String, dynamic> _$UserInfoItemToJsonMap(UserInfo instance) =>
+//     <String, dynamic>{'documents': instance.list};
+
+// class UserInfoDetail {
+//   String userEmail;
+//   String userId;
+//   String userName;
+//   String userPhoneNumber;
+//   String appAgreeMarketing;
+//   String userCheck;
+//   String birthday;
+//   String gender;
+//   String profileFileSeq;
+//   String kakaoProfil;
+
+//   UserInfoDetail({
+//     this.userEmail,
+//     this.userId,
+//     this.userName,
+//     this.userPhoneNumber,
+//     this.appAgreeMarketing,
+//     this.userCheck,
+//     this.birthday,
+//     this.gender,
+//     this.profileFileSeq,
+//     this.kakaoProfil,
+//   });
+//   factory UserInfoDetail.fromJson(Map<String, dynamic> json) => UserInfoDetail(
+//         userEmail: json["USER_EMAIL"],
+//         userId: json["USER_ID"],
+//         userName: json["USER_NAME"],
+//         userPhoneNumber: json['USER_PHONE_NUMBER'],
+//         appAgreeMarketing: json["APP_AGREE_MARKETING_YN"],
+//         userCheck: json["USER_CHECK"],
+//         birthday: json["BIRTHDAY"],
+//         gender: json["GENDER"],
+//         profileFileSeq: json["PRF_FILE_SEQ"],
+//         kakaoProfil: json["KAKAO_PROFILE"],
+//       );
+
+//   Map<String, dynamic> toJson() => {
+//         "USER_EMAIL": userEmail,
+//         "USER_ID": userId,
+//         "USER_NAME": userName,
+//         "USER_PHONE_NUMBER": userPhoneNumber,
+//         "APP_AGREE_MARKETING_YN": appAgreeMarketing,
+//         "USER_CHECK": userCheck,
+//         "BIRTHDAY": birthday,
+//         "GENDER": gender,
+//         "PRF_FILE_SEQ": profileFileSeq,
+//         "KAKAO_PROFILE": kakaoProfil,
+//       };
+//   factory UserInfoDetail.fromJsonMap(Map<String, dynamic> json) =>
+//       _$UserInfoDetailFromJsonMap(json);
+//   Map<String, dynamic> toJsonMap() => _$UserInfoDetailToJsonMap(this);
+// }
+
+// UserInfoDetail _$UserInfoDetailFromJsonMap(Map<String, dynamic> json) {
+//   return UserInfoDetail(
+//     userEmail: json['USER_EMAIL'] as String,
+//     userId: json['USER_ID'] as String,
+//     userName: json['USER_NAME'] as String,
+//     userPhoneNumber: json['USER_PHONE_NUMBER'] as String,
+//     appAgreeMarketing: json['APP_AGREE_MARKETING_YN'] as String,
+//     userCheck: json['USER_CHECK'] as String,
+//     birthday: json['BIRTHDAY'] as String,
+//     gender: json['GENDER'] as String,
+//     profileFileSeq: json['PRF_FILE_SEQ'] as String,
+//     kakaoProfil: json['KAKAO_PROFILE'] as String,
+//   );
+// }
+
+// Map<String, dynamic> _$UserInfoDetailToJsonMap(UserInfoDetail instance) =>
+//     <String, dynamic>{
+//       'USER_EMAIL': instance.userEmail,
+//       'USER_ID': instance.userId,
+//       'USER_NAME': instance.userName,
+//       'USER_PHONE_NUMBER': instance.userPhoneNumber,
+//       'APP_AGREE_MARKETING_YN': instance.appAgreeMarketing,
+//       'USER_CHECK': instance.userCheck,
+//       'BIRTHDAY': instance.birthday,
+//       'GENDER': instance.gender,
+//       'PRF_FILE_SEQ': instance.profileFileSeq,
+//       'KAKAO_PROFILE': instance.kakaoProfil,
+//     };
+
+// Future<UserInfo> getUserInfoDetailList(String userEmail) async {
+//   var bodyParam = new Map();
+//   bodyParam['userId'] = userEmail;
+
+//   http.Response response = await http.post(
+//     //Uri.encodeFull('http://hndsolution.iptime.org:8080/getUserInfo'),
+//     Uri.encodeFull('http://192.168.0.47:8080/getUserInfo'),
+//     headers: {"Accept": "application/json"},
+//     body: bodyParam,
+//   );
+
+//   if (200 == response.statusCode) {
+//     print(response.body);
+//     return UserInfo.fromJsonMap(json.decode(response.body));
+//   } else {
+//     return json.decode(response.body);
+//   }
+// }
+
+/////////////////////////
+//////
+class UserInfomation {
   String status;
   int cnt;
-  UserInfoDetail userList;
-  final List<UserInfoDetail> list;
-
-  UserInfo({this.status, this.cnt, this.list, this.userList});
-
-  factory UserInfo.fromJson(Map<String, dynamic> json) => UserInfo(
-        status: json["STATUS"],
-        userList: UserInfoDetail.fromJson(json["LIST"]),
-        cnt: json["CNT"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "status": status,
-        "cnt": cnt,
-        "list": userList.toJson(),
-      };
-
-  factory UserInfo.fromJsonMap(Map<String, dynamic> json) =>
-      _$UserInfoItemFromJsonMap(json);
-
-  Map<String, dynamic> toJsonMap() => _$UserInfoItemToJsonMap(this);
-}
-
-UserInfo _$UserInfoItemFromJsonMap(Map<String, dynamic> json) {
-  return UserInfo(
-    list: (json['LIST'] as List)
-        ?.map((e) => e == null
-            ? null
-            : UserInfoDetail.fromJsonMap(e as Map<String, dynamic>))
-        ?.toList(),
-  );
-}
-
-Map<String, dynamic> _$UserInfoItemToJsonMap(UserInfo instance) =>
-    <String, dynamic>{'documents': instance.list};
-
-class UserInfoDetail {
   String userEmail;
   String userId;
   String userName;
   String userPhoneNumber;
   String appAgreeMarketing;
   String userCheck;
+  String birthday;
+  String gender;
 
-  UserInfoDetail({
+  String kakaoProfil;
+  String userToken;
+  UserInfomation({
     this.userEmail,
     this.userId,
     this.userName,
     this.userPhoneNumber,
     this.appAgreeMarketing,
     this.userCheck,
+    this.status,
+    this.cnt,
+    this.birthday,
+    this.gender,
+    this.kakaoProfil,
+    this.userToken,
   });
-  factory UserInfoDetail.fromJson(Map<String, dynamic> json) => UserInfoDetail(
+
+  factory UserInfomation.fromJson(Map<String, dynamic> json) => UserInfomation(
         userEmail: json["USER_EMAIL"],
         userId: json["USER_ID"],
         userName: json["USER_NAME"],
         userPhoneNumber: json['USER_PHONE_NUMBER'],
         appAgreeMarketing: json["APP_AGREE_MARKETING_YN"],
         userCheck: json["USER_CHECK"],
+        status: json["STATUS"],
+        cnt: json["CNT"],
+        birthday: json["BIRTHDAY"],
+        gender: json["GENDER"],
+        kakaoProfil: json["KAKAO_PROFILE"],
+        userToken: json["USER_DEVICE"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -887,24 +857,36 @@ class UserInfoDetail {
         "USER_PHONE_NUMBER": userPhoneNumber,
         "APP_AGREE_MARKETING_YN": appAgreeMarketing,
         "USER_CHECK": userCheck,
+        "STATUS": status,
+        "CNT": cnt,
+        "BIRTHDAY": birthday,
+        "GENDER": gender,
+        "KAKAO_PROFILE": kakaoProfil,
+        "USER_DEVICE": userToken
       };
-  factory UserInfoDetail.fromJsonMap(Map<String, dynamic> json) =>
-      _$UserInfoDetailFromJsonMap(json);
-  Map<String, dynamic> toJsonMap() => _$UserInfoDetailToJsonMap(this);
+  factory UserInfomation.fromJsonMap(Map<String, dynamic> json) =>
+      _$UserInfomationFromJsonMap(json);
+  Map<String, dynamic> toJsonMap() => _$UserInfomationToJsonMap(this);
 }
 
-UserInfoDetail _$UserInfoDetailFromJsonMap(Map<String, dynamic> json) {
-  return UserInfoDetail(
+UserInfomation _$UserInfomationFromJsonMap(Map<String, dynamic> json) {
+  return UserInfomation(
     userEmail: json['USER_EMAIL'] as String,
     userId: json['USER_ID'] as String,
     userName: json['USER_NAME'] as String,
     userPhoneNumber: json['USER_PHONE_NUMBER'] as String,
     appAgreeMarketing: json['APP_AGREE_MARKETING_YN'] as String,
     userCheck: json['USER_CHECK'] as String,
+    status: json['STATUS'] as String,
+    cnt: json['CNT'] as int,
+    birthday: json['BIRTHDAY'] as String,
+    gender: json['GENDER'] as String,
+    kakaoProfil: json['KAKAO_PROFILE'] as String,
+    userToken: json['USER_DEVICE'] as String,
   );
 }
 
-Map<String, dynamic> _$UserInfoDetailToJsonMap(UserInfoDetail instance) =>
+Map<String, dynamic> _$UserInfomationToJsonMap(UserInfomation instance) =>
     <String, dynamic>{
       'USER_EMAIL': instance.userEmail,
       'USER_ID': instance.userId,
@@ -912,11 +894,17 @@ Map<String, dynamic> _$UserInfoDetailToJsonMap(UserInfoDetail instance) =>
       'USER_PHONE_NUMBER': instance.userPhoneNumber,
       'APP_AGREE_MARKETING_YN': instance.appAgreeMarketing,
       'USER_CHECK': instance.userCheck,
+      'STATUS': instance.status,
+      'CNT': instance.cnt,
+      'BIRTHDAY': instance.birthday,
+      'GENDER': instance.gender,
+      'KAKAO_PROFILE': instance.kakaoProfil,
+      'USER_DEVICE': instance.userToken,
     };
 
-Future<UserInfo> getUserInfoDetailList(String userEmail) async {
+Future<UserInfomation> getUserInfomation(String userId) async {
   var bodyParam = new Map();
-  bodyParam['userId'] = userEmail;
+  bodyParam['userId'] = userId;
 
   http.Response response = await http.post(
     //Uri.encodeFull('http://hndsolution.iptime.org:8080/getUserInfo'),
@@ -926,8 +914,8 @@ Future<UserInfo> getUserInfoDetailList(String userEmail) async {
   );
 
   if (200 == response.statusCode) {
-    print(response.body);
-    return UserInfo.fromJsonMap(json.decode(response.body));
+    print(bodyParam);
+    return UserInfomation.fromJsonMap(json.decode(response.body));
   } else {
     return json.decode(response.body);
   }
@@ -956,27 +944,28 @@ class UpdateUser {
 }
 
 Future<UpdateUser> updateUser(
-  String userId,
-  String userPassword,
-  String userProfile,
   String userEmail,
-  String userName,
+  String userPassword,
   String userPhoneNumber,
-  String birthdayJson,
+  String userName,
   String gender,
+  String birthdayJson,
+  String marketing,
+  String kakaoPro,
+  String userId,
+  String userToken,
 ) async {
   var bodyParam = new Map();
-
-  bodyParam["userPhoneNumber"] = userPhoneNumber;
-
   bodyParam["userEmail"] = userEmail;
-
-  bodyParam['userPassword'] = userPassword;
-  bodyParam["gender"] = gender;
-  bodyParam["userId"] = userId;
+  bodyParam["userPassword"] = userPassword;
+  bodyParam["userPhoneNumber"] = userPhoneNumber;
   bodyParam["userName"] = userName;
-  bodyParam["user_profile"] = userProfile;
-  bodyParam["birthdayJson"] = birthdayJson;
+  bodyParam["gender"] = gender;
+  bodyParam["birthday"] = birthdayJson;
+  bodyParam["marketing"] = marketing;
+  bodyParam['kkoProfile'] = kakaoPro;
+  bodyParam['userId'] = userId;
+  bodyParam['userDevice'] = userToken;
 
   http.Response response = await http.post(
     //Uri.encodeFull('http://hndsolution.iptime.org:8080/updateUserInfo'),
@@ -1002,9 +991,65 @@ Future<UpdateUser> updateUser(
 ////////////////회원 탈퇴///////////////////////
 ///////////////////////////////////////////////
 ///////////////////////////////////////////////
+///
+void getDelete(String userEmail) async {
+  var bodyParam = new Map();
+  bodyParam['userId'] = userEmail;
+
+  http.Response response = await http.post(
+    //Uri.encodeFull('http://hndsolution.iptime.org:8080/getUserInfo'),
+    Uri.encodeFull('http://192.168.0.47:8080/deleteUserInfo'),
+    headers: {"Accept": "application/json"},
+    body: bodyParam,
+  );
+
+  if (200 == response.statusCode) {
+    print("success");
+
+    //  return UserInfomation.fromJsonMap(json.decode(response.body));
+  } else {
+    return json.decode(response.body);
+  }
+}
 
 ///////////////////////////////////////////////
 ///////////////////////////////////////////////
 ////////////////로그아웃//////////////////
 ///////////////////////////////////////////////
 ///////////////////////////////////////////////
+
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+////////////////웹뷰//////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+
+Future<Status> webView(
+  String userEmail,
+  String userPassword,
+  String userChk,
+) async {
+  var bodyParam = new Map();
+
+  bodyParam['userId'] = userEmail;
+  bodyParam['userPassword'] = userPassword;
+  bodyParam['userChk'] = userChk;
+
+  http.Response response = await http.post(
+    //Uri.encodeFull('http://hndsolution.iptime.org:8080/login'),
+    Uri.encodeFull('http://192.168.0.47:8080//usermngr/shopTmplatView.do'),
+
+    headers: {"Accept": "application/json"},
+    body: bodyParam,
+  );
+
+  if (response.statusCode == 200) {
+    return Status.fromJson(json.decode(response.body));
+  } else {
+    throw HttpException(
+      'Unexpected status code ${response.statusCode}:'
+      ' ${response.reasonPhrase}',
+      //uri: Uri.parse(query)
+    );
+  }
+}

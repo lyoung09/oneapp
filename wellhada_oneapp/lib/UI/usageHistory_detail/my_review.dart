@@ -29,7 +29,8 @@ class _MyReviewState extends State<MyReview> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => WebViewContainer(url, placeName)));
+            builder: (context) =>
+                WebViewContainer(placeName, 12, userId, "!23")));
 
     // Navigator.pushNamed(context, '/webview');
   }

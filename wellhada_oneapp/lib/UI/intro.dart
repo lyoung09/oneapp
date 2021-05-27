@@ -15,79 +15,10 @@ class Introduce extends StatefulWidget {
 
 class _IntroduceState extends State<Introduce> {
   var index;
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-  String _messagingTitle = "";
-  StreamSubscription iosSubscription;
+
   initState() {
     super.initState();
     index = 0;
-    firebaseCloudMessagingListener();
-  }
-
-  firebaseCloudMessagingListener() async {
-    if (Platform.isIOS) {
-      _firebaseMessaging.requestNotificationPermissions(
-          const IosNotificationSettings(
-              sound: true, badge: true, alert: true, provisional: true));
-
-      iosSubscription =
-          _firebaseMessaging.onIosSettingsRegistered.listen((data) {
-        //_saveDeviceToken();
-      });
-      _firebaseMessaging
-          .requestNotificationPermissions(IosNotificationSettings());
-    } else {
-      // _firebaseMessaging.getToken().then((token) {
-      //   print('token:' + token);
-      // });
-      //_saveDeviceToken();
-    }
-
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        _messagingTitle = message['notification']['title'].toString();
-        if (_messagingTitle.endsWith("null")) {
-          _messagingTitle = "";
-        }
-        showOverlayNotification((context) {
-          return MessageNotification(
-            title: _messagingTitle,
-            message: message['notification']['body'],
-            onReply: () {
-              OverlaySupportEntry.of(context).dismiss();
-              //toast('you checked this message');
-            },
-          );
-        }, duration: Duration(milliseconds: 4000));
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        print("onLaunch: $message");
-      },
-      onResume: (Map<String, dynamic> message) async {
-        print("onResume: $message");
-      },
-    );
-    _firebaseMessaging.requestNotificationPermissions(
-        const IosNotificationSettings(sound: true, badge: true, alert: true));
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
-    });
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
-    });
-    SharedPreferences prefs;
-    prefs = await SharedPreferences.getInstance();
-    _firebaseMessaging.getToken().then((String token) {
-      assert(token != null);
-      print("Push Messaging token: $token");
-      setState(() {
-        prefs.setString("userToken", "$token");
-
-        //_homeScreenText = "Push Messaging token: $token";
-      });
-    });
   }
 
   dispose() {
@@ -104,7 +35,7 @@ class _IntroduceState extends State<Introduce> {
   }
 
   goStart() {
-    Navigator.pushNamed(context, '/BottomNav');
+    Navigator.pushNamed(context, '/login');
   }
 
   goBack() async {

@@ -10,9 +10,8 @@ import 'package:wellhada_oneapp/UI/banner/top_banner.dart';
 import 'package:provider/provider.dart';
 
 import 'package:location_permissions/location_permissions.dart';
-
-import 'home_detail/list_screen.dart';
-import 'home_detail/mapUI/map.dart';
+import 'package:wellhada_oneapp/UI/main/home_detail/list_screen.dart';
+import 'package:wellhada_oneapp/UI/main/home_detail/mapUI/map.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -25,6 +24,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _selectedTab;
   LatLng _currentLocation;
   bool provideLocation = false;
+
+  var userId;
   @override
   void initState() {
     super.initState();

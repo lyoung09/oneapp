@@ -7,14 +7,18 @@ import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:kakao_flutter_sdk/user.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wellhada_oneapp/UI/privateInfo_detail/mobile_authen/mobile.dart';
+import 'package:wellhada_oneapp/UI/main/bottom_detail/private_info.dart';
+import 'package:wellhada_oneapp/UI/main/bottom_nav.dart';
+import 'package:wellhada_oneapp/UI/privateInfo_detail/email_login/mobile.dart';
+
 import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
 import 'package:wellhada_oneapp/model/login/certification_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
-
 import 'package:image_picker/image_picker.dart';
+import 'package:wellhada_oneapp/model/login/userData.dart';
 
 class UserUpdate extends StatefulWidget {
   @override
@@ -23,7 +27,8 @@ class UserUpdate extends StatefulWidget {
 
 class _UserUpdateState extends State<UserUpdate> {
   var userChk;
-  var userEmail, userName, userPhone = '';
+  var userEmail, userPhone = '';
+  String userName;
   var userProfile = '';
   var nicknameController = TextEditingController(text: '');
   var mobileController = TextEditingController(text: '');
@@ -32,7 +37,6 @@ class _UserUpdateState extends State<UserUpdate> {
   bool isSelected;
   List<RadioModel> sampleData = new List<RadioModel>();
   File _image;
-  var uriUserProfile;
   String errorType;
   var cookie;
   FirebaseAuth _auth = FirebaseAuth.instance;
@@ -41,12 +45,14 @@ class _UserUpdateState extends State<UserUpdate> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   MobileVerificationState currentState =
       MobileVerificationState.SHOW_MOBILE_FORM_STATE;
-
+  var userKey;
   String verificationId;
+  bool mobileChecking;
   @override
   initState() {
     super.initState();
     check();
+    mobileChecking = false;
     isSelected = false;
     sampleData.add(new RadioModel(false, '남'));
     sampleData.add(new RadioModel(false, '여'));
@@ -58,12 +64,18 @@ class _UserUpdateState extends State<UserUpdate> {
   }
 
   void check() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    setState(() {
-      userChk = prefs.getString("userChk");
-    });
-    if (userChk != '02') userDefault();
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      setState(() {
+        userKey = prefs.getString("userKey");
+      });
+      if (userKey != null) {
+        userDefault();
+      }
+    } catch (e) {
+      userChk = 'O';
+      print(e);
+    }
   }
 
   _imgFromCamera() async {
@@ -127,15 +139,6 @@ class _UserUpdateState extends State<UserUpdate> {
                     }),
               ],
             ));
-
-    // SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    // setState(() {
-    //   cookie = prefs.setInt("cookie", 1);
-    //   _image = image;
-    //   userProfile = _image.path;
-    //   prefs.setString("userProfile", userProfile);
-    // });
   }
 
   void _showPicker(context) {
@@ -178,18 +181,36 @@ class _UserUpdateState extends State<UserUpdate> {
         });
   }
 
+  var userToken;
+  var checkPhone;
   userDefault() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      final userData = await user.getUserInfomation(userKey);
+
       setState(() {
-        userName = prefs.getString("userName");
-        userProfile = prefs.getString("userProfile");
-        userEmail = prefs.getString("userEmail");
-        userPhone = prefs.getString("userPhone");
         cookie = prefs.getInt("cookie");
-        gender = prefs.getString("gender");
-        birthday = prefs.getString("birthday");
+        password = prefs.getString("userPasswordGoweb");
+        marketing = prefs.getString("marketing");
+        userToken = prefs.getString("userToken");
+        userPhone = userData.userPhoneNumber;
+        checkPhone = userPhone;
       });
+      userName = userData.userName;
+      userEmail = userData.userEmail;
+      userProfile = userData.kakaoProfil == null ? "" : userData.kakaoProfil;
+      birthdayJson = userData.birthday;
+      birthdayJson == "" || birthdayJson == null
+          ? birthday = ""
+          : birthday =
+              '${birthdayJson.substring(0, 4)}.${birthdayJson.substring(4, 6)}.${birthdayJson.substring(6, 8)}';
+
+      print('user token ${userToken}');
+      genderDb = userData.gender;
+
+      if (genderDb == "M") gender = "남";
+      if (genderDb == "F") gender = "여";
 
       nicknameController = TextEditingController(text: '${userName}');
       mobileController = TextEditingController(text: '${userPhone}');
@@ -209,15 +230,19 @@ class _UserUpdateState extends State<UserUpdate> {
             confirmText: '확인',
             firstDate: DateTime(1950),
             builder: (context, child) {
-              return Theme(
-                data: ThemeData.light().copyWith(
-                  primaryColor: Colors.black,
-                  accentColor: Colors.white,
-                  colorScheme: ColorScheme.light(primary: Colors.black),
-                  buttonTheme:
-                      ButtonThemeData(textTheme: ButtonTextTheme.primary),
+              return FittedBox(
+                child: Theme(
+                  isMaterialAppTheme: true,
+                  data: ThemeData.light().copyWith(
+                    primaryColor: Colors.black,
+                    accentColor: Colors.white,
+                    colorScheme: ColorScheme.light(primary: Colors.black),
+
+                    // buttonTheme:
+                    //     ButtonThemeData(textTheme: ButtonTextTheme.primary),
+                  ),
+                  child: child,
                 ),
-                child: child,
               );
             },
             lastDate: DateTime
@@ -228,12 +253,11 @@ class _UserUpdateState extends State<UserUpdate> {
         //if user tap cancel then this function will stop
         return;
       }
-      DateFormat formatter = DateFormat('yy.MM.dd');
-      DateFormat formatterSave = DateFormat('yyMMdd');
+      DateFormat formatter = DateFormat('yyyy.MM.dd');
+      DateFormat formatterSave = DateFormat('yyyyMMdd');
       setState(() {
         //for rebuilding the ui
         birthdayJson = formatterSave.format(pickedDate);
-
         birthday = formatter.format(pickedDate);
       });
     });
@@ -256,22 +280,26 @@ class _UserUpdateState extends State<UserUpdate> {
 
       if (authCredential?.user != null) {
         setState(() {
+          mobileChecking = false;
           prefs.setString('userPhone', '${mobileController.text}');
+
           currentState = MobileVerificationState.SHOW_MOBILE_FORM_STATE;
         });
-        Navigator.pushReplacementNamed(
-          context,
-          '/userUpdate',
-        );
       }
     } on FirebaseAuthException catch (e) {
       setState(() {
         showLoading = false;
       });
       if (Platform.isAndroid) {
+        print(e.message);
         switch (e.message) {
+          case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ TOO_SHORT ]':
+          case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ TOO_LONG ]':
           case 'The sms verification code used to create the phone auth credential is invalid. Please resend the verification code sms and be sure use the verification code provided by the user.':
             errorType = " SMS 확인 코드가 잘못되었습니다";
+            break;
+          case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code].':
+            errorType = " 핸드폰 번호가 없습니다";
             break;
           case 'We have blocked all requests from this device due to unusual activity. Try again later.':
           case 'The verification ID used to create the phone auth credential is invalid.':
@@ -332,6 +360,7 @@ class _UserUpdateState extends State<UserUpdate> {
                   Container(
                     width: MediaQuery.of(context).size.width * 0.6,
                     child: TextField(
+                      keyboardType: TextInputType.number,
                       controller: otpController,
                       decoration: InputDecoration(
                         hintText: "인증 번호",
@@ -378,24 +407,34 @@ class _UserUpdateState extends State<UserUpdate> {
         ));
   }
 
-  emailDefault() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-  }
+  var genderDb;
+  var marketing, password;
 
   checkUpdate() async {
-    print(userProfile);
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
+    final update = await user.updateUser(
+        userKey,
+        password == null ? "" : password,
+        mobileController.text == null ? "" : mobileController.text,
+        nicknameController.text == "" ? userName : nicknameController.text,
+        genderDb == null ? "" : genderDb,
+        birthdayJson == null ? "" : birthdayJson,
+        marketing,
+        userProfile == null ? "" : userProfile,
+        userKey,
+        userToken
+
+        //gender, birthdayJson
+        );
+
     setState(() {
+      print('update =====================${update.status}');
       prefs.setString("userName", nicknameController.text);
-      prefs.setString("userPhone", mobileController.text);
-      prefs.setString("birthday", birthdayJson);
-      prefs.setString("gender", gender);
-      print(gender);
-      prefs.setString("userProfile", userProfile);
     });
 
-    Navigator.pop(context);
+    Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => new BottomNav(number: 3)));
   }
 
   cancel() async {
@@ -404,6 +443,20 @@ class _UserUpdateState extends State<UserUpdate> {
 
   profileUpdate() {
     _showPicker(context);
+  }
+
+  dialog() {
+    showDialog(
+        context: context,
+        builder: (_) => CupertinoAlertDialog(
+              content: Text(errorType),
+              actions: <Widget>[
+                CupertinoDialogAction(
+                  child: Text('확인'),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            ));
   }
 
   Widget _updateWidget() {
@@ -440,7 +493,7 @@ class _UserUpdateState extends State<UserUpdate> {
                   child: Container(
                     height: 90,
                     width: 90,
-                    child: userProfile == null
+                    child: userProfile == ""
                         ? IconButton(
                             icon: SvgPicture.asset(
                               "assets/svg/defaultUser.svg",
@@ -556,11 +609,19 @@ class _UserUpdateState extends State<UserUpdate> {
                                 keyboardType: TextInputType.number,
                                 style: TextStyle(color: Colors.black),
                                 controller: mobileController,
+                                onChanged: (value) {
+                                  setState(() {
+                                    if (value != userPhone)
+                                      mobileChecking = true;
+                                    if (value == userPhone)
+                                      mobileChecking = false;
+                                  });
+                                },
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
                                 ),
                               )),
-                          userChk == '01'
+                          userChk == 'E'
                               ? Align(
                                   alignment: Alignment.centerRight,
                                   child: FlatButton(
@@ -581,8 +642,11 @@ class _UserUpdateState extends State<UserUpdate> {
                                             showLoading = false;
                                           });
                                           if (Platform.isAndroid) {
+                                            print(verificationFailed.message);
                                             switch (
                                                 verificationFailed.message) {
+                                              case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ TOO_SHORT ]':
+                                              case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ TOO_LONG ]':
                                               case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ Invalid format. ]':
                                                 errorType = " 정확한 번호를 적어주세요";
                                                 break;
@@ -661,11 +725,15 @@ class _UserUpdateState extends State<UserUpdate> {
                                             showLoading = false;
                                           });
                                           if (Platform.isAndroid) {
+                                            print(verificationFailed.message);
                                             switch (
                                                 verificationFailed.message) {
+                                              case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ TOO_SHORT ]':
                                               case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ Invalid format. ]':
+                                              case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ TOO_LONG ]':
                                                 errorType = " 정확한 번호를 적어주세요";
                                                 break;
+
                                               case 'We have blocked all requests from this device due to unusual activity. Try again later.':
                                               case 'The verification ID used to create the phone auth credential is invalid.':
                                                 errorType =
@@ -740,23 +808,7 @@ class _UserUpdateState extends State<UserUpdate> {
                           ),
                           Container(
                             width: MediaQuery.of(context).size.width * 0.59,
-                            child: Text(
-
-                                // style: TextStyle(color: Colors.black),
-                                // validator: (String value) {
-                                //   if (value.length != 6) {
-                                //     return '6자리만 적어주세요';
-                                //   }
-                                //   return null;
-                                // },
-                                // keyboardType: TextInputType.number,
-                                // controller: birthdayController,
-                                // decoration: InputDecoration(
-                                //   hintText: "숫자만 적어주세요",
-                                //   hintStyle: TextStyle(color: Colors.black),
-                                //   border: InputBorder.none,
-                                // ),
-                                birthday == null ? "" : "${birthday}",
+                            child: Text(birthday == null ? "" : "${birthday}",
                                 style: TextStyle(color: Colors.black)),
                           ),
                           Padding(
@@ -828,6 +880,12 @@ class _UserUpdateState extends State<UserUpdate> {
                                         sampleData[index].isSelected = true;
                                         print(sampleData[index].buttonText);
                                         gender = sampleData[index].buttonText;
+                                        if (gender == "남") {
+                                          genderDb = "M";
+                                        }
+                                        if (gender == "여") {
+                                          genderDb = "F";
+                                        }
                                       });
                                     },
                                     child: new RadioItem(sampleData[index]),
@@ -849,7 +907,8 @@ class _UserUpdateState extends State<UserUpdate> {
                         height: 45,
                         width: 200,
                         child: RaisedButton(
-                          onPressed: checkUpdate,
+                          onPressed:
+                              mobileChecking == true ? dialog : checkUpdate,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(40.0),
                               side: BorderSide(color: Colors.black)),

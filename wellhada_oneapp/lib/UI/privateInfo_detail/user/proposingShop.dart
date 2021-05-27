@@ -30,7 +30,7 @@ class _ProposingShopState extends State<ProposingShop> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     setState(() {
-      userEmail = prefs.getString("userEmail");
+      userEmail = prefs.getString("userKey");
     });
     emailController = TextEditingController(text: '${userEmail}');
   }

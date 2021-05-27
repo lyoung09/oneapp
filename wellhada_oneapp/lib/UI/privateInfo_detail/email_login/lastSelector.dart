@@ -1,9 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:wellhada_oneapp/UI/main/bottom_nav.dart';
 import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
+import 'package:wellhada_oneapp/model/login/userData.dart';
 
 class LastSelection extends StatefulWidget {
   @override
@@ -25,6 +28,7 @@ class _LastSelectionState extends State<LastSelection> {
   var userChk;
   var userProfile, cookie, userGenderDB, userCheckDB;
   bool isSelected;
+  String deviceToken;
   final _formKey = GlobalKey<FormState>();
   List<RadioModel> sampleData = new List<RadioModel>();
   var birthday, gender, birthdayJson;
@@ -47,13 +51,16 @@ class _LastSelectionState extends State<LastSelection> {
         userPhone = prefs.getString("userPhone");
         userChk = prefs.getString("userChk");
         cookie = prefs.getInt("cookie");
-        userPassword = prefs.getString("userPassword");
+        userPassword = prefs.getString("userPasswordGoweb");
         marketing = prefs.getString("marketing");
         userToken = prefs.getString("userToken");
         appAgreeService = prefs.getString("appAgreeService");
         appAgreePrivacy = prefs.getString("appAgreePrivacy");
         appPushToken = prefs.getString("appPushToken");
         appAgreePush = prefs.getString("appAgreePush");
+        deviceToken = prefs.getString("userToken");
+
+        deviceToken = deviceToken.toLowerCase();
 
         //userProfile = uriUserProfile.toString();
       });
@@ -64,8 +71,6 @@ class _LastSelectionState extends State<LastSelection> {
       if (userChk == "00") {
         userCheckDB = "K";
       }
-      print(
-          '${userEmail} : ${userName}: ${userProfile}: ${userPhone}: ${userChk}: ${userPassword}: ${marketing}: ${userToken}: ${appAgreeService}: ${appAgreePrivacy}: ${appPushToken}: ${appAgreePush}');
     } catch (e) {
       print(e);
     }
@@ -81,15 +86,17 @@ class _LastSelectionState extends State<LastSelection> {
             confirmText: '확인',
             firstDate: DateTime(1950),
             builder: (context, child) {
-              return Theme(
-                data: ThemeData.light().copyWith(
-                  primaryColor: Colors.black,
-                  accentColor: Colors.white,
-                  colorScheme: ColorScheme.light(primary: Colors.black),
-                  buttonTheme:
-                      ButtonThemeData(textTheme: ButtonTextTheme.primary),
+              return FittedBox(
+                child: Theme(
+                  data: ThemeData.light().copyWith(
+                    primaryColor: Colors.black,
+                    accentColor: Colors.white,
+                    colorScheme: ColorScheme.light(primary: Colors.black),
+                    buttonTheme:
+                        ButtonThemeData(textTheme: ButtonTextTheme.primary),
+                  ),
+                  child: child,
                 ),
-                child: child,
               );
             },
             lastDate: DateTime
@@ -100,10 +107,11 @@ class _LastSelectionState extends State<LastSelection> {
         //if user tap cancel then this function will stop
         return;
       }
-      DateFormat formatter = DateFormat('yy.MM.dd');
-      DateFormat formatterSave = DateFormat('yyMMdd');
+      DateFormat formatter = DateFormat('yyyy.MM.dd');
+      DateFormat formatterSave = DateFormat('yyyyMMdd');
       setState(() {
         //for rebuilding the ui
+
         birthdayJson = formatterSave.format(pickedDate);
         birthday = formatter.format(pickedDate);
       });
@@ -111,40 +119,62 @@ class _LastSelectionState extends State<LastSelection> {
   }
 
   insertUser() async {
+    print("insert ${deviceToken}");
     final signUp = await user.insertUser(
-        userCheckDB,
-        userId,
-        userPassword,
-        userEmail,
-        userPhone,
-        userName,
-        userGenderDB,
-        birthdayJson,
-        marketing,
-        appPushToken,
-        appAgreeService,
-        appAgreePrivacy,
-        appAgreePush);
+      userCheckDB,
+      userId,
+      userPassword == null ? "" : userPassword,
+      userEmail,
+      userPhone,
+      userName,
+      userGenderDB == null ? "" : userGenderDB,
+      birthdayJson == null ? "" : birthdayJson,
+      marketing,
+      appPushToken == null ? "N" : appPushToken,
+      appAgreeService == null ? "N" : appAgreeService,
+      appAgreePrivacy == null ? "N" : appAgreePrivacy,
+      appAgreePush == null ? "N" : appAgreePush,
+      deviceToken == null ? "" : deviceToken,
+    );
 
-    setState(() {});
+    if (signUp.status == "00") {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      setState(() {
+        print('sign up =============${signUp.status}');
 
-    Navigator.pushNamed(context, '/BottomNav');
+        prefs.setString("userKey", userId);
+        prefs.setBool('login', true);
+        prefs.setString("userPasswordGoweb", userPassword);
+      });
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => new BottomNav(
+                number: 3,
+              )));
+    }
+
+    // if (signUp.status == "20") {
+    //   showDialog(
+    //       context: context,
+    //       builder: (_) => CupertinoAlertDialog(
+    //             content: Text("중복된 아이디입니다."),
+    //             actions: <Widget>[
+    //               CupertinoDialogAction(
+    //                 child: Text('확인'),
+    //                 onPressed: () => Navigator.of(context).pop(),
+    //               ),
+    //             ],
+    //           ));
+    // }
+    // Navigator.pushNamed(context, '/BottomNav');
   }
 
   void checkInfo() async {
-    if (gender == "남") {
-      userGenderDB = "M";
-    }
-    if (gender == "여") {
-      userGenderDB = "F";
-    }
-
     insertUser();
   }
 
   void skip() async {
-    userGenderDB = "";
-    birthdayJson = "";
+    userGenderDB = null;
+    birthdayJson = null;
     insertUser();
   }
 
@@ -266,6 +296,13 @@ class _LastSelectionState extends State<LastSelection> {
                                         sampleData[index].isSelected = true;
 
                                         gender = sampleData[index].buttonText;
+
+                                        if (gender == "남") {
+                                          userGenderDB = "M";
+                                        }
+                                        if (gender == "여") {
+                                          userGenderDB = "F";
+                                        }
                                       });
                                     },
                                     child: new RadioItem(sampleData[index]),
