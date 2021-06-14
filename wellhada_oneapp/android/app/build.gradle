@@ -27,8 +27,8 @@ apply plugin: 'com.google.gms.google-services'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 29
-
+    compileSdkVersion 30
+buildToolsVersion "30.0.3"
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
@@ -40,11 +40,12 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.example.wellhada_oneapp"
-        minSdkVersion 19
+        minSdkVersion 23
         targetSdkVersion 29
         multiDexEnabled true
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
          Properties properties = new Properties()
         if (rootProject.file("local.properties").exists()) {
             properties.load(rootProject.file("local.properties").newDataInputStream())
@@ -73,4 +74,11 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-messaging:20.1.0'
     implementation 'com.google.firebase:firebase-auth'
+    // implementation 'com.github.bootpay:client_android_java:3.3.91'
+    // implementation 'com.github.bootpay:client_android_java:3.4.11'
+    // implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
+    // implementation 'com.github.bootpay:client_android_java:3.3.91'
+    // implementation 'dev.samstevens.totp:totp:1.7'
+    // implementation "androidx.constraintlayout:constraintlayout:2.0.0"
+    // implementation "com.github.skydoves:powerspinner:1.1.5"
 }

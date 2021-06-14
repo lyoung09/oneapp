@@ -1,4 +1,6 @@
+// @dart=2.9
 import 'dart:collection';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,11 +9,12 @@ import 'package:getwidget/getwidget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/UI/main/home_detail/webview.dart';
 import 'package:wellhada_oneapp/UI/privateInfo_detail/login.dart';
+
 import 'package:wellhada_oneapp/UI/usageHistory_detail/my_review.dart';
 import 'package:wellhada_oneapp/UI/usageHistory_detail/review.dart';
-import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
+import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
 import 'package:intl/intl.dart';
-
+import 'package:wellhada_oneapp/listitem/shop/orderList.dart' as orderList;
 import 'package:slide_popup_dialog/slide_popup_dialog.dart' as slideDialog;
 
 class UsageHistory extends StatefulWidget {
@@ -20,39 +23,92 @@ class UsageHistory extends StatefulWidget {
 }
 
 class _UsageHistoryState extends State<UsageHistory> {
-  String webviewDefault = 'http://192.168.0.47:8080/usermngr';
-  var userId;
+  String webviewDefault = 'http://hndsolution.iptime.org:8086/usermngr';
+  String userId, userChk;
   String date, year, month, day;
   int _value = 1;
+  var orderFuture;
 
+  Map<int, bool> openShopSeq = new Map();
+  Map<int, bool> dayOpenShop = new Map();
   @override
-  initState() {
-    super.initState();
+  void initState() {
     check();
+    super.initState();
   }
 
   @override
-  void didChangeDependencies() {
-    check();
-
-    super.didChangeDependencies();
+  void dispose() {
+    super.dispose();
   }
 
   void check() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      setState(() {
-        userId = prefs.getString("userKey");
-      });
-      if (userId != null) {
-        print('userKey :${userId}');
+      if (this.mounted) {
+        setState(() {
+          userId = prefs.getString("userKey");
+          userPassword = prefs.getString("userPasswordGoweb");
+          userChk = prefs.getString("userChk");
+          if (userChk == "01") {
+            userChk = "E";
+          }
+          if (userChk == "00") {
+            userChk = "K";
+          }
+        });
 
-        print(userId);
+        orderFuture = getOrderUsageHistory(userId);
       }
-      if (userId == null || userId == "") {}
     } catch (e) {
       print(e);
     }
+  }
+
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  delete(userId, orderSeq) async {
+    final deleteReview = await orderList.deleteReview(userId, orderSeq);
+    if (this.mounted) {
+      setState(() {
+        print('delete ============================${deleteReview.cnt}');
+      });
+    }
+    Navigator.pop(context);
+  }
+
+  double toDouble(TimeOfDay myTime) {
+    return myTime.hour + myTime.minute / 60.0;
+  }
+
+  openingShop(startTime, endTime, int shopId) async {
+    DateTime now = DateTime.now();
+    var nowTimeofDay = TimeOfDay(hour: now.hour, minute: now.minute);
+
+    double toStart = toDouble(startTime);
+    double toNow = toDouble(nowTimeofDay);
+    double toEnd = toDouble(endTime);
+
+    if (toStart <= toNow && toNow <= toEnd) {
+      print("영업중");
+      openShopSeq[shopId] = true;
+    } else {
+      print("영업 시작 안함");
+      openShopSeq[shopId] = false;
+    }
+  }
+
+  userDataCheck(placeName, shopSeq) async {
+    // final webLoginData =
+    //     await webLogin.loginWebUser(userKey, userPassword, userChk);
+
+    _handleURLButtonPress(context, '${webviewDefault}/shopTmplatView.do',
+        placeName, shopSeq, userId);
   }
 
   void _showIncludePicutreDialog(
@@ -153,11 +209,11 @@ class _UsageHistoryState extends State<UsageHistory> {
                     padding: const EdgeInsets.only(left: 5.0, right: 5),
                     child: Container(
                       padding: EdgeInsets.only(top: 5),
-                      decoration: BoxDecoration(border: Border.all()),
+                      // decoration: BoxDecoration(border: Border.all()),
                       width: MediaQuery.of(context).size.width * 0.8,
                       height: MediaQuery.of(context).size.height * 0.3,
-                      child: Image.network(
-                        pic,
+                      child: Image.file(
+                        File(pic),
                         width: MediaQuery.of(context).size.width * 0.8,
                         height: MediaQuery.of(context).size.height * 0.3,
                         fit: BoxFit.fitWidth,
@@ -174,16 +230,16 @@ class _UsageHistoryState extends State<UsageHistory> {
                       padding: EdgeInsets.only(left: 15, top: 15),
                     ),
                     Padding(
-                        padding: EdgeInsets.only(left: 8),
+                        padding: EdgeInsets.only(left: 12),
                         child: Container(
                           width: MediaQuery.of(context).size.width * 0.9,
                           child: Text(
                             story,
                             //'11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111',
-                            maxLines: 5,
+                            maxLines: 7,
                             style: TextStyle(
                               fontFamily: "nanumR",
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w700,
                               fontSize: 18,
                             ),
                           ),
@@ -219,8 +275,20 @@ class _UsageHistoryState extends State<UsageHistory> {
     );
   }
 
+  moveLogin() {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => new LOGIN(
+              number: 1,
+            )));
+  }
+
   void _showOnlyReviewDialog(
-      String date, String pic, String placeName, String order, String story) {
+      String date,
+      // String pic,
+      String placeName,
+      String order,
+      String story,
+      int orderSeq) {
     slideDialog.showSlideDialog(
       context: context,
       child: Expanded(
@@ -313,20 +381,20 @@ class _UsageHistoryState extends State<UsageHistory> {
                 Container(
                   padding: EdgeInsets.only(left: 12.0, bottom: 20.0),
                 ),
-                Padding(
-                    padding: const EdgeInsets.only(left: 5.0, right: 5),
-                    child: Container(
-                      padding: EdgeInsets.only(top: 5),
-                      decoration: BoxDecoration(border: Border.all()),
-                      width: MediaQuery.of(context).size.width * 0.8,
-                      height: MediaQuery.of(context).size.height * 0.3,
-                      child: Image.network(
-                        pic,
-                        width: MediaQuery.of(context).size.width * 0.8,
-                        height: MediaQuery.of(context).size.height * 0.3,
-                        fit: BoxFit.fitWidth,
-                      ),
-                    )),
+                // Padding(
+                //     padding: const EdgeInsets.only(left: 5.0, right: 5),
+                //     child: Container(
+                //       padding: EdgeInsets.only(top: 5),
+                //       decoration: BoxDecoration(border: Border.all()),
+                //       width: MediaQuery.of(context).size.width * 0.8,
+                //       height: MediaQuery.of(context).size.height * 0.3,
+                //       child: Image.network(
+                //         pic,
+                //         width: MediaQuery.of(context).size.width * 0.8,
+                //         height: MediaQuery.of(context).size.height * 0.3,
+                //         fit: BoxFit.fitWidth,
+                //       ),
+                //     )),
                 Container(
                   padding: EdgeInsets.only(left: 20.0, bottom: 10.0),
                 ),
@@ -338,7 +406,7 @@ class _UsageHistoryState extends State<UsageHistory> {
                       padding: EdgeInsets.only(left: 15, top: 15),
                     ),
                     Padding(
-                        padding: EdgeInsets.only(left: 8),
+                        padding: EdgeInsets.only(left: 30, top: 30),
                         child: Container(
                           width: MediaQuery.of(context).size.width * 0.9,
                           child: Text(
@@ -348,12 +416,24 @@ class _UsageHistoryState extends State<UsageHistory> {
                             style: TextStyle(
                               fontFamily: "nanumR",
                               fontWeight: FontWeight.w500,
-                              fontSize: 18,
+                              fontSize: 20,
                             ),
                           ),
                         )),
                   ],
                 ),
+                // Container(
+                //   alignment: Alignment.bottomRight,
+                //   child: FlatButton(
+                //     onPressed: delete(userId, orderSeq),
+                //     child: Text('리뷰 삭제',
+                //         style: TextStyle(
+                //           fontFamily: "nanumR",
+                //           fontSize: 16,
+                //           fontWeight: FontWeight.w800,
+                //         )),
+                //   ),
+                // )
                 // Padding(
                 //     padding: EdgeInsets.only(bottom: 15, left: 15),
                 //     child: Align(
@@ -383,9 +463,981 @@ class _UsageHistoryState extends State<UsageHistory> {
     );
   }
 
-  writingReview(shopId, shopName, order, userId) async {
+  void _showCancelDialog(
+    String date,
+    String reason,
+    String placeName,
+    String order,
+    int orderSeq,
+    String pic,
+    int shopSeq,
+  ) {
+    slideDialog.showSlideDialog(
+      context: context,
+      child: Expanded(
+        child: SingleChildScrollView(
+          child: Container(
+            child: Column(
+              children: <Widget>[
+                Row(
+                  // crossAxisAlignment: CrossAxisAlignment.center,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Padding(
+                        padding: EdgeInsets.only(
+                            left: MediaQuery.of(context).size.width * 0.25)),
+                    Text(
+                      '${placeName}',
+                      style: TextStyle(
+                        fontFamily: "nanumB",
+                        fontWeight: FontWeight.w900,
+                        fontSize: 18.0,
+                      ),
+                    ),
+                    Text(
+                      "에서 ",
+                      style: TextStyle(
+                        fontFamily: "nanumB",
+                        fontWeight: FontWeight.w500,
+                        fontSize: 11,
+                      ),
+                    ),
+                    Text(
+                      order,
+                      style: TextStyle(
+                        fontFamily: "nanumB",
+                        fontWeight: FontWeight.w900,
+                        fontSize: 15.5,
+                      ),
+                    ),
+                    Text(
+                      " 취소!",
+                      style: TextStyle(
+                        color: Colors.redAccent,
+                        fontFamily: "nanumB",
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15,
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(right: 15),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).size.height * 0.02),
+                ),
+                Row(
+                  //crossAxisAlignment: CrossAxisAlignment.end,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Padding(
+                        padding: EdgeInsets.only(
+                            left: MediaQuery.of(context).size.width * 0.4)),
+                    Text(
+                      "취소 사유:",
+                      style: TextStyle(
+                        fontFamily: "nanumB",
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16.0,
+                      ),
+                    ),
+                    reason == "1"
+                        ? Align(
+                            alignment: Alignment.center,
+                            child: Padding(
+                              padding: EdgeInsets.only(right: 1),
+                              child: Text(
+                                "고객 요청",
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontFamily: "nanumR",
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ),
+                          )
+                        : reason == "2"
+                            ? Align(
+                                alignment: Alignment.centerRight,
+                                child: Padding(
+                                  padding: EdgeInsets.only(),
+                                  child: Text(
+                                    "재료 소진",
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontFamily: "nanumR",
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : reason == "3"
+                                ? Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Padding(
+                                      padding: EdgeInsets.only(),
+                                      child: Text(
+                                        "업소 사정",
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: "nanumR",
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Padding(
+                                      padding: EdgeInsets.only(),
+                                      child: Text(
+                                        "변심",
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: "nanumR",
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                    Padding(
+                      padding: EdgeInsets.only(right: 5),
+                    )
+                  ],
+                ),
+                Container(
+                  padding: EdgeInsets.only(left: 20.0, bottom: 15.0),
+                ),
+                Container(
+                  padding: EdgeInsets.only(left: 12.0, bottom: 20.0),
+                ),
+                Padding(
+                    padding: const EdgeInsets.only(left: 5.0, right: 10),
+                    child: Container(
+                        padding: EdgeInsets.only(top: 5),
+                        decoration: BoxDecoration(border: Border.all()),
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        height: MediaQuery.of(context).size.height * 0.3,
+                        child: Image.network(
+                          'http://hndsolution.iptime.org:8086${pic}',
+                          width: MediaQuery.of(context).size.width * 0.13,
+                          height: MediaQuery.of(context).size.height * 0.15,
+                          fit: BoxFit.fitWidth,
+                        ))),
+                Container(
+                  padding: EdgeInsets.only(left: 20.0, bottom: 10.0),
+                ),
+
+                openShopSeq[shopSeq] == true && dayOpenShop[shopSeq] == true
+                    ? Container(
+                        alignment: Alignment.bottomCenter,
+                        child: FlatButton(
+                          onPressed: () {
+                            webView(placeName, shopSeq, userId, userPassword);
+                          },
+                          child: Text('재주문',
+                              style: TextStyle(
+                                fontFamily: "nanumR",
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                              )),
+                        ),
+                      )
+                    : Container(
+                        alignment: Alignment.bottomCenter,
+                        child: Text(
+                          '준비중',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontFamily: "nanumR",
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                // Padding(
+                //     padding: EdgeInsets.only(bottom: 15, left: 15),
+                //     child: Align(
+                //       alignment: Alignment.bottomRight,
+                //       child: FlatButton(
+                //         color: Colors.black,
+                //         onPressed: () {
+                //           Navigator.of(context).pop();
+                //         },
+                //         child: Text('확인',
+                //             style: TextStyle(
+                //               fontFamily: "nanumR",
+                //               fontSize: 13,
+                //               fontWeight: FontWeight.w900,
+                //             )),
+                //         textColor: Colors.black,
+                //       ),
+                //     )),
+                Padding(
+                  padding: EdgeInsets.only(bottom: 1.5),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      barrierColor: Colors.white.withOpacity(0.7),
+      pillColor: Colors.amberAccent,
+      backgroundColor: Colors.white,
+    );
+  }
+
+  void _usageDetail(
+    String date,
+    int price,
+    String placeName,
+    String order,
+    int orderSeq,
+    String pic,
+    int shopSeq,
+    String beginWeek,
+    String endWeek,
+    String beginWeekend,
+    String endWeekend,
+  ) {
+    showDialog(
+        context: context,
+        builder: (_) => Dialog(
+                child: Container(
+              height: MediaQuery.of(context).size.height * 0.5,
+              decoration: BoxDecoration(
+                  //color: Colors.redAccent,
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.all(Radius.circular(12))),
+              child: Column(
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(
+                        top: MediaQuery.of(context).size.height * 0.02),
+                  ),
+                  Text(
+                    placeName.length > 14
+                        ? "${placeName.substring(0, 14)}"
+                        : "${placeName}",
+                    style: TextStyle(
+                      fontFamily: "nanumB",
+                      fontWeight: FontWeight.w900,
+                      fontSize: 21.0,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 10),
+                  ),
+                  Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: Text(
+                          '날짜 : ${date}',
+                          style: TextStyle(
+                            fontFamily: "nanumB",
+                            fontWeight: FontWeight.w700,
+                            fontSize: 11.0,
+                          ),
+                        ),
+                      )),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 10),
+                  ),
+                  Container(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 12.0, right: 12.0),
+                      child: Image.network(
+                        'http://hndsolution.iptime.org:8086${pic}',
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        height: MediaQuery.of(context).size.height * 0.25,
+                        fit: BoxFit.fitWidth,
+                      ),
+                    ),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(12),
+                            topRight: Radius.circular(12))),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 25),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        order == null
+                            ? ""
+                            : order.length > 100
+                                ? "주문 내역: ${order.substring(0, 99)}"
+                                : "주문 내역: ${order}",
+                        maxLines: 3,
+                        style: TextStyle(
+                          fontFamily: "nanumR",
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Spacer(),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: OutlineButton(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(3)),
+                          borderSide: BorderSide(
+                            color: Colors.black, //Color of the border
+                            style: BorderStyle.solid, //Style of the border
+                            width: 0.5, //width of the border
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text('취소'),
+                          textColor: Colors.black,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 15,
+                      ),
+                      OutlineButton(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(3)),
+                        borderSide: BorderSide(
+                          color: Colors.black, //Color of the border
+                          style: BorderStyle.solid, //Style of the border
+                          width: 0.5, //width of the border
+                        ),
+                        onPressed: () {
+                          openShopSeq[shopSeq] == true &&
+                                  dayOpenShop[shopSeq] == true
+                              ? userDataCheck(placeName, shopSeq)
+                              : showDialog(
+                                  context: context,
+                                  builder: (_) => CupertinoAlertDialog(
+                                        content: Text("영업 시간이 아닙니다"),
+                                        actions: <Widget>[
+                                          CupertinoDialogAction(
+                                            child: Text('확인'),
+                                            onPressed: () =>
+                                                Navigator.of(context).pop(),
+                                          ),
+                                        ],
+                                      ));
+                        },
+                        child: Text('재주문'),
+                        color: Colors.white,
+                        textColor: Colors.black,
+                      )
+                    ],
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 1.5),
+                  ),
+                ],
+              ),
+            )));
+  }
+
+  void _reviewPicStory(String date, String shopName, String menuName,
+      String review, String pic) {
+    showDialog(
+        context: context,
+        builder: (_) => Dialog(
+                child: Container(
+              height: MediaQuery.of(context).size.height * 0.5,
+              decoration: BoxDecoration(
+                  //color: Colors.redAccent,
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.all(Radius.circular(12))),
+              child: Column(
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(
+                        top: MediaQuery.of(context).size.height * 0.02),
+                  ),
+                  Text(
+                    shopName.length > 14
+                        ? "${shopName.substring(0, 14)}"
+                        : "${shopName}",
+                    style: TextStyle(
+                      fontFamily: "nanumB",
+                      fontWeight: FontWeight.w900,
+                      fontSize: 21.0,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 10),
+                  ),
+                  Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: Text(
+                          '날짜 : ${date}',
+                          style: TextStyle(
+                            fontFamily: "nanumB",
+                            fontWeight: FontWeight.w700,
+                            fontSize: 11.0,
+                          ),
+                        ),
+                      )),
+                  Container(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 12.0, right: 12.0),
+                      child: Image.network(
+                        'http://hndsolution.iptime.org:8086${pic}',
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        height: MediaQuery.of(context).size.height * 0.3,
+                      ),
+                    ),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(12),
+                            topRight: Radius.circular(12))),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 10),
+                  ),
+                  Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: Text(
+                          menuName == null ? "" : '내역 : ${menuName}',
+                          style: TextStyle(
+                            fontFamily: "nanumB",
+                            fontWeight: FontWeight.w700,
+                            fontSize: 11.0,
+                          ),
+                        ),
+                      )),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 10),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        review.length > 100
+                            ? " ${review.substring(0, 99)}"
+                            : review,
+                        maxLines: 3,
+                        style: TextStyle(
+                          fontFamily: "nanumR",
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Spacer(),
+                  OutlineButton(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(3)),
+                    borderSide: BorderSide(
+                      color: Colors.black, //Color of the border
+                      style: BorderStyle.solid, //Style of the border
+                      width: 0.5, //width of the border
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('확인'),
+                    textColor: Colors.black,
+                    color: Colors.white,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 1.5),
+                  ),
+                ],
+              ),
+            )));
+  }
+
+  void _reviewStory(
+      String date, String shopName, String menuName, String review) {
+    showDialog(
+        context: context,
+        builder: (_) => Dialog(
+                child: Container(
+              height: MediaQuery.of(context).size.height * 0.3,
+              decoration: BoxDecoration(
+                  //color: Colors.redAccent,
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.all(Radius.circular(12))),
+              child: Column(
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(
+                        top: MediaQuery.of(context).size.height * 0.02),
+                  ),
+                  Text(
+                    shopName.length > 14
+                        ? "${shopName.substring(0, 14)}"
+                        : "${shopName}",
+                    style: TextStyle(
+                      fontFamily: "nanumB",
+                      fontWeight: FontWeight.w900,
+                      fontSize: 21.0,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 10),
+                  ),
+                  Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: Text(
+                          '날짜 : ${date}',
+                          style: TextStyle(
+                            fontFamily: "nanumB",
+                            fontWeight: FontWeight.w700,
+                            fontSize: 11.0,
+                          ),
+                        ),
+                      )),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 15),
+                  ),
+                  Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 12),
+                        child: Text(
+                          menuName == null ? "" : '내역 : ${menuName}',
+                          style: TextStyle(
+                            fontFamily: "nanumB",
+                            fontWeight: FontWeight.w700,
+                            fontSize: 11.0,
+                          ),
+                        ),
+                      )),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 15),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12.0),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        review.length > 100
+                            ? " ${review.substring(0, 99)}"
+                            : review,
+                        maxLines: 3,
+                        style: TextStyle(
+                          fontFamily: "nanumR",
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Spacer(),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: OutlineButton(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(3)),
+                      borderSide: BorderSide(
+                        color: Colors.black, //Color of the border
+                        style: BorderStyle.solid, //Style of the border
+                        width: 0.5, //width of the border
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text('확인'),
+                      textColor: Colors.black,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            )));
+  }
+
+  // void _showCancelDetail(
+  //   String date,
+  //   String reason,
+  //   String shopName,
+  //   String order,
+  //   int orderSeq,
+  //   String pic,
+  //   int shopSeq,
+  //   String beginWeek,
+  //   String endWeek,
+  //   String beginWeekend,
+  //   String endWeekend,
+  // ) {
+  //   DateTime now = DateTime.now();
+
+  //   String startHour, startMin, endHour, endMin;
+  //   TimeOfDay startTime, endTime;
+  //   if (now.weekday == 6 || now.weekday == 7) {
+  //     startHour = beginWeek.substring(0, 2);
+  //     startMin = endWeek.substring(2, 4);
+  //     endHour = beginWeekend.substring(0, 2);
+  //     endMin = endWeekend.substring(2, 4);
+
+  //     startTime =
+  //         TimeOfDay(hour: int.parse(startHour), minute: int.parse(startMin));
+  //     endTime = TimeOfDay(hour: int.parse(endHour), minute: int.parse(endMin));
+  //   } else {
+  //     startHour = beginWeek.substring(0, 2);
+  //     startMin = endWeek.substring(2, 4);
+  //     endHour = beginWeekend.substring(0, 2);
+  //     endMin = endWeekend.substring(2, 4);
+
+  //     startTime =
+  //         TimeOfDay(hour: int.parse(startHour), minute: int.parse(startMin));
+  //     endTime = TimeOfDay(hour: int.parse(endHour), minute: int.parse(endMin));
+  //   }
+  //   openingShop(startTime, endTime);
+
+  //   showDialog(
+  //       context: context,
+  //       builder: (_) => Dialog(
+  //               child: Container(
+  //             height: MediaQuery.of(context).size.height * 0.5,
+  //             decoration: BoxDecoration(
+  //                 //color: Colors.redAccent,
+  //                 shape: BoxShape.rectangle,
+  //                 borderRadius: BorderRadius.all(Radius.circular(12))),
+  //             child: Column(
+  //               children: <Widget>[
+  //                 Padding(
+  //                   padding: EdgeInsets.only(
+  //                       top: MediaQuery.of(context).size.height * 0.02),
+  //                 ),
+  //                 Text(
+  //                   shopName.length > 14
+  //                       ? "${shopName.substring(0, 14)}"
+  //                       : "${shopName}",
+  //                   style: TextStyle(
+  //                     fontFamily: "nanumB",
+  //                     fontWeight: FontWeight.w900,
+  //                     fontSize: 21.0,
+  //                   ),
+  //                 ),
+  //                 Padding(
+  //                   padding: EdgeInsets.only(bottom: 10),
+  //                 ),
+  //                 Align(
+  //                     alignment: Alignment.centerRight,
+  //                     child: Padding(
+  //                       padding: const EdgeInsets.only(right: 12),
+  //                       child: Text(
+  //                         '날짜 : ${date}',
+  //                         style: TextStyle(
+  //                           fontFamily: "nanumB",
+  //                           fontWeight: FontWeight.w700,
+  //                           fontSize: 11.0,
+  //                         ),
+  //                       ),
+  //                     )),
+  //                 Container(
+  //                   child: Padding(
+  //                     padding: const EdgeInsets.only(left: 12.0, right: 12.0),
+  //                     child: Image.network(
+  //                       'http://hndsolution.iptime.org:8086${pic}',
+  //                       width: MediaQuery.of(context).size.width * 0.8,
+  //                       height: MediaQuery.of(context).size.height * 0.25,
+  //                       fit: BoxFit.fitWidth,
+  //                     ),
+  //                   ),
+  //                   width: double.infinity,
+  //                   decoration: BoxDecoration(
+  //                       color: Colors.white,
+  //                       shape: BoxShape.rectangle,
+  //                       borderRadius: BorderRadius.only(
+  //                           topLeft: Radius.circular(12),
+  //                           topRight: Radius.circular(12))),
+  //                 ),
+  //                 Padding(
+  //                   padding: const EdgeInsets.only(left: 12.0),
+  //                   child: Align(
+  //                     alignment: Alignment.centerLeft,
+  //                     child: Text(
+  //                       order.length > 100
+  //                           ? " ${order.substring(0, 99)}"
+  //                           : order,
+  //                       maxLines: 3,
+  //                       style: TextStyle(
+  //                         fontFamily: "nanumR",
+  //                         fontWeight: FontWeight.w600,
+  //                         fontSize: 15,
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 ),
+  //                 Padding(
+  //                   padding: EdgeInsets.only(bottom: 15),
+  //                 ),
+  //                 Align(
+  //                     alignment: Alignment.centerLeft,
+  //                     child: Padding(
+  //                       padding: const EdgeInsets.only(left: 12),
+  //                       child: Text(
+  //                         reason == "1"
+  //                             ? '취소사유 : 고객 요청'
+  //                             : reason == "2"
+  //                                 ? '취소사유 : 재료 소진'
+  //                                 : reason == "3"
+  //                                     ? '취소사유 : 업소 사정'
+  //                                     : '취소사유 : 기타',
+  //                         style: TextStyle(
+  //                           fontFamily: "nanumB",
+  //                           fontWeight: FontWeight.w700,
+  //                           fontSize: 11.0,
+  //                         ),
+  //                       ),
+  //                     )),
+  //                 Spacer(),
+  //                 Row(
+  //                   mainAxisSize: MainAxisSize.min,
+  //                   children: <Widget>[
+  //                     Align(
+  //                       alignment: Alignment.bottomCenter,
+  //                       child: OutlineButton(
+  //                         shape: RoundedRectangleBorder(
+  //                             borderRadius: BorderRadius.circular(3)),
+  //                         borderSide: BorderSide(
+  //                           color: Colors.black, //Color of the border
+  //                           style: BorderStyle.solid, //Style of the border
+  //                           width: 0.5, //width of the border
+  //                         ),
+  //                         onPressed: () {
+  //                           Navigator.of(context).pop();
+  //                         },
+  //                         child: Text('취소'),
+  //                         textColor: Colors.black,
+  //                         color: Colors.white,
+  //                       ),
+  //                     ),
+  //                     SizedBox(
+  //                       width: 15,
+  //                     ),
+  //                     Align(
+  //                         alignment: Alignment.bottomCenter,
+  //                         child: OutlineButton(
+  //                           shape: RoundedRectangleBorder(
+  //                               borderRadius: BorderRadius.circular(3)),
+  //                           borderSide: BorderSide(
+  //                             color: Colors.black, //Color of the border
+  //                             style: BorderStyle.solid, //Style of the border
+  //                             width: 0.5, //width of the border
+  //                           ),
+  //                           onPressed: () {
+  //                             opening == true
+  //                                 ? userDataCheck(shopName, shopSeq)
+  //                                 : showDialog(
+  //                                     context: context,
+  //                                     builder: (_) => CupertinoAlertDialog(
+  //                                           content: Text("영업 시간이 아닙니다"),
+  //                                           actions: <Widget>[
+  //                                             CupertinoDialogAction(
+  //                                               child: Text('확인'),
+  //                                               onPressed: () =>
+  //                                                   Navigator.of(context).pop(),
+  //                                             ),
+  //                                           ],
+  //                                         ));
+  //                           },
+  //                           child: Text('주문'),
+  //                           color: Colors.white,
+  //                           textColor: Colors.black,
+  //                         ))
+  //                   ],
+  //                 ),
+  //                 Padding(
+  //                   padding: EdgeInsets.only(bottom: 1.5),
+  //                 ),
+  //               ],
+  //             ),
+  //           )));
+  // }
+
+  // void _showDetailDialog(
+  //   String date,
+  //   int price,
+  //   String placeName,
+  //   String order,
+  //   int orderSeq,
+  //   String pic,
+  //   int shopSeq,
+  // ) {
+  //   slideDialog.showSlideDialog(
+  //     context: context,
+  //     child: Expanded(
+  //       child: SingleChildScrollView(
+  //         child: Container(
+  //           child: Column(
+  //             children: <Widget>[
+  //               Row(
+  //                 // crossAxisAlignment: CrossAxisAlignment.center,
+  //                 textBaseline: TextBaseline.alphabetic,
+  //                 children: [
+  //                   Padding(
+  //                       padding: EdgeInsets.only(
+  //                           left: MediaQuery.of(context).size.width * 0.25)),
+  //                   Text(
+  //                     '${placeName}',
+  //                     style: TextStyle(
+  //                       fontFamily: "nanumB",
+  //                       fontWeight: FontWeight.w900,
+  //                       fontSize: 18.0,
+  //                     ),
+  //                   ),
+  //                   Text(
+  //                     "에서 ",
+  //                     style: TextStyle(
+  //                       fontFamily: "nanumB",
+  //                       fontWeight: FontWeight.w500,
+  //                       fontSize: 11,
+  //                     ),
+  //                   ),
+  //                   Text(
+  //                     " 주문!",
+  //                     style: TextStyle(
+  //                       fontFamily: "nanumB",
+  //                       fontWeight: FontWeight.w500,
+  //                       fontSize: 18,
+  //                     ),
+  //                   ),
+  //                   Padding(
+  //                     padding: EdgeInsets.only(right: 15),
+  //                   ),
+  //                 ],
+  //               ),
+  //               Padding(
+  //                 padding: EdgeInsets.only(
+  //                     top: MediaQuery.of(context).size.height * 0.02),
+  //               ),
+
+  //               Container(
+  //                 padding: EdgeInsets.only(left: 20.0, bottom: 15.0),
+  //               ),
+  //               Container(
+  //                 padding: EdgeInsets.only(left: 12.0, bottom: 20.0),
+  //               ),
+  //               Padding(
+  //                   padding: const EdgeInsets.only(left: 5.0, right: 5),
+  //                   child: Container(
+  //                       padding: EdgeInsets.only(top: 5),
+  //                       decoration: BoxDecoration(border: Border.all()),
+  //                       width: MediaQuery.of(context).size.width * 0.8,
+  //                       height: MediaQuery.of(context).size.height * 0.3,
+  //                       child: Image.network(
+  //                         'http://hndsolution.iptime.org:8086${pic}',
+  //                         width: MediaQuery.of(context).size.width * 0.13,
+  //                         height: MediaQuery.of(context).size.height * 0.15,
+  //                         fit: BoxFit.fitWidth,
+  //                       ))),
+  //               Container(
+  //                 padding: EdgeInsets.only(left: 20.0, bottom: 10.0),
+  //               ),
+
+  //               Row(
+  //                 crossAxisAlignment: CrossAxisAlignment.end,
+  //                 textBaseline: TextBaseline.alphabetic,
+  //                 children: [
+  //                   Padding(
+  //                     padding: EdgeInsets.only(left: 15, top: 15),
+  //                   ),
+  //                   Padding(
+  //                       padding: EdgeInsets.only(left: 10, top: 30),
+  //                       child: Container(
+  //                         width: MediaQuery.of(context).size.width * 0.9,
+  //                         child: order.length > 45
+  //                             ? Text(
+  //                                 "${order.substring(0, 43)}...",
+  //                                 //'가ㅏ가가각가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가각가가가가가ㅏ가각가가ㅏ가가각',
+  //                                 maxLines: 7,
+  //                                 style: TextStyle(
+  //                                   fontFamily: "nanumR",
+  //                                   fontWeight: FontWeight.w700,
+  //                                   fontSize: 15,
+  //                                 ),
+  //                               )
+  //                             : Text(
+  //                                 order,
+  //                                 //'가ㅏ가가각가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가각가가가가가ㅏ가각가가ㅏ가가각',
+  //                                 maxLines: 7,
+  //                                 style: TextStyle(
+  //                                   fontFamily: "nanumR",
+  //                                   fontWeight: FontWeight.w700,
+  //                                   fontSize: 15,
+  //                                 ),
+  //                               ),
+  //                       )),
+  //                 ],
+  //               ),
+  //               Padding(
+  //                 padding: EdgeInsets.only(right: 5, bottom: 20),
+  //               ),
+
+  //               // Padding(
+  //               //     padding: EdgeInsets.only(bottom: 15, left: 15),
+  //               //     child: Align(
+  //               //       alignment: Alignment.bottomRight,
+  //               //       child: FlatButton(
+  //               //         color: Colors.black,
+  //               //         onPressed: () {
+  //               //           Navigator.of(context).pop();
+  //               //         },
+  //               //         child: Text('확인',
+  //               //             style: TextStyle(
+  //               //               fontFamily: "nanumR",
+  //               //               fontSize: 13,
+  //               //               fontWeight: FontWeight.w900,
+  //               //             )),
+  //               //         textColor: Colors.black,
+  //               //       ),
+  //               //     )),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //     barrierColor: Colors.white.withOpacity(0.7),
+  //     pillColor: Colors.amberAccent,
+  //     backgroundColor: Colors.white,
+  //   );
+  // }
+
+  writingReview(orderSeq, shopName, order, userId, userSeq) async {
     Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => new Review(shopId, shopName, order, userId)));
+        builder: (context) =>
+            new Review(orderSeq, shopName, order, userId, userSeq)));
+  }
+
+  webView(placeName, shopSeq, userId, userPassword) async {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => WebViewContainer(
+                placeName, shopSeq, userId, userPassword, userChk, "1")));
   }
 
   readingMyReview(shopId, shopName, order, userId) async {
@@ -394,48 +1446,48 @@ class _UsageHistoryState extends State<UsageHistory> {
 
   myReview() async {
     Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => new MyReview()));
+        .push(MaterialPageRoute(builder: (context) => new MyReview(userId)));
   }
 
   var userPassword;
   void _handleURLButtonPress(BuildContext context, String url, String placeName,
-      int userSeq, String userId) {
+      int shopSeq, String userId) {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) =>
-                WebViewContainer(placeName, userSeq, userId, userPassword)));
-
-    // Navigator.pushNamed(context, '/webview');
+            builder: (context) => WebViewContainer(
+                placeName, shopSeq, userId, userPassword, userChk, "1")));
   }
 
   Widget _usageCard(reviewInfoList) {
-    print(_value);
-
     if (_value == 1) {
     } else if (_value == 2) {
-      reviewInfoList =
-          reviewInfoList.where((element) => element['review'] == "Y").toList();
+      reviewInfoList = reviewInfoList
+          .where((element) => element['ORDER_STATUS'] == "3")
+          .toList();
     } else if (_value == 3) {
-      reviewInfoList =
-          reviewInfoList.where((element) => element['review'] == "N").toList();
+      reviewInfoList = reviewInfoList
+          .where((element) => element['ORDER_STATUS'] == "9")
+          .toList();
     }
-    reviewInfoList
-        .sort((b, a) => int.parse(a['date']).compareTo(int.parse(b['date'])));
+
+    reviewInfoList.sort((b, a) =>
+        int.parse(a['RESERVE_DATE']).compareTo(int.parse(b['RESERVE_DATE'])));
 
     return ListView.builder(
         scrollDirection: Axis.vertical,
         shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
         itemCount: reviewInfoList.length == null ? null : reviewInfoList.length,
         padding: EdgeInsets.zero,
         itemBuilder: (context, position) {
-          var date = reviewInfoList[position]['date'];
+          var date = reviewInfoList[position]['RESERVE_DATE'];
 
           DateTime now = DateTime.now();
 
           var orderDate = DateTime.parse(date);
 
-          date = reviewInfoList[position]['date'];
+          date = reviewInfoList[position]['RESERVE_DATE'];
           year = date.substring(0, 4);
           month = date.substring(4, 6);
           day = date.substring(6, 8);
@@ -445,288 +1497,804 @@ class _UsageHistoryState extends State<UsageHistory> {
           String showDate = '${year}년${month}월${day}일';
           int compareDate = now.difference(orderDate).inDays;
 
-          return Container(
-            height: height * 0.2,
-            width: width * 0.85,
-            child: Card(
-                elevation: 1,
-                child: Row(
-                  children: <Widget>[
-                    Container(
-                      decoration: BoxDecoration(border: Border.all()),
-                      width: width * 0.25,
-                      height: height * 0.2,
-                      child: Padding(
-                        padding: EdgeInsets.only(top: height * 0.005),
-                        child: InkWell(
-                          onTap: () {
-                            setState(() {
-                              _handleURLButtonPress(
-                                  context,
-                                  '${webviewDefault}/shopTmplatView.do',
-                                  reviewInfoList[position]['place_name'],
-                                  12,
-                                  userId);
-                            });
-                          },
-                          child: Image.network(
-                            reviewInfoList[position]['place_url'],
-                            width: MediaQuery.of(context).size.width * 0.13,
-                            height: MediaQuery.of(context).size.height * 0.15,
-                            fit: BoxFit.fitWidth,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(right: width * 0.005),
-                    ),
-                    Container(
-                      width: width * 0.42,
-                      height: height * 0.15,
-                      child: Column(
-                        children: <Widget>[
-                          Align(
-                            alignment: Alignment.topLeft,
-                            child: Padding(
-                              padding: EdgeInsets.only(
-                                  left: width * 0.01, top: height * 0.005),
-                              child: InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    _handleURLButtonPress(
-                                        context,
-                                        '${webviewDefault}/shopTmplatView.do',
-                                        reviewInfoList[position]['place_name'],
-                                        12,
-                                        userId);
-                                  });
-                                },
-                                child: reviewInfoList[position]['place_name']
-                                            .length >
-                                        15
-                                    ? Text(
-                                        // "가가가가가가가가가가가가가가가...",
-                                        "${reviewInfoList[position]['place_name'].substring(0, 15)}...",
-                                        style: TextStyle(
-                                          fontFamily: "nanumB",
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 17.0,
-                                        ),
-                                      )
-                                    : Text(
-                                        reviewInfoList[position]['place_name'],
-                                        //"안녕하세요요요요요요",
-                                        style: TextStyle(
-                                          fontFamily: "nanumB",
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 17.0,
-                                        ),
-                                      ),
-                              ),
-                            ),
-                          ),
-                          Align(
-                            alignment: Alignment.topLeft,
-                            child: Padding(
-                              padding: EdgeInsets.only(
-                                  left: width * 0.01, top: height * 0.02),
-                              child:
-                                  reviewInfoList[position]['order'].length < 105
-                                      ? Text(
-                                          "${reviewInfoList[position]['order']}",
-                                          maxLines: 5,
-                                          style: TextStyle(
-                                            fontFamily: "nanumR",
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 12,
-                                          ),
-                                        )
-                                      : Text(
-                                          "${reviewInfoList[position]['order'].substring(0, 100)}...",
-                                          maxLines: 5,
-                                          style: TextStyle(
-                                            fontFamily: "nanumR",
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      width: width * 0.3,
-                      child: Column(
-                        children: <Widget>[
-                          reviewInfoList[position]['review'] == "Y"
-                              ? Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: <Widget>[
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                        top: height * 0.01,
-                                      ),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.amberAccent,
-                                          border: Border.all(
-                                            color: Colors.amberAccent,
-                                            width: 1.8,
-                                          ),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(
-                                                  5.0) //                 <--- border radius here
-                                              ),
-                                        ),
-                                        child: Text(
-                                          '리뷰완료',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            fontFamily: "nanumR",
-                                            fontWeight: FontWeight.w900,
-                                            fontSize: 10,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                        left: width * 0.02,
-                                        right: width * 0.01,
-                                        top: height * 0.01,
-                                      ),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.blue[400],
-                                          border: Border.all(
-                                            color: Colors.blueAccent,
-                                            width: 1.8,
-                                          ),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(
-                                                  5.0) //                 <--- border radius here
-                                              ),
-                                        ),
-                                        child: Text(
-                                          '포인트',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            fontFamily: "nanumR",
-                                            fontWeight: FontWeight.w900,
-                                            fontSize: 10,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              : Align(
-                                  alignment: Alignment.topRight,
+          String startHour, startMin, endHour, endMin;
+          TimeOfDay startTime, endTime;
+          String holiday = "";
+          holiday = reviewInfoList[position]['HLDY_CD'];
+
+          List<String> restDay;
+
+          if (holiday != null) {
+            restDay = holiday.split(',');
+
+            for (int hold = 0; hold < restDay.length; hold++) {
+              if (restDay.elementAt(hold) == now.weekday.toString()) {
+                dayOpenShop[reviewInfoList[position]["SHOP_SEQ"]] = false;
+              }
+              // print('out ${now.weekday}');
+              // print('out ${restDay.elementAt(hold)}');
+              else {
+                dayOpenShop[reviewInfoList[position]["SHOP_SEQ"]] = true;
+              }
+            }
+          }
+
+          if (now.weekday == 6 || now.weekday == 7) {
+            startHour =
+                reviewInfoList[position]['WEEK_BEGIN_TIME'].substring(0, 2);
+            startMin =
+                reviewInfoList[position]['WEEK_BEGIN_TIME'].substring(2, 4);
+            endHour = reviewInfoList[position]['WEEK_END_TIME'].substring(0, 2);
+            endMin = reviewInfoList[position]['WEEK_END_TIME'].substring(2, 4);
+
+            startTime = TimeOfDay(
+                hour: int.parse(startHour), minute: int.parse(startMin));
+            endTime =
+                TimeOfDay(hour: int.parse(endHour), minute: int.parse(endMin));
+          } else {
+            startHour =
+                reviewInfoList[position]['BSN_BEGIN_TIME'].substring(0, 2);
+            startMin =
+                reviewInfoList[position]['BSN_BEGIN_TIME'].substring(2, 4);
+            endHour = reviewInfoList[position]['BSN_END_TIME'].substring(0, 2);
+            endMin = reviewInfoList[position]['BSN_END_TIME'].substring(2, 4);
+
+            startTime = TimeOfDay(
+                hour: int.parse(startHour), minute: int.parse(startMin));
+            endTime =
+                TimeOfDay(hour: int.parse(endHour), minute: int.parse(endMin));
+          }
+          openingShop(startTime, endTime, reviewInfoList[position]['SHOP_SEQ']);
+
+          return reviewInfoList[position]['ORDER_STATUS'] == "3"
+              ? SingleChildScrollView(
+                  physics: ScrollPhysics(),
+                  child: Container(
+                    height: height * 0.233,
+                    width: width * 0.9,
+                    child: Column(
+                      children: [
+                        Card(
+                            elevation: 1,
+                            child: Row(
+                              children: <Widget>[
+                                Container(
+                                  //decoration: BoxDecoration(border: Border.all()),
+                                  width: width * 0.3,
+                                  height: height * 0.1,
                                   child: Padding(
                                     padding: EdgeInsets.only(
-                                      right: width * 0.01,
-                                      top: height * 0.02,
-                                    ),
-                                    child: Text(
-                                      ' ${showDate}',
-                                      style: TextStyle(
-                                        fontFamily: "nanumR",
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 13.5,
-                                      ),
-                                    ),
-                                  )),
-                          Padding(
-                            padding: EdgeInsets.only(bottom: height * 0.01),
-                          ),
-                          reviewInfoList[position]['review'] == "Y"
-                              ? Align(
-                                  alignment: Alignment.topRight,
-                                  child: Padding(
-                                    padding: EdgeInsets.only(
-                                        top: height * 0.01,
-                                        right: width * 0.01),
-                                    child: Text(
-                                      ' ${showDate}',
-                                      style: TextStyle(
-                                        fontFamily: "nanumR",
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 13.5,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              : Text(""),
-                          Spacer(),
-                          reviewInfoList[position]['review'] == "Y"
-                              ? Container(
-                                  alignment: Alignment.bottomRight,
-                                  child: FlatButton(
-                                    onPressed: () {
-                                      if (reviewInfoList[position]
-                                              ['review_picture'] ==
-                                          "")
-                                        _showOnlyReviewDialog(
-                                            showDate,
-                                            reviewInfoList[position]
-                                                ['place_url'],
-                                            reviewInfoList[position]
-                                                ['place_name'],
-                                            reviewInfoList[position]['order'],
-                                            reviewInfoList[position]['story']);
-                                      else
-                                        _showIncludePicutreDialog(
-                                            showDate,
-                                            reviewInfoList[position]
-                                                ['review_picture'],
-                                            reviewInfoList[position]
-                                                ['place_name'],
-                                            reviewInfoList[position]['order'],
-                                            reviewInfoList[position]['story']);
-                                    },
-                                    child: Text('리뷰 보기',
-                                        style: TextStyle(
-                                          fontFamily: "nanumR",
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w800,
-                                        )),
-                                  ),
-                                )
-                              : Container(
-                                  alignment: Alignment.bottomRight,
-                                  child: FlatButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        writingReview(
-                                          reviewInfoList[position]['shopId'],
-                                          reviewInfoList[position]
-                                              ['place_name'],
-                                          reviewInfoList[position]['order'],
-                                          reviewInfoList[position]['userId'],
-                                        );
-                                      });
-                                    },
-                                    child: Text('리뷰 쓰기',
-                                        style: TextStyle(
-                                          fontFamily: "nanumR",
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w800,
-                                        )),
+                                        left: width * 0.01,
+                                        top: height * 0.005),
+                                    child: InkWell(
+                                        onTap: () {},
+                                        child: reviewInfoList[position]
+                                                    ['FILE_URL'] ==
+                                                null
+                                            ? Image.asset(
+                                                'assets/icon/noImage.png')
+                                            : Image.network(
+                                                'http://hndsolution.iptime.org:8086${reviewInfoList[position]['FILE_URL']}',
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.28,
+                                                height: MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    0.2,
+                                                fit: BoxFit.fitWidth,
+                                              )),
                                   ),
                                 ),
-                        ],
-                      ),
+                                Padding(
+                                  padding: EdgeInsets.only(right: width * 0.01),
+                                ),
+                                Container(
+                                  width: width * 0.34,
+                                  height: height * 0.14,
+                                  child: Column(
+                                    children: <Widget>[
+                                      Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Padding(
+                                          padding: EdgeInsets.only(
+                                            left: width * 0.01,
+                                            top: height * 0.03,
+                                          ),
+                                          child: InkWell(
+                                            onTap: () {
+                                              if (this.mounted) {
+                                                setState(() {
+                                                  userDataCheck(
+                                                      reviewInfoList[position]
+                                                          ['SHOP_NAME'],
+                                                      reviewInfoList[position]
+                                                          ['SHOP_SEQ']);
+                                                });
+                                              }
+                                            },
+                                            child: reviewInfoList[position]
+                                                            ['SHOP_NAME']
+                                                        .length >
+                                                    14
+                                                ? Text(
+                                                    "${reviewInfoList[position]['SHOP_NAME'].substring(0, 15)}...",
+                                                    style: TextStyle(
+                                                      fontFamily: "nanumB",
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                      fontSize: 16.0,
+                                                    ),
+                                                  )
+                                                : Text(
+                                                    reviewInfoList[position]
+                                                        ['SHOP_NAME'],
+                                                    //"가나다라마바사하아나자아러너",
+                                                    style: TextStyle(
+                                                      fontFamily: "nanumB",
+                                                      fontWeight:
+                                                          FontWeight.w900,
+                                                      fontSize: 18.0,
+                                                    ),
+                                                  ),
+                                          ),
+                                        ),
+                                      ),
+                                      Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Padding(
+                                          padding: EdgeInsets.only(
+                                            left: width * 0.01,
+                                            top: height * 0.008,
+                                          ),
+                                          child: reviewInfoList[position]
+                                                      ['MENU_NAME'] ==
+                                                  null
+                                              ? Text("")
+                                              : reviewInfoList[position]
+                                                              ['MENU_NAME']
+                                                          .length <
+                                                      60
+                                                  ? Text(
+                                                      "${reviewInfoList[position]['MENU_NAME']}",
+                                                      maxLines: 6,
+                                                      style: TextStyle(
+                                                        fontFamily: "nanumB",
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                        fontSize: 15,
+                                                      ),
+                                                    )
+                                                  : Text(
+                                                      "${reviewInfoList[position]['MENU_NAME'].substring(0, 35)}",
+                                                      // "아이스 아메리카노 2개 카푸치노 1개 삼겹살 2인분 소주 6병",
+                                                      maxLines: 3,
+                                                      style: TextStyle(
+                                                        fontFamily: "nanumB",
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        fontSize: 12.5,
+                                                      ),
+                                                    ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                Spacer(),
+                                Container(
+                                  width: width * 0.32,
+                                  height: height * 0.14,
+                                  child: Column(
+                                    children: <Widget>[
+                                      reviewInfoList[position]['REVIEW_YN'] ==
+                                              "Y"
+                                          ? Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              children: <Widget>[
+                                                Padding(
+                                                  padding: EdgeInsets.only(
+                                                      right: 5, top: 5),
+                                                  child: Container(
+                                                    child: InkWell(
+                                                      onTap: () {
+                                                        showDialog(
+                                                            context: context,
+                                                            builder: (_) =>
+                                                                CupertinoAlertDialog(
+                                                                  title: Text(
+                                                                      '정말 삭제하시겠어요?'),
+                                                                  content:
+                                                                      Text(""),
+                                                                  actions: <
+                                                                      Widget>[
+                                                                    CupertinoDialogAction(
+                                                                      child: Text(
+                                                                          '아니요'),
+                                                                      onPressed:
+                                                                          () =>
+                                                                              Navigator.of(context).pop(),
+                                                                    ),
+                                                                    CupertinoDialogAction(
+                                                                        child: Text(
+                                                                            '네'),
+                                                                        onPressed:
+                                                                            () {
+                                                                          if (this
+                                                                              .mounted) {
+                                                                            setState(() {
+                                                                              delete(userId, reviewInfoList[position]['ORDER_SEQ']);
+                                                                            });
+                                                                          }
+                                                                        }),
+                                                                  ],
+                                                                ));
+                                                      },
+                                                      child: Icon(
+                                                        Icons.delete,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                          : Align(
+                                              alignment: Alignment.topRight,
+                                              child: Padding(
+                                                padding: EdgeInsets.only(
+                                                    right: width * 0.02,
+                                                    top: height * 0.02),
+                                                child: Text(
+                                                  ' ${showDate}',
+                                                  style: TextStyle(
+                                                    fontFamily: "nanumR",
+                                                    fontWeight: FontWeight.w800,
+                                                    fontSize: 13.5,
+                                                  ),
+                                                ),
+                                              )),
+                                      Padding(
+                                        padding:
+                                            EdgeInsets.only(top: height * 0.01),
+                                      ),
+                                      Spacer(),
+                                      Padding(
+                                        padding: EdgeInsets.only(
+                                            right: width * 0.03,
+                                            bottom: height * 0.02),
+                                        child: Align(
+                                          alignment: Alignment.bottomRight,
+                                          child: reviewInfoList[position]
+                                                          ['TOTAL_PRICE']
+                                                      .toString()
+                                                      .length >
+                                                  7
+                                              ? Text(
+                                                  "총액: ${reviewInfoList[position]['TOTAL_PRICE']}원",
+                                                  //"총액: 200,000원",
+                                                  textAlign: TextAlign.end,
+                                                  style: TextStyle(
+                                                    fontFamily: "nanumR",
+                                                    fontWeight: FontWeight.w700,
+                                                    fontSize: 12,
+                                                  ),
+                                                )
+                                              : Text(
+                                                  "총액: ${reviewInfoList[position]['TOTAL_PRICE']}원",
+                                                  //"총액: 200,000원",
+                                                  textAlign: TextAlign.end,
+                                                  style: TextStyle(
+                                                    fontFamily: "nanumR",
+                                                    fontWeight: FontWeight.w700,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            )),
+                        reviewInfoList[position]['REVIEW_YN'] == "N"
+                            ? Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                textBaseline: TextBaseline.alphabetic,
+                                children: [
+                                  Spacer(),
+                                  Container(
+                                    alignment: Alignment.bottomRight,
+                                    child: FlatButton(
+                                      onPressed: () {
+                                        // _showDetailDialog(
+                                        //     showDate,
+                                        //     reviewInfoList[position]['TOTAL_PRICE'],
+                                        //     reviewInfoList[position]['SHOP_NAME'],
+                                        //     reviewInfoList[position]['MENU_NAME'],
+                                        //     reviewInfoList[position]['ORDER_SEQ'],
+                                        //     reviewInfoList[position]['FILE_URL'],
+                                        //     reviewInfoList[position]['SHOP_SEQ']);
+                                        _usageDetail(
+                                            showDate,
+                                            reviewInfoList[position]
+                                                ['TOTAL_PRICE'],
+                                            reviewInfoList[position]
+                                                ['SHOP_NAME'],
+                                            reviewInfoList[position]
+                                                ['MENU_NAME'],
+                                            reviewInfoList[position]
+                                                ['ORDER_SEQ'],
+                                            reviewInfoList[position]
+                                                ['FILE_URL'],
+                                            reviewInfoList[position]
+                                                ['SHOP_SEQ'],
+                                            reviewInfoList[position]
+                                                ['BSN_BEGIN_TIME'],
+                                            reviewInfoList[position]
+                                                ['BSN_END_TIME'],
+                                            reviewInfoList[position]
+                                                ['WEEK_BEGIN_TIME'],
+                                            reviewInfoList[position]
+                                                ['WEEK_END_TIME']);
+                                      },
+                                      child: Text('상세 내역',
+                                          style: TextStyle(
+                                            fontFamily: "nanumR",
+                                            fontSize: 13.5,
+                                            fontWeight: FontWeight.w600,
+                                          )),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.only(
+                                      right: width * 0.005,
+                                    ),
+                                    alignment: Alignment.bottomRight,
+                                    child: FlatButton(
+                                      onPressed: () {
+                                        if (this.mounted) {
+                                          setState(() {
+                                            writingReview(
+                                              reviewInfoList[position]
+                                                  ['ORDER_SEQ'],
+                                              reviewInfoList[position]
+                                                  ['SHOP_NAME'],
+                                              reviewInfoList[position]
+                                                          ['MENU_NAME'] ==
+                                                      null
+                                                  ? ""
+                                                  : reviewInfoList[position]
+                                                      ['MENU_NAME'],
+                                              userId,
+                                              reviewInfoList[position]
+                                                  ['USER_SEQ'],
+                                            );
+                                          });
+                                        }
+                                      },
+                                      child: Text('리뷰 쓰기',
+                                          style: TextStyle(
+                                            fontFamily: "nanumR",
+                                            fontSize: 13.5,
+                                            fontWeight: FontWeight.w800,
+                                          )),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                textBaseline: TextBaseline.alphabetic,
+                                children: [
+                                  Spacer(),
+                                  Container(
+                                    alignment: Alignment.bottomRight,
+                                    child: FlatButton(
+                                      onPressed: () {
+                                        // _showDetailDialog(
+                                        //   showDate,
+                                        //   reviewInfoList[position]['TOTAL_PRICE'],
+                                        //   reviewInfoList[position]['SHOP_NAME'],
+                                        //   reviewInfoList[position]['MENU_NAME'],
+                                        //   reviewInfoList[position]['ORDER_SEQ'],
+                                        //   reviewInfoList[position]['FILE_URL'],
+                                        //   reviewInfoList[position]['SHOP_SEQ'],
+                                        // );
+                                        _usageDetail(
+                                            showDate,
+                                            reviewInfoList[position]
+                                                ['TOTAL_PRICE'],
+                                            reviewInfoList[position]
+                                                ['SHOP_NAME'],
+                                            reviewInfoList[position]
+                                                ['MENU_NAME'],
+                                            reviewInfoList[position]
+                                                ['ORDER_SEQ'],
+                                            reviewInfoList[position]
+                                                ['FILE_URL'],
+                                            reviewInfoList[position]
+                                                ['SHOP_SEQ'],
+                                            reviewInfoList[position]
+                                                ['BSN_BEGIN_TIME'],
+                                            reviewInfoList[position]
+                                                ['BSN_END_TIME'],
+                                            reviewInfoList[position]
+                                                ['WEEK_BEGIN_TIME'],
+                                            reviewInfoList[position]
+                                                ['WEEK_END_TIME']);
+                                      },
+                                      child: Text('상세 내역',
+                                          style: TextStyle(
+                                            fontFamily: "nanumR",
+                                            fontSize: 13.5,
+                                            fontWeight: FontWeight.w600,
+                                          )),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding:
+                                        EdgeInsets.only(right: width * 0.005),
+                                    alignment: Alignment.bottomRight,
+                                    child: FlatButton(
+                                      onPressed: () {
+                                        reviewInfoList[position]
+                                                        ['REVIEW_IMG_URL'] ==
+                                                    null ||
+                                                reviewInfoList[position]
+                                                        ['REVIEW_IMG_URL'] ==
+                                                    ""
+                                            ? _reviewStory(
+                                                showDate,
+                                                reviewInfoList[position]
+                                                    ['SHOP_NAME'],
+                                                reviewInfoList[position]
+                                                    ['MENU_NAME'],
+                                                reviewInfoList[position]
+                                                    ['REVIEW_COMMENT'],
+                                              )
+                                            : _reviewPicStory(
+                                                showDate,
+                                                reviewInfoList[position]
+                                                    ['SHOP_NAME'],
+                                                reviewInfoList[position]
+                                                    ['MENU_NAME'],
+                                                reviewInfoList[position]
+                                                    ['REVIEW_COMMENT'],
+                                                reviewInfoList[position]
+                                                    ['REVIEW_IMG_URL'],
+                                              );
+                                      },
+                                      child: Text('리뷰 보기',
+                                          style: TextStyle(
+                                            fontFamily: "nanumR",
+                                            fontSize: 13.5,
+                                            fontWeight: FontWeight.w600,
+                                          )),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                        Container(
+                          child: Divider(
+                            height: 1.5,
+                            color: Colors.black,
+                          ),
+                          padding: EdgeInsets.only(left: 12.0, right: 12.0),
+                        ),
+                      ],
                     ),
-                  ],
-                )),
-          );
+                  ),
+                )
+              : SingleChildScrollView(
+                  physics: ScrollPhysics(),
+                  child: Container(
+                    height: height * 0.233,
+                    width: width * 0.9,
+                    child: Column(
+                      children: [
+                        Card(
+                            elevation: 1,
+                            child: Row(
+                              children: <Widget>[
+                                Container(
+                                  //decoration: BoxDecoration(border: Border.all()),
+                                  width: width * 0.3,
+                                  height: height * 0.1,
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                        left: width * 0.01,
+                                        top: height * 0.005),
+                                    child: InkWell(
+                                        onTap: () {},
+                                        child: reviewInfoList[position]
+                                                    ['FILE_URL'] ==
+                                                null
+                                            ? Image.asset(
+                                                'assets/icon/noImage.png')
+                                            : Image.network(
+                                                'http://hndsolution.iptime.org:8086${reviewInfoList[position]['FILE_URL']}',
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.28,
+                                                height: MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    0.2,
+                                                fit: BoxFit.fitWidth,
+                                              )),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(right: width * 0.01),
+                                ),
+                                Container(
+                                  width: width * 0.34,
+                                  height: height * 0.14,
+                                  child: Column(
+                                    children: <Widget>[
+                                      Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Padding(
+                                          padding: EdgeInsets.only(
+                                            left: width * 0.01,
+                                            top: height * 0.03,
+                                          ),
+                                          child: InkWell(
+                                            onTap: () {
+                                              if (this.mounted) {
+                                                setState(() {
+                                                  userDataCheck(
+                                                      reviewInfoList[position]
+                                                          ['SHOP_NAME'],
+                                                      reviewInfoList[position]
+                                                          ['SHOP_SEQ']);
+                                                });
+                                              }
+                                            },
+                                            child: reviewInfoList[position]
+                                                            ['SHOP_NAME']
+                                                        .length >
+                                                    14
+                                                ? Text(
+                                                    "${reviewInfoList[position]['SHOP_NAME'].substring(0, 15)}...",
+                                                    style: TextStyle(
+                                                      color: Colors.grey[400],
+                                                      fontFamily: "nanumR",
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                      fontSize: 16.0,
+                                                    ),
+                                                  )
+                                                : Text(
+                                                    reviewInfoList[position]
+                                                        ['SHOP_NAME'],
+                                                    style: TextStyle(
+                                                      color: Colors.grey[400],
+                                                      fontFamily: "nanumR",
+                                                      fontWeight:
+                                                          FontWeight.w900,
+                                                      fontSize: 18.0,
+                                                    ),
+                                                  ),
+                                          ),
+                                        ),
+                                      ),
+                                      Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Padding(
+                                          padding: EdgeInsets.only(
+                                            left: width * 0.01,
+                                            top: height * 0.008,
+                                          ),
+                                          child: reviewInfoList[position]
+                                                      ['MENU_NAME'] ==
+                                                  null
+                                              ? Text("")
+                                              : reviewInfoList[position]
+                                                              ['MENU_NAME']
+                                                          .length <
+                                                      60
+                                                  ? Text(
+                                                      "${reviewInfoList[position]['MENU_NAME']}",
+                                                      maxLines: 6,
+                                                      style: TextStyle(
+                                                        color: Colors.grey[400],
+                                                        fontFamily: "nanumR",
+                                                        fontWeight:
+                                                            FontWeight.w900,
+                                                        fontSize: 15,
+                                                      ),
+                                                    )
+                                                  : Text(
+                                                      "${reviewInfoList[position]['MENU_NAME'].substring(0, 60)}",
+                                                      maxLines: 6,
+                                                      style: TextStyle(
+                                                        color: Colors.grey[400],
+                                                        fontFamily: "nanumR",
+                                                        fontWeight:
+                                                            FontWeight.w900,
+                                                        fontSize: 15,
+                                                      ),
+                                                    ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Spacer(),
+                                Container(
+                                  width: width * 0.32,
+                                  height: height * 0.14,
+                                  child: Column(
+                                    children: <Widget>[
+                                      Align(
+                                        alignment: Alignment.topRight,
+                                        child: Padding(
+                                          padding:
+                                              EdgeInsets.only(right: 5, top: 5),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.redAccent[100],
+                                              border: Border.all(
+                                                color: Colors.transparent,
+                                                width: 2,
+                                              ),
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(
+                                                      15.0) //                 <--- border radius here
+                                                  ),
+                                            ),
+                                            child: Text(
+                                              '주문취소',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontFamily: "nanumR",
+                                                fontWeight: FontWeight.w900,
+                                                fontSize: 11,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Spacer(),
+                                      // Align(
+                                      //                                       alignment: Alignment.topRight,
+                                      //                                       child: Padding(
+                                      //                                         padding: EdgeInsets.only(
+                                      //                                             right: width * 0.02,
+                                      //                                             top: height * 0.02),
+                                      //                                         child: Text(
+                                      //                                           ' ${showDate}',
+                                      //                                           style: TextStyle(
+                                      //                                             color: Colors.grey[400],
+                                      //                                             fontFamily: "nanumR",
+                                      //                                             fontWeight: FontWeight.w800,
+                                      //                                             fontSize: 13.5,
+                                      //                                           ),
+                                      //                                         ),
+                                      //                                       )),
+
+                                      Align(
+                                        alignment: Alignment.bottomRight,
+                                        child: Padding(
+                                            padding: EdgeInsets.only(
+                                                right: width * 0.03,
+                                                bottom: height * 0.02),
+                                            child: Text(
+                                              reviewInfoList[position]
+                                                          ['CANCEL_REASON'] ==
+                                                      "1"
+                                                  ? '고객 요청'
+                                                  : reviewInfoList[position][
+                                                              'CANCEL_REASON'] ==
+                                                          "2"
+                                                      ? '재료 소진'
+                                                      : reviewInfoList[position]
+                                                                  [
+                                                                  'CANCEL_REASON'] ==
+                                                              "3"
+                                                          ? '업소 사정'
+                                                          : '기타',
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                                fontFamily: "nanumB",
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 14.0,
+                                              ),
+                                            )),
+                                      ),
+
+                                      // Align(
+                                      //         alignment: Alignment.topRight,
+                                      //         child: Padding(
+                                      //           padding: EdgeInsets.only(
+                                      //               right: width * 0.01,
+                                      //               top: height * 0.02),
+                                      //           child: Text(
+                                      //             ' ${showDate}',
+                                      //             style: TextStyle(
+                                      //               fontFamily: "nanumR",
+                                      //               fontWeight: FontWeight.w800,
+                                      //               fontSize: 13.5,
+                                      //             ),
+                                      //           ),
+                                      //         )),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            )),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          //textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Spacer(),
+                            Container(
+                              padding: EdgeInsets.only(right: width * 0.005),
+                              alignment: Alignment.bottomRight,
+                              child: FlatButton(
+                                onPressed: () {
+                                  openShopSeq[reviewInfoList[position]
+                                                  ['SHOP_SEQ']] ==
+                                              true &&
+                                          dayOpenShop[reviewInfoList[position]
+                                                  ['SHOP_SEQ']] ==
+                                              true
+                                      ? setState(() {
+                                          userDataCheck(
+                                              reviewInfoList[position]
+                                                  ['SHOP_NAME'],
+                                              reviewInfoList[position]
+                                                  ['SHOP_SEQ']);
+                                        })
+                                      : showDialog(
+                                          context: context,
+                                          builder: (_) => CupertinoAlertDialog(
+                                                content: Text("영업 시간이 아닙니다"),
+                                                actions: <Widget>[
+                                                  CupertinoDialogAction(
+                                                    child: Text('확인'),
+                                                    onPressed: () =>
+                                                        Navigator.of(context)
+                                                            .pop(),
+                                                  ),
+                                                ],
+                                              ));
+                                  ;
+                                },
+                                child: Text('주문 하기',
+                                    style: TextStyle(
+                                      fontFamily: "nanumR",
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.w600,
+                                    )),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          child: Divider(
+                            height: 1.5,
+                            color: Colors.black,
+                          ),
+                          padding: EdgeInsets.only(left: 12.0, right: 12.0),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
         });
   }
 
-  Future<Map<String, dynamic>> getReview() async {
-    return user.getMyReviewList();
+  getOrderUsageHistory(userId) async {
+    if (userId == null || userId == "") {
+      return "hoit";
+    } else {
+      return orderList.getOrderHistory(userId);
+    }
   }
 
   Widget noData() {
@@ -746,14 +2314,23 @@ class _UsageHistoryState extends State<UsageHistory> {
             "이용내역",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
           ),
+          // actions: <Widget>[
+          //  FlatButton(
+          //           child: Text("내 리뷰",
+          //               style: TextStyle(
+          //                   color: Colors.white, fontWeight: FontWeight.w900)),
+          //           onPressed: myReview)
+
+          // ],
         ),
         body: FutureBuilder(
-            future: getReview(),
+            future: orderFuture,
             builder: (context, AsyncSnapshot snapshot) {
               if (!snapshot.hasData) {
-                return Center(child: CupertinoActivityIndicator());
+                return Center();
               }
-              if (!snapshot.hasData && (userId == null || userId == "")) {
+
+              if (snapshot.data == "hoit") {
                 return Column(
                   children: <Widget>[
                     Padding(
@@ -837,7 +2414,7 @@ class _UsageHistoryState extends State<UsageHistory> {
                         child: Align(
                             alignment: Alignment.center,
                             child: Text(
-                              " 이용내역을 확인하실수 있습니다.",
+                              " 좋아요 목록을 확인하실수 있습니다.",
                               style: TextStyle(
                                 // color: _colorText,
                                 fontSize: 16.0,
@@ -852,9 +2429,9 @@ class _UsageHistoryState extends State<UsageHistory> {
                       height: 50.0,
                       margin: EdgeInsets.all(10),
                       child: RaisedButton(
-                        //onPressed: moveLogin,
+                        onPressed: moveLogin,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50.0)),
+                            borderRadius: BorderRadius.circular(80.0)),
                         padding: EdgeInsets.all(0.0),
                         child: Ink(
                           decoration: BoxDecoration(
@@ -863,16 +2440,16 @@ class _UsageHistoryState extends State<UsageHistory> {
                                 begin: Alignment.centerLeft,
                                 end: Alignment.centerRight,
                               ),
-                              borderRadius: BorderRadius.circular(20.0)),
+                              borderRadius: BorderRadius.circular(30.0)),
                           child: Container(
                             constraints: BoxConstraints(
-                                maxWidth: 200.0, minHeight: 30.0),
+                                maxWidth: 250.0, minHeight: 50.0),
                             alignment: Alignment.center,
                             child: Text(
                               "로그인",
                               textAlign: TextAlign.center,
                               style:
-                                  TextStyle(color: Colors.black, fontSize: 18),
+                                  TextStyle(color: Colors.white, fontSize: 15),
                             ),
                           ),
                         ),
@@ -884,73 +2461,140 @@ class _UsageHistoryState extends State<UsageHistory> {
                   ],
                 );
               }
+
               Map<String, dynamic> reviewInfo = snapshot.data;
-              List<dynamic> reviewInfoList = reviewInfo["LIST"];
 
-              reviewInfoList = reviewInfoList
-                  .where((element) =>
-                      element['using'] == "Y" && userId == element['userId'])
-                  .toList();
-
-              return Container(
-                  child: Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(top: 25),
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Align(
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            '뭐를 샀을까요~~?',
-                            style: TextStyle(
-                                fontFamily: 'nanumR',
-                                fontSize: 20,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w900),
-                          ),
+              if (reviewInfo["LIST"] == "" || reviewInfo["LIST"] == null) {
+                return Container(
+                    child: Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(top: 5),
+                    ),
+                    Row(
+                      children: [
+                        Spacer(),
+                        Container(
+                            padding: EdgeInsets.only(
+                                right:
+                                    MediaQuery.of(context).size.width * 0.08),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(3.0),
+                                color: Colors.transparent,
+                                border: Border.all()),
+                            child: DropdownButton(
+                                value: _value,
+                                items: [
+                                  DropdownMenuItem(
+                                    child: Text("모두 보기"),
+                                    value: 1,
+                                  ),
+                                  DropdownMenuItem(
+                                    child: Text("조리 완료"),
+                                    value: 2,
+                                  ),
+                                  DropdownMenuItem(child: Text("취소"), value: 3),
+                                ],
+                                onChanged: (value) {
+                                  setState(() {
+                                    _value = value;
+                                  });
+                                })),
+                      ],
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 5),
+                    ),
+                    new SizedBox(
+                      height: 10.0,
+                      child: new Center(
+                        child: new Container(
+                          margin: new EdgeInsetsDirectional.only(
+                              start: 1.0, end: 1.0),
+                          height: 2.0,
+                          color: Colors.black,
                         ),
                       ),
-                      Spacer(),
-                      Container(
-                          color: Colors.transparent,
-                          padding: EdgeInsets.only(right: 7),
-                          child: DropdownButton(
-                              value: _value,
-                              items: [
-                                DropdownMenuItem(
-                                  child: Text("모두 보기"),
-                                  value: 1,
-                                ),
-                                DropdownMenuItem(
-                                  child: Text("작성 완료"),
-                                  value: 2,
-                                ),
-                                DropdownMenuItem(child: Text("미작성"), value: 3),
-                              ],
-                              onChanged: (value) {
-                                setState(() {
-                                  _value = value;
-                                });
-                              })),
-                    ],
-                  ),
-                  Container(
-                    child: Divider(
-                      color: Color.fromRGBO(82, 110, 208, 1.0),
                     ),
-                    padding:
-                        EdgeInsets.only(left: 20.0, right: 20.0, bottom: 0.0),
-                  ),
-                  Expanded(
-                      child: reviewInfoList.isEmpty
-                          ? noData()
-                          : _usageCard(reviewInfoList)),
-                ],
-              ));
+                    Container(
+                      padding: EdgeInsets.only(
+                          left: 20.0, right: 20.0, bottom: 10.0),
+                    ),
+                    Expanded(child: noData()),
+                  ],
+                ));
+              } else {
+                List<dynamic> reviewInfoList = reviewInfo["LIST"];
+
+                return Container(
+                    child: Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(
+                          top: MediaQuery.of(context).size.height * 0.01),
+                    ),
+                    Row(
+                      children: [
+                        Spacer(),
+                        reviewInfoList.isEmpty
+                            ? Text("")
+                            : Container(
+                                //  height: MediaQuery.of(context).size.height * 0.8,
+                                padding: const EdgeInsets.only(
+                                    left: 10.0, right: 10.0),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(3.0),
+                                    color: Colors.transparent,
+                                    border: Border.all()),
+                                child: DropdownButton(
+                                    value: _value,
+                                    items: [
+                                      DropdownMenuItem(
+                                        child: Text("모두 보기"),
+                                        value: 1,
+                                      ),
+                                      DropdownMenuItem(
+                                        child: Text("조리 완료"),
+                                        value: 2,
+                                      ),
+                                      DropdownMenuItem(
+                                          child: Text("취소"), value: 3),
+                                    ],
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _value = value;
+                                      });
+                                    })),
+                      ],
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 5),
+                    ),
+                    new SizedBox(
+                      height: 10.0,
+                      child: new Center(
+                        child: new Container(
+                          margin: new EdgeInsetsDirectional.only(
+                              start: 1.0, end: 1.0),
+                          height: 2.0,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(
+                          left: 20.0, right: 20.0, bottom: 10.0),
+                    ),
+                    reviewInfoList.isEmpty
+                        ? noData()
+                        : Expanded(
+                            child: SingleChildScrollView(
+                              child: _usageCard(reviewInfoList),
+                            ),
+                          ),
+                  ],
+                ));
+              }
             }));
   }
 }

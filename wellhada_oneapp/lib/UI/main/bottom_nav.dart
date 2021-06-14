@@ -1,3 +1,4 @@
+// @dart=2.9
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hexcolor/hexcolor.dart';
@@ -6,7 +7,7 @@ import 'package:wellhada_oneapp/UI/main/bottom_detail/private_info.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_detail/usage_history.dart';
 
 import 'package:wellhada_oneapp/UI/usageHistory_detail/review.dart';
-import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
+import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
 import 'package:wellhada_oneapp/model/menu/drawer_detail/qr_34.dart';
 
 import 'bottom_detail/favorite.dart';

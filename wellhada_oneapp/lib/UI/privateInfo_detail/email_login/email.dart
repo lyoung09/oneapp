@@ -1,3 +1,4 @@
+// @dart=2.9
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
@@ -6,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:wellhada_oneapp/model/login/userData.dart';
 import 'package:validators/validators.dart' as validator;
-import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
+import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
 
 import 'mobile.dart';
 
@@ -372,7 +373,7 @@ class _EmailState extends State<Email> {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
     return Scaffold(
-        resizeToAvoidBottomPadding: false,
+        resizeToAvoidBottomInset: false,
         body: Stack(
           children: <Widget>[
             Container(

@@ -1,3 +1,4 @@
+// @dart=2.9
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -194,7 +195,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     return Scaffold(
-      resizeToAvoidBottomPadding: false,
+      resizeToAvoidBottomInset: false,
       body: FutureBuilder(
           future: _function(),
           builder: (context, snapshot) {
@@ -204,30 +205,26 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.only(top: size.height / 4),
-                      ),
-                      Text(
-                        '#스토리',
-                        style: TextStyle(
-                          fontFamily: 'nanumB',
-                          fontWeight: FontWeight.w900,
-                          fontSize: 40.0,
-                          color: Hexcolor('${appFontColor}'),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(top: size.height / 2),
-                      ),
-                      Text(
-                        'HndSolution',
-                        style: TextStyle(
-                          fontFamily: 'nanumB',
-                          fontWeight: FontWeight.w900,
-                          fontSize: 20.0,
-                          color: Hexcolor('${appFontColor}'),
-                        ),
-                      ),
+                      Center(
+                          child: Image.asset(
+                        "assets/icon/intro_dosis.png",
+                        //width: size.width * 0.9,
+                      )),
+                      // Padding(
+                      //   padding: EdgeInsets.only(bottom: 20),
+                      //   child: Align(
+                      //     alignment: Alignment.bottomCenter,
+                      //     child: Text(
+                      //       'HndSolution',
+                      //       style: TextStyle(
+                      //         fontFamily: 'nanumB',
+                      //         fontWeight: FontWeight.w900,
+                      //         fontSize: 20.0,
+                      //         color: Hexcolor('${appFontColor}'),
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),

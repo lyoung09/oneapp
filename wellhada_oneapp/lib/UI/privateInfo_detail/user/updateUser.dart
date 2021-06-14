@@ -1,3 +1,4 @@
+// @dart=2.9
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,7 @@ import 'package:wellhada_oneapp/UI/main/bottom_detail/private_info.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_nav.dart';
 import 'package:wellhada_oneapp/UI/privateInfo_detail/email_login/mobile.dart';
 
-import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
+import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
 import 'package:wellhada_oneapp/model/login/certification_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
@@ -232,7 +233,7 @@ class _UserUpdateState extends State<UserUpdate> {
             builder: (context, child) {
               return FittedBox(
                 child: Theme(
-                  isMaterialAppTheme: true,
+                  //isMaterialAppTheme: true,
                   data: ThemeData.light().copyWith(
                     primaryColor: Colors.black,
                     accentColor: Colors.white,
@@ -544,9 +545,7 @@ class _UserUpdateState extends State<UserUpdate> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Padding(
-                            padding: EdgeInsets.only(left: 5),
-                          ),
+                          Padding(padding: EdgeInsets.only(left: 8)),
                           Text(
                             "닉네임 : ",
                             style: TextStyle(color: Colors.black, fontSize: 20),
@@ -596,9 +595,7 @@ class _UserUpdateState extends State<UserUpdate> {
                       ),
                       Row(
                         children: [
-                          Padding(
-                            padding: EdgeInsets.only(left: 5),
-                          ),
+                          Padding(padding: EdgeInsets.only(left: 8)),
                           Text(
                             "핸드폰 : ",
                             style: TextStyle(color: Colors.black, fontSize: 20),
@@ -611,10 +608,12 @@ class _UserUpdateState extends State<UserUpdate> {
                                 controller: mobileController,
                                 onChanged: (value) {
                                   setState(() {
-                                    if (value != userPhone)
+                                    if (value != userPhone) {
                                       mobileChecking = true;
-                                    if (value == userPhone)
+                                    }
+                                    if (value == userPhone) {
                                       mobileChecking = false;
+                                    }
                                   });
                                 },
                                 decoration: InputDecoration(
@@ -796,9 +795,7 @@ class _UserUpdateState extends State<UserUpdate> {
                       ),
                       Row(
                         children: [
-                          Padding(
-                            padding: EdgeInsets.only(left: 5),
-                          ),
+                          Padding(padding: EdgeInsets.only(left: 8)),
                           Text(
                             "생일 : ",
                             style: TextStyle(color: Colors.black, fontSize: 20),
@@ -834,9 +831,7 @@ class _UserUpdateState extends State<UserUpdate> {
                       ),
                       Row(
                         children: [
-                          Padding(
-                            padding: EdgeInsets.only(left: 5),
-                          ),
+                          Padding(padding: EdgeInsets.only(left: 8)),
                           Text(
                             "성별 : ",
                             style: TextStyle(color: Colors.black, fontSize: 20),
@@ -907,8 +902,20 @@ class _UserUpdateState extends State<UserUpdate> {
                         height: 45,
                         width: 200,
                         child: RaisedButton(
-                          onPressed:
-                              mobileChecking == true ? dialog : checkUpdate,
+                          onPressed: mobileChecking == true
+                              ? showDialog(
+                                  context: context,
+                                  builder: (_) => CupertinoAlertDialog(
+                                        content: Text("핸드폰 인증을 해주세요"),
+                                        actions: <Widget>[
+                                          CupertinoDialogAction(
+                                            child: Text('확인'),
+                                            onPressed: () =>
+                                                Navigator.of(context).pop(),
+                                          ),
+                                        ],
+                                      ))
+                              : checkUpdate,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(40.0),
                               side: BorderSide(color: Colors.black)),

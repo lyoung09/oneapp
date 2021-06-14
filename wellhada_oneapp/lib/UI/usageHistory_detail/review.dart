@@ -1,5 +1,8 @@
+// @dart=2.9
 import 'dart:async';
 import 'dart:io';
+import 'package:wellhada_oneapp/UI/main/bottom_nav.dart';
+import 'package:wellhada_oneapp/listitem/shop/orderList.dart' as orderList;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,27 +15,32 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:validators/validators.dart' as validator;
 
 class Review extends StatefulWidget {
-  var shopId;
+  var orderSeq;
   var shopName;
   var order;
   var userId;
-  Review(this.shopId, this.shopName, this.order, this.userId);
+  var userSeq;
+  Review(this.orderSeq, this.shopName, this.order, this.userId, this.userSeq);
   @override
-  _ReviewState createState() => _ReviewState(shopId, shopName, order, userId);
+  _ReviewState createState() =>
+      _ReviewState(orderSeq, shopName, order, userId, userSeq);
 }
 
 class _ReviewState extends State<Review> {
-  var shopId;
+  var orderSeq;
   var shopName;
-  var order, userId;
-  _ReviewState(this.shopId, this.shopName, this.order, this.userId);
+  var order, userId, userSeq;
+  _ReviewState(
+      this.orderSeq, this.shopName, this.order, this.userId, this.userSeq);
   File _image;
   var story;
-
+  var reviewImage;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    print(userSeq);
+    print(userSeq.runtimeType);
   }
 
   final _formKey = GlobalKey<FormState>();
@@ -42,6 +50,7 @@ class _ReviewState extends State<Review> {
 
     setState(() {
       _image = image;
+      reviewImage = _image.path;
     });
   }
 
@@ -51,29 +60,47 @@ class _ReviewState extends State<Review> {
 
     setState(() {
       _image = image;
+      reviewImage = _image.path;
     });
   }
 
   checkReview() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    print(story);
+    final saveReview = await orderList.saveReview(
+        userSeq, orderSeq, story, _image == null ? "" : _image);
+    var fileSeq;
+
+    fileSeq = saveReview.fileSeq;
+
+    if (fileSeq != null) {
+      final insertReview =
+          await orderList.insertReview(userSeq, orderSeq, story, fileSeq);
+      setState(() {
+        print('insertReview======================== ${insertReview.cnt}');
+      });
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => BottomNav(
+                number: 1,
+              )),
+    );
+  }
+
+  noImageReview() async {
+    final saveReview = await orderList.noImageReview(userSeq, orderSeq, story);
 
     setState(() {
-      if (_image == null) {
-        prefs.setString("shopId", shopId);
-        prefs.setString("userId", userId);
-        prefs.setString("review", "Y");
-        prefs.setString("story", story);
-        prefs.setString("review_picture", "");
-      } else {
-        prefs.setString("shopId", shopId);
-        prefs.setString("userId", userId);
-        prefs.setString("review", "Y");
-        prefs.setString("story", story);
-        prefs.setString("review_picture", _image.path);
-      }
+      print('saveReview======================== ${saveReview.cnt}');
     });
-    Navigator.pop(context);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => BottomNav(
+                number: 1,
+              )),
+    );
   }
 
   cancel() {
@@ -116,7 +143,7 @@ class _ReviewState extends State<Review> {
                 child: Text(
                   order,
                   style: TextStyle(
-                    fontSize: 12.0,
+                    fontSize: 16.0,
                     fontFamily: "nanumB",
                     fontWeight: FontWeight.w800,
                   ),
@@ -201,7 +228,8 @@ class _ReviewState extends State<Review> {
                   onPressed: () {
                     if (_formKey.currentState.validate()) {
                       _formKey.currentState.save();
-                      checkReview();
+                      print(_image);
+                      _image == null ? noImageReview() : checkReview();
                     }
                   },
                   shape: RoundedRectangleBorder(
@@ -279,7 +307,7 @@ class _ReviewState extends State<Review> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomPadding: false,
+      resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
         child: Stack(
           children: [

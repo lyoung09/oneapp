@@ -1,180 +1,293 @@
+// @dart=2.9
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/UI/main/home_detail/webview.dart';
-import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
+import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
+import 'package:wellhada_oneapp/listitem/shop/orderList.dart' as orderList;
 
 class MyReview extends StatefulWidget {
+  var userId;
+
+  MyReview(this.userId);
   @override
-  _MyReviewState createState() => _MyReviewState();
+  _MyReviewState createState() => _MyReviewState(userId);
 }
 
 class _MyReviewState extends State<MyReview> {
-  String webviewDefault = 'http://192.168.0.47:8080/usermngr';
-  var userId = "112";
+  String webviewDefault = 'http://hndsolution.iptime.org:8086/usermngr';
+  var userId, userChk;
+
   String date, year, month, day;
-  delete() {
-    print('delete');
-    String a = "1234567890";
+  var myFutureReview;
+  _MyReviewState(this.userId);
 
-    print(a.substring(3, 5));
+  @override
+  initState() {
+    super.initState();
+    check();
   }
 
+  delete(userId) async {
+    final deleteReview = await orderList.deleteReview(userId, 12);
+
+    if (this.mounted) {
+      setState(() {
+        print('delete ============================${deleteReview.cnt}');
+      });
+    }
+  }
+
+  check() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userPassword = prefs.getString("userPasswordGoweb");
+      userChk = prefs.getString("userChk") ?? "O";
+      if (userChk == "01") {
+        userChk = "E";
+      }
+      if (userChk == "00") {
+        userChk = "K";
+      }
+    });
+    print('review :${userChk}');
+  }
+
+  var userPassword;
   Future<Map<String, dynamic>> getReview() async {
-    return user.getMyReviewList();
+    return orderList.getReviewList(userId);
   }
 
-  void _handleURLButtonPress(
-      BuildContext context, String url, String placeName) {
+  void _handleURLButtonPress(BuildContext context, String url, String placeName,
+      int shopSeq, String userId) {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) =>
-                WebViewContainer(placeName, 12, userId, "!23")));
+            builder: (context) => WebViewContainer(
+                placeName, shopSeq, userId, userPassword, userChk, "1")));
 
     // Navigator.pushNamed(context, '/webview');
   }
 
   Widget _practice(reviewInfoList) {
-    reviewInfoList
-        .sort((a, b) => int.parse(a['date']).compareTo(int.parse(b['date'])));
+    reviewInfoList.sort((a, b) =>
+        int.parse(a['RESERVE_DATE']).compareTo(int.parse(b['RESERVE_DATE'])));
 
     return ListView.builder(
         scrollDirection: Axis.vertical,
         shrinkWrap: true,
         itemCount: reviewInfoList.length == null ? 0 : reviewInfoList.length,
         itemBuilder: (context, position) {
-          date = reviewInfoList[position]['date'];
+          date = reviewInfoList[position]['RESERVE_DATE'];
           year = date.substring(0, 4);
           month = date.substring(4, 6);
           day = date.substring(6, 8);
 
           String showDate = '${year}년 ${month}월 ${day}일';
 
-          return Padding(
-            padding: const EdgeInsets.all(3.0),
-            child: Column(
-              children: [
-                GFCard(
-                  // boxFit: BoxFit.cover,
-                  titlePosition: GFPosition.start,
-                  image: reviewInfoList[position]['review_picture'] == ""
-                      ? null
-                      : Image.network(
-                          reviewInfoList[position]['review_picture'],
+          return reviewInfoList[position]['REVIEW_IMG_URL'] == "" ||
+                  reviewInfoList[position]['REVIEW_IMG_URL'] == null
+              ? Padding(
+                  padding: const EdgeInsets.all(3.0),
+                  child: Column(
+                    children: [
+                      GFCard(
+                        // boxFit: BoxFit.cover,
+                        titlePosition: GFPosition.start,
+                        title: GFListTile(
+                          avatar: GFAvatar(
+                            backgroundImage: NetworkImage(
+                                'http://hndsolution.iptime.org:8086${reviewInfoList[position]['FILE_URL']}'),
+                            backgroundColor: Colors.white,
+                          ),
+                          title: Row(
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    _handleURLButtonPress(
+                                        context,
+                                        '${webviewDefault}/shopTmplatView.do',
+                                        reviewInfoList[position]['SHOP_NAME'],
+                                        reviewInfoList[position]['SHOP_SEQ'],
+                                        userId);
+                                  });
+                                },
+                                child: Text(
+                                  reviewInfoList[position]['SHOP_NAME'],
+                                  style: TextStyle(
+                                    fontFamily: "nanumB",
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 18.0,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          subtitle: Padding(
+                            padding: const EdgeInsets.only(
+                                top: 3, bottom: 3, left: 3),
+                            child: Text(
+                              '${showDate}',
+                              style: TextStyle(
+                                fontFamily: "nanumR",
+                                fontWeight: FontWeight.w500,
+                                fontSize: 11.0,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        buttonBar: GFButtonBar(
+                          children: <Widget>[
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 3.0),
+                                child: Text(
+                                  '${reviewInfoList[position]['REVIEW_COMMENT']}',
+                                  //"아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아아",
+                                  style: TextStyle(
+                                    fontFamily: "nanumR",
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 14.0,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Column(
+                                  children: [
+                                    Align(
+                                        alignment: Alignment.topRight,
+                                        child: InkWell(
+                                          onTap: () {
+                                            delete(userId);
+                                          },
+                                          child: Icon(
+                                            Icons.delete,
+                                          ),
+                                        )),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(3.0),
+                  child: Column(
+                    children: [
+                      GFCard(
+                        // boxFit: BoxFit.cover,
+                        titlePosition: GFPosition.start,
+                        image: Image.file(
+                          File(reviewInfoList[position]['REVIEW_IMG_URL']),
                           height: 120,
                           width: 400,
                           fit: BoxFit.fitWidth,
                         ),
-                  title: GFListTile(
-                    avatar: GFAvatar(
-                      backgroundImage:
-                          NetworkImage(reviewInfoList[position]['place_url']),
-                      backgroundColor: Colors.white,
-                    ),
-                    title: Row(
-                      children: [
-                        InkWell(
-                          onTap: () {
-                            setState(() {
-                              _handleURLButtonPress(
-                                  context,
-                                  '${webviewDefault}/shopTmplatView.do',
-                                  reviewInfoList[position].placeName);
-                            });
-                          },
-                          child: Text(
-                            reviewInfoList[position]['place_name'],
-                            style: TextStyle(
-                              fontFamily: "nanumB",
-                              fontWeight: FontWeight.w800,
-                              fontSize: 18.0,
-                            ),
+                        title: GFListTile(
+                          avatar: GFAvatar(
+                            backgroundImage: NetworkImage(
+                                'http://hndsolution.iptime.org:8086${reviewInfoList[position]['FILE_URL']}'),
+                            backgroundColor: Colors.white,
                           ),
-                        ),
-                        Spacer(),
-                        //InkWell(onTap: delete, child: Text("삭제")),
-                      ],
-                    ),
-                    subtitle: Row(
-                      children: [
-                        Text(
-                          "",
-                        ),
-                        Container(
-                          width: 35,
-                          height: 10,
-                          decoration: BoxDecoration(
-                            color: Colors.amberAccent,
-                            border: Border.all(
-                              color: Colors.amberAccent,
-                              width: 1,
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(
-                                    5.0) //                 <--- border radius here
-                                ),
-                          ),
-                          child: Text(
-                            '리뷰완료',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontFamily: "nanumR",
-                              fontWeight: FontWeight.w800,
-                              fontSize: 7.3,
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(right: 4),
-                        ),
-                        Text(
-                          '${showDate}',
-                          style: TextStyle(
-                            fontFamily: "nanumR",
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12.0,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  buttonBar: GFButtonBar(
-                    children: <Widget>[
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 3.0),
-                          child: Text(
-                            '${reviewInfoList[position]['story']}',
-                            style: TextStyle(
-                              fontFamily: "nanumR",
-                              fontWeight: FontWeight.w400,
-                              fontSize: 12.0,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Column(
+                          title: Row(
                             children: [
-                              Text(
-                                "ㅇ",
-                                style: TextStyle(color: Colors.white),
+                              InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    _handleURLButtonPress(
+                                        context,
+                                        '${webviewDefault}/shopTmplatView.do',
+                                        reviewInfoList[position]['SHOP_NAME'],
+                                        reviewInfoList[position]['SHOP_SEQ'],
+                                        userId);
+                                  });
+                                },
+                                child: Text(
+                                  reviewInfoList[position]['SHOP_NAME'],
+                                  style: TextStyle(
+                                    fontFamily: "nanumB",
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 18.0,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
-                        ],
+                          subtitle: Padding(
+                            padding: const EdgeInsets.only(
+                                top: 3, bottom: 3, left: 3),
+                            child: Text(
+                              '${showDate}',
+                              style: TextStyle(
+                                fontFamily: "nanumR",
+                                fontWeight: FontWeight.w500,
+                                fontSize: 11.0,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        buttonBar: GFButtonBar(
+                          children: <Widget>[
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 3.0),
+                                child: Text(
+                                  '${reviewInfoList[position]['REVIEW_COMMENT']}',
+                                  style: TextStyle(
+                                    fontFamily: "nanumR",
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 14.0,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Column(
+                                  children: [
+                                    Align(
+                                        alignment: Alignment.topRight,
+                                        child: InkWell(
+                                          onTap: () {
+                                            delete(userId);
+                                          },
+                                          child: Icon(
+                                            Icons.delete,
+                                          ),
+                                        )),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
-          );
+                );
         });
+  }
+
+  Widget noData() {
+    return Center(
+      child: Image.asset('assets/icon/noImage.png'),
+    );
   }
 
   @override
@@ -196,16 +309,16 @@ class _MyReviewState extends State<MyReview> {
               }
 
               Map<String, dynamic> reviewInfo = snapshot.data;
+              print('reviewInfo : ${reviewInfo}');
               List<dynamic> reviewInfoList = reviewInfo["LIST"];
-
+              print('reviewInfoList : ${reviewInfoList}');
               reviewInfoList = reviewInfoList
-                  .where((element) =>
-                      element['using'] == "Y" &&
-                      userId == element['userId'] &&
-                      element['review'] == "Y")
+                  .where((element) => element['REVIEW_YN'] == "Y")
                   .toList();
 
-              return _practice(reviewInfoList);
+              return reviewInfoList == null
+                  ? noData()
+                  : _practice(reviewInfoList);
             }));
   }
 }

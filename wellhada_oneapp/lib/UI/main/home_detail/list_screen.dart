@@ -1,3 +1,4 @@
+// @dart=2.9
 import 'dart:collection';
 import 'dart:ffi';
 import 'package:flutter_svg/svg.dart';
@@ -16,7 +17,8 @@ import 'package:wellhada_oneapp/listitem/shop/shopInfoListItem.dart'
     as shopInfoListItem;
 import 'package:hexcolor/hexcolor.dart';
 import 'dart:math' show cos, sqrt, asin;
-import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
+import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
+import '../bottom_nav.dart';
 
 class ListScreen extends StatefulWidget {
   @override
@@ -29,7 +31,7 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
   var appFontColor = '#333333';
   var menuFontColor = '#333333';
   String coupon = 'C:\Users\hndso\Desktop\icon_jandi\coupon.svg';
-  var category, shopSeq;
+  var placeName, shopSeq;
   List shop, shopCategory;
   TabController _tabController;
   bool wellhada, init;
@@ -39,9 +41,11 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
   LatLng _currentLocation;
   Map<int, String> initDistance = new Map();
   Map<int, String> distance = new Map();
+  Map<int, bool> openShopSeq = new Map();
+  Map<int, bool> dayOpenShop = new Map();
   var lat, lng;
-  String webviewDefault = 'http://192.168.0.47:8080/usermngr';
-  bool opening;
+  String webviewDefault = 'http://hndsolution.iptime.org:8086/usermngr';
+
   var userChk, userKey, userId;
   var userPassword;
   // For storing the current position
@@ -81,15 +85,11 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
           userChk = "K";
         }
 
-        prefs.setString("userChk", userChk);
+        print('list : ${userChk}');
       });
     } catch (e) {
       print(e);
     }
-    // setState(() {
-    //   userChk = userData.userCheck;
-    // });
-    // if (userChk != 'O') userDefault();
   }
 
   @override
@@ -111,21 +111,40 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
     }
   }
 
-  userDataCheck(category, shopSeq) async {
-    print('${userKey},${userPassword},${userChk}');
-
+  userDataCheck(placeName, shopSeq) async {
     _handleURLButtonPress(context, '${webviewDefault}/shopTmplatView.do',
-        category, shopSeq, userKey);
+        placeName, shopSeq, userKey, userChk);
   }
 
   void _handleURLButtonPress(BuildContext context, String url, String placeName,
-      int shopSeq, String userKey) {
+      int shopSeq, String userKey, userChk) {
     // userDataCheck();
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) =>
-                WebViewContainer(placeName, shopSeq, userKey, userPassword)));
+
+    if (userKey == null || userKey == "") {
+      showDialog(
+          context: context,
+          builder: (_) => CupertinoAlertDialog(
+                content: Text("로그인 이후 사용해주세요"),
+                actions: <Widget>[
+                  CupertinoDialogAction(
+                    child: Text('확인'),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => BottomNav(
+                                number: 3,
+                              )),
+                    ),
+                  ),
+                ],
+              ));
+    } else {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => WebViewContainer(
+                  placeName, shopSeq, userKey, userPassword, userChk, "0")));
+    }
 
     // Navigator.pushNamed(context, '/webview');
   }
@@ -140,6 +159,7 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
     return ((12742 * asin(sqrt(a)) * 1000)).toStringAsFixed(0);
   }
 
+  var shopId;
   void getShopCategory() async {
     final shopCategoryList = await shopInfoListItem.getShopListEntire();
 
@@ -154,6 +174,23 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
 
         String startHour, startMin, endHour, endMin;
         TimeOfDay startTime, endTime;
+        String holiday = "";
+        holiday = shopCategoryList.list[i].holiday;
+        List<String> restDay;
+
+        if (holiday != null) {
+          restDay = holiday.split(',');
+
+          for (int hold = 0; hold < restDay.length; hold++) {
+            if (restDay.elementAt(hold) == now.weekday.toString()) {
+              //쉬는날은 false~
+              dayOpenShop[shopCategoryList.list[i].shopSeq] = false;
+            } else {
+              dayOpenShop[shopCategoryList.list[i].shopSeq] = true;
+            }
+          }
+        }
+
         if (now.weekday == 6 || now.weekday == 7) {
           startHour = shopCategoryList.list[i].weekBeginTime.substring(0, 2);
           startMin = shopCategoryList.list[i].weekBeginTime.substring(2, 4);
@@ -175,7 +212,9 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
           endTime =
               TimeOfDay(hour: int.parse(endHour), minute: int.parse(endMin));
         }
-        openingShop(startTime, endTime);
+        shopId = shopCategoryList.list[i].shopSeq;
+
+        openingShop(startTime, endTime, shopId);
       }
       shopCategory = shopCategoryList.list
           .where((el) => 3000 > int.parse(initDistance[el.shopSeq]))
@@ -350,16 +389,27 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
     );
   }
 
-  openingShop(startTime, endTime) async {
+  double toDouble(TimeOfDay myTime) {
+    return myTime.hour + myTime.minute / 60.0;
+  }
+
+  openingShop(startTime, endTime, int shopId) async {
     setState(() {
       DateTime now = DateTime.now();
+      var nowTimeofDay = TimeOfDay(hour: now.hour, minute: now.minute);
 
-      if (startTime.hour < now.hour && now.hour < endTime.hour) {
-        if (startTime.minute < now.minute && now.minute < endTime.minute) {
-          opening = false;
-        }
+      double toStart = toDouble(startTime);
+      double toNow = toDouble(nowTimeofDay);
+      double toEnd = toDouble(endTime);
+
+      if (toStart <= toNow && toNow <= toEnd) {
+        print("영업중");
+        openShopSeq[shopId] = true;
+      } else {
+        //시작 안한거는 false
+        print("영업 시작 안함");
+        openShopSeq[shopId] = true;
       }
-      opening = true;
     });
   }
 
@@ -445,140 +495,35 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
                   // }
                   // openingShop(startTime, endTime);
                   print(
-                      'http://192.168.0.47:8080${menuCode[position].fileUrl}');
-                  return opening == true
+                      '${menuCode[position].shopSeq}:${openShopSeq[menuCode[position].shopSeq]}');
+
+                  return openShopSeq[menuCode[position].shopSeq] == true &&
+                          dayOpenShop[menuCode[position].shopSeq] == true
                       ? InkWell(
                           child: Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Row(
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsets.only(right: 10),
-                                  ),
-                                  Container(
-                                    child: Image.network(
-                                      'http://192.168.0.47:8080${menuCode[position].fileUrl}',
-                                      fit: BoxFit.fill,
-                                      width: 40.0,
-                                      height: 40.0,
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(right: 20),
-                                  ),
-                                  Container(
-                                    width:
-                                        MediaQuery.of(context).size.width - 110,
-                                    child: Column(
-                                      //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        Text(
-                                          menuCode[position].placeName,
-                                          style: TextStyle(fontSize: 18.0),
-                                        ),
-                                        Row(
-                                          verticalDirection:
-                                              VerticalDirection.down,
-                                          children: [
-                                            Text(
-                                              menuCode[position].address,
-                                              style: TextStyle(fontSize: 10.0),
-                                            ),
-                                            Padding(
-                                              padding: EdgeInsets.only(
-                                                  left: 5, right: 5),
-                                            ),
-                                            ClipOval(
-                                              child: Material(
-                                                color: Colors.green,
-                                                child: InkWell(
-                                                  onTap: () {},
-                                                  child: SvgPicture.asset(
-                                                    "assets/svg/coupon.svg",
-                                                    fit: BoxFit.fill,
-                                                    width: 20,
-                                                    height: 20,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            Spacer(),
-                                            Image.asset(
-                                              'assets/img/location.png',
-                                              width: 20.0,
-                                              height: 20.0,
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  EdgeInsets.only(right: 3.0),
-                                            ),
-                                            Text(fromUserToMarket == null
-                                                ? alone.length > 3
-                                                    ? '${(int.parse(alone) * 0.001).toStringAsFixed(1)}km'
-                                                    : '${alone}m'
-                                                : fromUserToMarket[position]
-                                                            .length >
-                                                        3
-                                                    ? '${(int.parse(fromUserToMarket[position]) * 0.001).toStringAsFixed(1)}km'
-                                                    : '${fromUserToMarket[position]}m'),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          onTap: () {
-                            setState(() {
-                              category = menuCode[position].placeName;
-                              shopSeq = menuCode[position].shopSeq;
-
-                              userDataCheck(category, shopSeq);
-                            });
-                          })
-                      : Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
                             child: Row(
                               children: [
                                 Padding(
-                                  padding: EdgeInsets.only(right: 10),
+                                  padding: EdgeInsets.only(right: 5),
                                 ),
-                                Stack(
-                                  children: <Widget>[
-                                    Padding(
-                                      padding: EdgeInsets.only(top: 10.0),
-                                      child: Align(
-                                        alignment: Alignment.center,
-                                        child: Text("준비중",
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontFamily: 'nanumB',
-                                            )),
-                                      ),
-                                    ),
-                                    Container(
-                                      child: Image.network(
-                                        'http://192.168.0.47:8080/${menuCode[position].fileUrl}',
-                                        fit: BoxFit.fill,
-                                        width: 40.0,
-                                        height: 40.0,
-                                      ),
-                                    ),
-                                  ],
+                                Container(
+                                  child: Image.network(
+                                    'http://hndsolution.iptime.org:8086${menuCode[position].fileUrl}',
+                                    fit: BoxFit.fill,
+                                    width: MediaQuery.of(context).size.width *
+                                        0.23,
+                                    height: MediaQuery.of(context).size.height *
+                                        0.11,
+                                  ),
                                 ),
                                 Padding(
-                                  padding: EdgeInsets.only(right: 20),
+                                  padding: EdgeInsets.only(right: 5),
                                 ),
                                 Container(
                                   width:
-                                      MediaQuery.of(context).size.width - 130,
+                                      MediaQuery.of(context).size.width * 0.72,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.11,
                                   child: Column(
                                     //mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     crossAxisAlignment:
@@ -586,60 +531,62 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
                                     children: <Widget>[
                                       Text(
                                         menuCode[position].placeName,
-                                        style: TextStyle(
-                                            fontSize: 18.0,
-                                            color: Colors.grey[500]),
+                                        style: TextStyle(fontSize: 18.0),
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.only(bottom: 2),
                                       ),
                                       Row(
                                         verticalDirection:
                                             VerticalDirection.down,
                                         children: [
                                           Text(
-                                            menuCode[position].address,
-                                            style: TextStyle(
-                                                fontSize: 10.0,
-                                                color: Colors.grey[500]),
+                                            menuCode[position].address.length >
+                                                    18
+                                                ? '${menuCode[position].address.substring(0, 18) + '\n' + menuCode[position].address.substring(18, menuCode[position].address.length)}'
+                                                : menuCode[position].address,
+                                            maxLines: 4,
+                                            style: TextStyle(fontSize: 15.5),
                                           ),
                                           Padding(
-                                            padding: EdgeInsets.only(
-                                                left: 5, right: 5),
+                                            padding: EdgeInsets.only(left: 5),
                                           ),
-                                          ClipOval(
-                                            child: Material(
-                                              color: Colors.green,
-                                              child: InkWell(
-                                                onTap: () {},
-                                                child: SvgPicture.asset(
-                                                  "assets/svg/coupon.svg",
-                                                  fit: BoxFit.fill,
-                                                  width: 20,
-                                                  height: 20,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
+                                          // ClipOval(
+                                          //   child: Material(
+                                          //     color: Colors.green,
+                                          //     child: InkWell(
+                                          //       onTap: () {},
+                                          //       child: SvgPicture.asset(
+                                          //         "assets/svg/coupon.svg",
+                                          //         fit: BoxFit.fill,
+                                          //         width: 20,
+                                          //         height: 20,
+                                          //       ),
+                                          //     ),
+                                          //   ),
+                                          // ),
                                           Spacer(),
-                                          Image.asset(
-                                            'assets/img/location.png',
-                                            width: 20.0,
-                                            height: 20.0,
-                                          ),
-                                          Padding(
-                                            padding:
-                                                EdgeInsets.only(right: 3.0),
-                                          ),
-                                          Text(
-                                            fromUserToMarket == null
-                                                ? alone.length > 3
-                                                    ? '${(int.parse(alone) * 0.001).toStringAsFixed(1)}km'
-                                                    : '${alone}m'
-                                                : fromUserToMarket[position]
-                                                            .length >
-                                                        3
-                                                    ? '${(int.parse(fromUserToMarket[position]) * 0.001).toStringAsFixed(1)}km'
-                                                    : '${fromUserToMarket[position]}m',
-                                            style: TextStyle(
-                                                color: Colors.grey[500]),
+                                          Align(
+                                              alignment: Alignment.bottomRight,
+                                              child: Image.asset(
+                                                'assets/img/location.png',
+                                                width: 22.5,
+                                                height: 22.5,
+                                              )),
+                                          Align(
+                                            alignment: Alignment.bottomRight,
+                                            child: Text(
+                                              fromUserToMarket == null
+                                                  ? alone.length > 3
+                                                      ? '${(int.parse(alone) * 0.001).toStringAsFixed(1)}km'
+                                                      : '${alone}m'
+                                                  : fromUserToMarket[position]
+                                                              .length >
+                                                          3
+                                                      ? '${(int.parse(fromUserToMarket[position]) * 0.001).toStringAsFixed(1)}km'
+                                                      : '${fromUserToMarket[position]}m',
+                                              style: TextStyle(fontSize: 13.5),
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -648,6 +595,121 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
                                 ),
                               ],
                             ),
+                          ),
+                          onTap: () {
+                            setState(() {
+                              placeName = menuCode[position].placeName;
+                              shopSeq = menuCode[position].shopSeq;
+
+                              userDataCheck(placeName, shopSeq);
+                            });
+                          })
+                      : Card(
+                          child: Row(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(right: 5),
+                              ),
+                              Container(
+                                child: Image.network(
+                                    'http://hndsolution.iptime.org:8086/${menuCode[position].fileUrl}',
+                                    fit: BoxFit.fill,
+                                    width: MediaQuery.of(context).size.width *
+                                        0.23,
+                                    height: MediaQuery.of(context).size.height *
+                                        0.11),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.only(right: 5),
+                              ),
+                              Container(
+                                width: MediaQuery.of(context).size.width * 0.7,
+                                height:
+                                    MediaQuery.of(context).size.height * 0.11,
+                                child: Column(
+                                  //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.baseline,
+                                      textBaseline: TextBaseline.alphabetic,
+                                      children: [
+                                        Text(
+                                          menuCode[position].placeName,
+                                          style: TextStyle(
+                                              fontSize: 18.0,
+                                              color: Colors.grey[500]),
+                                        ),
+                                        Text(" <준비중> ",
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.red[500]))
+                                      ],
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.only(bottom: 2),
+                                    ),
+                                    Row(
+                                      verticalDirection: VerticalDirection.down,
+                                      children: [
+                                        Text(
+                                          menuCode[position].address.length > 17
+                                              ? '${menuCode[position].address.substring(0, 16) + '\n' + menuCode[position].address.substring(17, menuCode[position].address.length)}'
+                                              : menuCode[position].address,
+                                          maxLines: 4,
+                                          style: TextStyle(fontSize: 15.0),
+                                        ),
+
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              left: 5, right: 5),
+                                        ),
+                                        // ClipOval(
+                                        //   child: Material(
+                                        //     color: Colors.green,
+                                        //     child: InkWell(
+                                        //       onTap: () {},
+                                        //       child: SvgPicture.asset(
+                                        //         "assets/svg/coupon.svg",
+                                        //         fit: BoxFit.fill,
+                                        //         width: 20,
+                                        //         height: 20,
+                                        //       ),
+                                        //     ),
+                                        //   ),
+                                        // ),
+                                        Spacer(),
+                                        Align(
+                                          alignment: Alignment.bottomRight,
+                                          child: Image.asset(
+                                            'assets/img/location.png',
+                                            width: 22.5,
+                                            height: 22.5,
+                                          ),
+                                        ),
+                                        Align(
+                                            alignment: Alignment.bottomRight,
+                                            child: Text(
+                                              fromUserToMarket == null
+                                                  ? alone.length > 3
+                                                      ? '${(int.parse(alone) * 0.001).toStringAsFixed(1)}km'
+                                                      : '${alone}m'
+                                                  : fromUserToMarket[position]
+                                                              .length >
+                                                          3
+                                                      ? '${(int.parse(fromUserToMarket[position]) * 0.001).toStringAsFixed(1)}km'
+                                                      : '${fromUserToMarket[position]}m',
+                                              style: TextStyle(
+                                                  color: Colors.grey[500],
+                                                  fontSize: 13.5),
+                                            )),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         );
                 },

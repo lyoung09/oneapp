@@ -1,3 +1,4 @@
+// @dart=2.9
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -16,8 +17,10 @@ import 'package:wellhada_oneapp/listitem/shop/shopInfoListItem.dart'
     as shopInfoListItem;
 import 'package:slide_popup_dialog/slide_popup_dialog.dart' as slideDialog;
 import 'package:wellhada_oneapp/model/map/map_model.dart';
-import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
+import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
 import 'package:wellhada_oneapp/listitem/shop/web.dart' as webLogin;
+
+import '../../bottom_nav.dart';
 
 class GoogleMapUI extends StatefulWidget {
   @override
@@ -43,7 +46,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
   Map<int, Uint8List> wellhadaIconSet = new Map();
   // button click
   String category;
-  String webviewDefault = 'http://192.168.0.47:8080/usermngr';
+  String webviewDefault = 'http://hndsolution.iptime.org:8086/usermngr';
   // contanier boolean
   bool itemSelected;
   Future _categoryFuture;
@@ -57,6 +60,8 @@ class _Google1MapUIState extends State<GoogleMapUI>
   //googlemap marker icon
   bool favorite = false;
   LatLngBounds latLngBounds;
+  Map<int, bool> openShopSeq = new Map();
+  Map<int, bool> dayOpenShop = new Map();
   List<Marker> nullMark = [];
   var placeName,
       shopSeq,
@@ -68,6 +73,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
       beginWeekendDate,
       endWeekendDate;
   bool opening;
+  bool openingDay;
   var userChk, userKey, userId, userPassword;
   @override
   void initState() {
@@ -85,7 +91,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       setState(() {
-        userKey = prefs.getString("userKey") ?? prefs.getString("userToken");
+        userKey = prefs.getString("userKey");
         userPassword = prefs.getString("userPasswordGoweb");
         userChk = prefs.getString("userChk") ?? "O";
 
@@ -95,8 +101,8 @@ class _Google1MapUIState extends State<GoogleMapUI>
         if (userChk == "00") {
           userChk = "K";
         }
-        prefs.setString("userChk", userChk);
       });
+      print('list : ${userChk}');
     } catch (e) {
       print(e);
     }
@@ -143,35 +149,62 @@ class _Google1MapUIState extends State<GoogleMapUI>
   //   //_currentLocation = Provider.of<LatLng>(context, listen: true);
   //   //distance(geoPos.latitude, geoPos.longitude);
   // }
-  openingShop(startTime, endTime) async {
+  double toDouble(TimeOfDay myTime) {
+    return myTime.hour + myTime.minute / 60.0;
+  }
+
+  openingShop(startTime, endTime, int shopId) async {
     setState(() {
       DateTime now = DateTime.now();
+      var nowTimeofDay = TimeOfDay(hour: now.hour, minute: now.minute);
 
-      if (startTime.hour < now.hour && now.hour < endTime.hour) {
-        if (startTime.minute < now.minute && now.minute < endTime.minute) {
-          opening = false;
-        }
+      double toStart = toDouble(startTime);
+      double toNow = toDouble(nowTimeofDay);
+      double toEnd = toDouble(endTime);
+
+      if (toStart <= toNow && toNow <= toEnd) {
+        print("영업중");
+        openShopSeq[shopId] = true;
+      } else {
+        print("영업 시작 안함");
+        openShopSeq[shopId] = false;
       }
-      opening = true;
     });
   }
 
   userDataCheck(category, shopSeq) async {
-    print('${category} ,${shopSeq}');
-    final webLoginData = await webLogin.loginWebUser(userKey, userPassword);
-
     _handleURLButtonPress(context, '${webviewDefault}/shopTmplatView.do',
-        category, shopSeq, userKey);
+        category, shopSeq, userKey, userChk);
   }
 
   void _handleURLButtonPress(BuildContext context, String url, String placeName,
-      int shopSeq, String userId) {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) =>
-                WebViewContainer(placeName, shopSeq, userId, userPassword)));
-
+      int shopSeq, String userKey, String userChk) {
+    print(userKey);
+    if (userKey == null || userKey == "") {
+      showDialog(
+          context: context,
+          builder: (_) => CupertinoAlertDialog(
+                content: Text("로그인 이후 사용해주세요"),
+                actions: <Widget>[
+                  CupertinoDialogAction(
+                    child: Text('확인'),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => BottomNav(
+                                number: 3,
+                              )),
+                    ),
+                  ),
+                ],
+              ));
+    } else {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => WebViewContainer(
+                  placeName, shopSeq, userKey, userPassword, userChk, "0")));
+    }
     // Navigator.pushNamed(context, '/webview');
   }
 
@@ -198,6 +231,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
     return shopInfoListItem.getShopCodeList();
   }
 
+  var shopId;
   void getShop() async {
     final entireShopList = await shopInfoListItem.getShopListEntire();
 
@@ -207,6 +241,24 @@ class _Google1MapUIState extends State<GoogleMapUI>
       wellhadaIconSet[entireShopList.list[i].shopSeq] = wellhadaIcon;
 
       DateTime now = DateTime.now();
+      String holiday = "";
+      holiday = entireShopList.list[i].holiday;
+      List<String> restDay;
+
+      if (holiday != null) {
+        restDay = holiday.split(',');
+
+        for (int hold = 0; hold < restDay.length; hold++) {
+          if (restDay.elementAt(hold) == now.weekday.toString()) {
+            dayOpenShop[entireShopList.list[i].shopSeq] = false;
+          }
+          // print('out ${now.weekday}');
+          // print('out ${restDay.elementAt(hold)}');
+          else {
+            dayOpenShop[entireShopList.list[i].shopSeq] = true;
+          }
+        }
+      }
 
       String startHour, startMin, endHour, endMin;
       TimeOfDay startTime, endTime;
@@ -231,7 +283,8 @@ class _Google1MapUIState extends State<GoogleMapUI>
         endTime =
             TimeOfDay(hour: int.parse(endHour), minute: int.parse(endMin));
       }
-      openingShop(startTime, endTime);
+      shopId = entireShopList.list[i].shopSeq;
+      openingShop(startTime, endTime, shopId);
     }
 
     setState(() {
@@ -329,10 +382,11 @@ class _Google1MapUIState extends State<GoogleMapUI>
                             Padding(
                               padding: EdgeInsets.only(top: 4.0, bottom: 1.0),
                             ),
-                            Image(
-                              image: AssetImage('assets/img/cafe.png'),
+                            Image.network(
+                              'http://hndsolution.iptime.org:8086/${shopCategoryList[position]['IMG_URL']}',
                               width: 25,
                               height: 25,
+                              fit: BoxFit.fitWidth,
                             ),
                             Padding(
                               padding: EdgeInsets.only(bottom: 1.0),
@@ -356,6 +410,168 @@ class _Google1MapUIState extends State<GoogleMapUI>
         });
   }
 
+  void _shopDetail(
+      String distance,
+      String pic,
+      String placeName,
+      String shopDc,
+      String beginWeek,
+      String endWeek,
+      String beginWeekend,
+      String endWeekend,
+      int shopSeq) {
+    var a = '${beginWeek.substring(0, 2)}시 ${beginWeek.substring(2, 4)}분 ';
+    var b = ' ${endWeek.substring(0, 2)}시 ${endWeek.substring(2, 4)}분';
+    var c =
+        '${beginWeekend.substring(0, 2)}시 ${beginWeekend.substring(2, 4)}분 ';
+    var d = ' ${endWeekend.substring(0, 2)}시 ${endWeekend.substring(2, 4)}분';
+
+    showDialog(
+        context: context,
+        builder: (_) => Dialog(
+                child: Container(
+              height: MediaQuery.of(context).size.height * 0.5,
+              decoration: BoxDecoration(
+                  //color: Colors.redAccent,
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.all(Radius.circular(12))),
+              child: Column(
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(
+                        top: MediaQuery.of(context).size.height * 0.02),
+                  ),
+                  Text(
+                    placeName.length > 14
+                        ? "${placeName.substring(0, 14)}"
+                        : "${placeName}",
+                    style: TextStyle(
+                      fontFamily: "nanumB",
+                      fontWeight: FontWeight.w900,
+                      fontSize: 21.0,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 15),
+                  ),
+                  Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 12, bottom: 3),
+                        child: Text(
+                          distance.length > 3
+                              ? '거리 : ${(int.parse(distance) * 0.001).toStringAsFixed(1)}km'
+                              : '거리 : ${distance}m',
+                          style: TextStyle(
+                            fontFamily: "nanumB",
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15.0,
+                          ),
+                        ),
+                      )),
+                  Container(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 12.0, right: 12.0),
+                      child: Image.network(
+                        'http://hndsolution.iptime.org:8086${pic}',
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        height: MediaQuery.of(context).size.height * 0.25,
+                        fit: BoxFit.fitWidth,
+                      ),
+                    ),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(12),
+                            topRight: Radius.circular(12))),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 10),
+                  ),
+                  Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: Text(
+                          '평일 : ${a + b}',
+                          style: TextStyle(
+                            fontFamily: "nanumR",
+                            fontWeight: FontWeight.w600,
+                            fontSize: 11.0,
+                          ),
+                          textAlign: TextAlign.right,
+                        ),
+                      )),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 10),
+                  ),
+                  Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: Text(
+                          '주말 : ${c + d}',
+                          style: TextStyle(
+                            fontFamily: "nanumR",
+                            fontWeight: FontWeight.w600,
+                            fontSize: 11.0,
+                          ),
+                          textAlign: TextAlign.right,
+                        ),
+                      )),
+                  Spacer(),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Align(
+                          alignment: Alignment.bottomCenter,
+                          child: OutlineButton(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(3)),
+                            borderSide: BorderSide(
+                              color: Colors.black, //Color of the border
+                              style: BorderStyle.solid, //Style of the border
+                              width: 0.5, //width of the border
+                            ),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text('취소'),
+                            textColor: Colors.black,
+                            color: Colors.white,
+                          )),
+                      SizedBox(
+                        width: 15,
+                      ),
+                      Align(
+                          alignment: Alignment.bottomCenter,
+                          child: OutlineButton(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(3)),
+                            borderSide: BorderSide(
+                              color: Colors.black, //Color of the border
+                              style: BorderStyle.solid, //Style of the border
+                              width: 0.5, //width of the border
+                            ),
+                            onPressed: () {
+                              userDataCheck(placeName, shopSeq);
+                            },
+                            child: Text('주문'),
+                            color: Colors.white,
+                            textColor: Colors.black,
+                          ))
+                    ],
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 1.5),
+                  ),
+                ],
+              ),
+            )));
+  }
+
   void _showShopListDialog(
       String distance,
       String pic,
@@ -366,11 +582,10 @@ class _Google1MapUIState extends State<GoogleMapUI>
       String beginWeekend,
       String endWeekend,
       int shopSeq) {
-    var a = '${beginWeek.substring(0, 2)}시 ${beginWeek.substring(2, 4)}분 ~';
-    var b = ' ${endWeek.substring(0, 2)}시 ${endWeek.substring(2, 4)}분까지';
-    var c =
-        '${beginWeekend.substring(0, 2)}시 ${beginWeekend.substring(2, 4)}분 ~';
-    var d = ' ${endWeekend.substring(0, 2)}시 ${endWeekend.substring(2, 4)}분까지';
+    var a = '${beginWeek.substring(0, 2)}시 ${beginWeek.substring(2, 4)}분';
+    var b = ' ${endWeek.substring(0, 2)}시 ${endWeek.substring(2, 4)}분';
+    var c = '${beginWeekend.substring(0, 2)}시 ${beginWeekend.substring(2, 4)}분';
+    var d = ' ${endWeekend.substring(0, 2)}시 ${endWeekend.substring(2, 4)}분';
 
     slideDialog.showSlideDialog(
       context: context,
@@ -504,11 +719,11 @@ class _Google1MapUIState extends State<GoogleMapUI>
                           padding: const EdgeInsets.only(left: 5.0, right: 5),
                           child: Container(
                             padding: EdgeInsets.only(top: 5),
-                            decoration: BoxDecoration(border: Border.all()),
+                            // decoration: BoxDecoration(border: Border.all()),
                             width: MediaQuery.of(context).size.width * 0.8,
                             height: MediaQuery.of(context).size.height * 0.3,
                             child: Image.network(
-                              'http://192.168.0.47:8080${pic}',
+                              'http://hndsolution.iptime.org:8086${pic}',
                               width: MediaQuery.of(context).size.width * 0.8,
                               height: MediaQuery.of(context).size.height * 0.3,
                               fit: BoxFit.fitWidth,
@@ -574,14 +789,6 @@ class _Google1MapUIState extends State<GoogleMapUI>
     );
   }
 
-  favoriteMethod() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      print(favorite);
-      favorite = !favorite;
-    });
-  }
-
   String _coordinateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
     var c = cos;
@@ -610,7 +817,10 @@ class _Google1MapUIState extends State<GoogleMapUI>
               latLngBounds.southwest.latitude < element.latitude &&
               latLngBounds.southwest.longitude < element.longtitude)
           .map((element) {
-        return opening == true
+        print(" ${shopId} :${openShopSeq[shopId]}");
+        print(" ${shopId} :${dayOpenShop[shopId]}");
+        return openShopSeq[element.shopSeq] == true &&
+                dayOpenShop[element.shopSeq] == true
             ? Marker(
                 markerId: MarkerId(element.shopSeq.toString()),
                 position: LatLng(element.latitude, element.longtitude),
@@ -627,7 +837,18 @@ class _Google1MapUIState extends State<GoogleMapUI>
                         element.latitude,
                         element.longtitude);
 
-                    _showShopListDialog(
+                    // _showShopListDialog(
+                    //   distance,
+                    //   element.fileUrl,
+                    //   element.placeName,
+                    //   element.shopDc,
+                    //   element.bsnBeginTime,
+                    //   element.bsnEndTime,
+                    //   element.weekBeginTime,
+                    //   element.weekEndTime,
+                    //   element.shopSeq,
+                    // );
+                    _shopDetail(
                       distance,
                       element.fileUrl,
                       element.placeName,

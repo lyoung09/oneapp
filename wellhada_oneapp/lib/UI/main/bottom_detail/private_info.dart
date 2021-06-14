@@ -1,3 +1,4 @@
+// @dart=2.9
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -8,11 +9,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/UI/privateInfo_detail/hndSolution.dart';
 
 import 'package:wellhada_oneapp/UI/privateInfo_detail/login.dart';
+import 'package:wellhada_oneapp/UI/privateInfo_detail/mileage_detail/point.dart';
+import 'package:wellhada_oneapp/UI/privateInfo_detail/user/mileage.dart';
 import 'package:wellhada_oneapp/UI/privateInfo_detail/user/notify.dart';
-import 'package:wellhada_oneapp/UI/privateInfo_detail/user/point.dart';
+
 import 'package:wellhada_oneapp/UI/privateInfo_detail/user/proposingShop.dart';
 import 'package:wellhada_oneapp/UI/privateInfo_detail/user/updateUser.dart';
-import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
+import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
 import 'package:wellhada_oneapp/model/menu/drawer_detail/qr_34.dart';
 
 import 'home_screen.dart';
@@ -134,7 +137,6 @@ class _PriavateInfoState extends State<PriavateInfo> {
   delete() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    user.getDelete(userId);
     setState(() {
       prefs.setString("userKey", null);
       prefs.setInt("cookie", null);
@@ -215,9 +217,14 @@ class _PriavateInfoState extends State<PriavateInfo> {
         .push(MaterialPageRoute(builder: (context) => new HndSolution()));
   }
 
+  mileage() async {
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => Mileage(userId, userName)));
+  }
+
   pointCheck() async {
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => new UsagePoint()));
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => UsagePoint(userId, userName)));
   }
 
   @override
@@ -239,18 +246,20 @@ class _PriavateInfoState extends State<PriavateInfo> {
         ),
         Positioned(
           top: -20.0,
-          left: -40.0,
+          left: 10.0,
           child: Container(
-            height: 150,
-            width: 150,
-            decoration: BoxDecoration(
-                color: Colors.amberAccent, shape: BoxShape.circle),
+            height: MediaQuery.of(context).size.height * 0.25,
+            width: MediaQuery.of(context).size.width * 0.25,
+            child: Image.asset(
+              "assets/icon/shopstoryIco.png",
+              //width: size.width * 0.9,
+            ),
           ),
         ),
         ListView(
           children: <Widget>[
             Container(
-              padding: const EdgeInsets.only(bottom: 10.0),
+              padding: const EdgeInsets.only(bottom: 5.0),
             ),
             Container(
               alignment: Alignment.centerLeft,
@@ -362,7 +371,7 @@ class _PriavateInfoState extends State<PriavateInfo> {
                                                     backgroundImage: Image.file(
                                                             File(userProfile))
                                                         .image,
-                                                    radius: 35.0,
+                                                    radius: 50.0,
                                                   ),
                                           ),
                                         ),
@@ -397,7 +406,7 @@ class _PriavateInfoState extends State<PriavateInfo> {
                                                   userName,
                                                   style: TextStyle(
                                                     // color: _colorText,
-                                                    fontSize: 16.0,
+                                                    fontSize: 18.0,
                                                     fontFamily: 'nanumB',
                                                     fontWeight: FontWeight.w800,
                                                   ),
@@ -423,93 +432,135 @@ class _PriavateInfoState extends State<PriavateInfo> {
                             padding: EdgeInsets.only(top: 40, bottom: 20.0),
                           ),
                           FlatButton(
-                            child: Text("내 정보"),
+                            child: Text(
+                              "내 정보",
+                              style: TextStyle(
+                                color: Colors.grey[900],
+                                fontSize: 15.0,
+                                fontFamily: "nanumB",
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
                             onPressed: updateUser,
                           ),
                           Container(
                             child: Divider(
                               color: Color.fromRGBO(82, 110, 208, 1.0),
                             ),
-                            padding: EdgeInsets.only(
-                                left: 20.0, right: 20.0, bottom: 0.0),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 10.0),
+                            padding: EdgeInsets.only(right: 20.0, bottom: 0.0),
                           ),
                           FlatButton(
-                            child: Text("알림"),
+                            child: Text(
+                              "알림",
+                              style: TextStyle(
+                                color: Colors.grey[900],
+                                fontSize: 15.0,
+                                fontFamily: "nanumB",
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
                             onPressed: notification,
                           ),
                           Container(
                             child: Divider(
                               color: Color.fromRGBO(82, 110, 208, 1.0),
                             ),
-                            padding: EdgeInsets.only(
-                                left: 20.0, right: 20.0, bottom: 0.0),
+                            padding: EdgeInsets.only(right: 20.0, bottom: 0.0),
                           ),
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 10.0),
-                          ),
-                          FlatButton(child: Text("포인트"), onPressed: pointCheck),
+                          FlatButton(
+                              child: Text(
+                                "포인트",
+                                style: TextStyle(
+                                  color: Colors.grey[900],
+                                  fontSize: 15.0,
+                                  fontFamily: "nanumB",
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              onPressed: pointCheck),
                           Container(
                             child: Divider(
                               color: Color.fromRGBO(82, 110, 208, 1.0),
                             ),
-                            padding: EdgeInsets.only(
-                                left: 20.0, right: 20.0, bottom: 0.0),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 10.0),
+                            padding: EdgeInsets.only(right: 20.0, bottom: 0.0),
                           ),
                           FlatButton(
-                            child: Text("홍보 및 가맹 문의"),
+                            child: Text(
+                              "홍보 및 가맹 문의",
+                              style: TextStyle(
+                                color: Colors.grey[900],
+                                fontSize: 15.0,
+                                fontFamily: "nanumB",
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
                             onPressed: proposeWellhada,
                           ),
                           Container(
                             child: Divider(
                               color: Color.fromRGBO(82, 110, 208, 1.0),
                             ),
-                            padding: EdgeInsets.only(
-                                left: 20.0, right: 20.0, bottom: 0.0),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 10.0),
+                            padding: EdgeInsets.only(right: 20.0, bottom: 0.0),
                           ),
                           FlatButton(
-                            child: Text("회사 정보"),
+                            child: Text(
+                              "회사 정보",
+                              style: TextStyle(
+                                color: Colors.grey[900],
+                                fontSize: 15.0,
+                                fontFamily: "nanumB",
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
                             onPressed: hndSolution,
                           ),
                           Container(
                             child: Divider(
                               color: Color.fromRGBO(82, 110, 208, 1.0),
                             ),
-                            padding: EdgeInsets.only(
-                                left: 20.0, right: 20.0, bottom: 0.0),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 10.0),
+                            padding: EdgeInsets.only(right: 20.0, bottom: 0.0),
                           ),
                           userChk == 'K'
                               ? FlatButton(
-                                  child: Text("로그아웃"),
+                                  child: Text(
+                                    "로그아웃",
+                                    style: TextStyle(
+                                      color: Colors.grey[900],
+                                      fontSize: 15.0,
+                                      fontFamily: "nanumB",
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
                                   onPressed: logOutTalk,
                                 )
                               : FlatButton(
-                                  child: Text("로그아웃"),
+                                  child: Text(
+                                    "로그아웃",
+                                    style: TextStyle(
+                                      color: Colors.grey[900],
+                                      fontSize: 15.0,
+                                      fontFamily: "nanumB",
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
                                   onPressed: logOutEmail,
                                 ),
                           Container(
                             child: Divider(
                               color: Color.fromRGBO(82, 110, 208, 1.0),
                             ),
-                            padding: EdgeInsets.only(
-                                left: 20.0, right: 20.0, bottom: 0.0),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 10.0),
+                            padding: EdgeInsets.only(right: 20.0, bottom: 0.0),
                           ),
                           FlatButton(
-                            child: Text("회원 탈퇴"),
+                            child: Text(
+                              "회원 탈퇴",
+                              style: TextStyle(
+                                color: Colors.grey[900],
+                                fontSize: 15.0,
+                                fontFamily: "nanumB",
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
                             onPressed: delete,
                           ),
                         ],
@@ -548,7 +599,7 @@ class _PriavateInfoState extends State<PriavateInfo> {
                                 ),
                               )),
                           Padding(
-                            padding: EdgeInsets.only(bottom: 10.0),
+                            padding: EdgeInsets.only(bottom: 2.5),
                           ),
                           Align(
                             alignment: Alignment.topRight,
@@ -591,7 +642,15 @@ class _PriavateInfoState extends State<PriavateInfo> {
                           Align(
                               alignment: Alignment.centerLeft,
                               child: FlatButton(
-                                child: Text("회사 정보"),
+                                child: Text(
+                                  "회사 정보",
+                                  style: TextStyle(
+                                    color: Colors.grey[900],
+                                    fontSize: 15.0,
+                                    fontFamily: "nanumB",
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
                                 onPressed: hndSolution,
                               )),
                           Padding(

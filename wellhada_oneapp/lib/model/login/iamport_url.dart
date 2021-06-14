@@ -1,3 +1,4 @@
+// @dart=2.9
 import 'dart:io' show Platform;
 
 import 'package:flutter/services.dart';

@@ -1,6 +1,8 @@
 name: wellhada_oneapp
 description: A new Flutter project.
-
+homepage: https://www.bootpay.co.kr
+repository: https://github.com/bootpay/flutter
+documentation: https://docs.bootpay.co.kr
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -15,11 +17,12 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+1
+# version: 1.0.0+1
+version: 3.3.1
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
-
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=1.25.0-8.1.pre"
 dependencies:
   flutter:
     sdk: flutter
@@ -51,7 +54,7 @@ dependencies:
   async: ^2.4.0
   overlay_support: ^1.0.5
   uuid: ^2.0.4
-  flutter_svg: 0.19.0
+  flutter_svg: 0.20.0-nullsafety.3
   geolocator: ^6.0.0
   cached_network_image: ^2.3.1
   cloud_firestore:
@@ -66,10 +69,14 @@ dependencies:
   firebase_auth: ^0.18.4+1
   getwidget: ^1.2.2
   slide_popup_dialog: ^0.0.2
+  http_parser: ^3.0.3
+  overlay_container: ^0.0.5+1
+  bootpay_api: ^2.0.6
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -80,14 +87,18 @@ flutter:
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
-  uses-material-design: true
 
+  uses-material-design: true
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/icon/icon_kakao.png   
+    - assets/icon/intro_dosis.png   
+    - assets/icon/shopstoryIco.png   
+ 
     - assets/icon/noImage.png   
     - assets/svg/coupon.svg   
     - assets/svg/home1.svg   
+    - assets/svg/intro_dosis.svg   
     - assets/svg/uselist.svg   
     - assets/svg/location.svg   
     - assets/svg/home.svg   

@@ -1,3 +1,4 @@
+// @dart=2.9
 import 'dart:async';
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -13,7 +14,7 @@ import 'package:kakao_flutter_sdk/common.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_nav.dart';
 import 'package:wellhada_oneapp/UI/privateInfo_detail/email_login/extraLogin.dart';
 
-import 'package:wellhada_oneapp/listitem/user/user.dart' as user;
+import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
 import 'package:wellhada_oneapp/model/login/userData.dart';
 import 'package:wellhada_oneapp/notification/custom_notification.dart';
 
@@ -248,7 +249,7 @@ class _LOGINState extends State<LOGIN> {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         setState(() {
           prefs.setString("userKey", _kakaoEmail);
-          prefs.setString("userPasswordGoweb", kakaoAccessToken);
+          prefs.setString("userPasswordGoweb", "");
           prefs.setBool('login', true);
           prefs.setString("marketing", userData.appAgreeMarketing);
           prefs.setString("userProfile", userData.kakaoProfil);

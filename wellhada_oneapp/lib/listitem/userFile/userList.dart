@@ -1,3 +1,4 @@
+// @dart=2.9
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
@@ -546,7 +547,7 @@ Future<Insert> insertUser(
   bodyParam['userDevice'] = usertoken;
 
   http.Response response = await http.post(
-    Uri.encodeFull('http://192.168.0.47:8080/insertUser'),
+    Uri.encodeFull('http://hndsolution.iptime.org:8086/insertUser'),
     headers: {"Accept": "application/json"},
     body: bodyParam,
   );
@@ -640,7 +641,7 @@ Future<Status> loginUser(String userEmail, String userPassword, String idIntre,
   bodyParam['userDevice'] = usertoken;
   http.Response response = await http.post(
     //Uri.encodeFull('http://hndsolution.iptime.org:8080/login'),
-    Uri.encodeFull('http://192.168.0.47:8080/login'),
+    Uri.encodeFull('http://hndsolution.iptime.org:8086/login'),
 
     headers: {"Accept": "application/json"},
     body: bodyParam,
@@ -791,7 +792,7 @@ Future<Status> loginUser(String userEmail, String userPassword, String idIntre,
 
 //   http.Response response = await http.post(
 //     //Uri.encodeFull('http://hndsolution.iptime.org:8080/getUserInfo'),
-//     Uri.encodeFull('http://192.168.0.47:8080/getUserInfo'),
+//     Uri.encodeFull('http://hndsolution.iptime.org:8086/getUserInfo'),
 //     headers: {"Accept": "application/json"},
 //     body: bodyParam,
 //   );
@@ -908,7 +909,7 @@ Future<UserInfomation> getUserInfomation(String userId) async {
 
   http.Response response = await http.post(
     //Uri.encodeFull('http://hndsolution.iptime.org:8080/getUserInfo'),
-    Uri.encodeFull('http://192.168.0.47:8080/getUserInfo'),
+    Uri.encodeFull('http://hndsolution.iptime.org:8086/getUserInfo'),
     headers: {"Accept": "application/json"},
     body: bodyParam,
   );
@@ -969,7 +970,7 @@ Future<UpdateUser> updateUser(
 
   http.Response response = await http.post(
     //Uri.encodeFull('http://hndsolution.iptime.org:8080/updateUserInfo'),
-    Uri.encodeFull('http://192.168.0.47:8080/updateUserInfo'),
+    Uri.encodeFull('http://hndsolution.iptime.org:8086/updateUserInfo'),
 
     headers: {"Accept": "application/json"},
     body: bodyParam,
@@ -998,7 +999,7 @@ void getDelete(String userEmail) async {
 
   http.Response response = await http.post(
     //Uri.encodeFull('http://hndsolution.iptime.org:8080/getUserInfo'),
-    Uri.encodeFull('http://192.168.0.47:8080/deleteUserInfo'),
+    Uri.encodeFull('http://hndsolution.iptime.org:8086/deleteUserInfo'),
     headers: {"Accept": "application/json"},
     body: bodyParam,
   );
@@ -1037,7 +1038,8 @@ Future<Status> webView(
 
   http.Response response = await http.post(
     //Uri.encodeFull('http://hndsolution.iptime.org:8080/login'),
-    Uri.encodeFull('http://192.168.0.47:8080//usermngr/shopTmplatView.do'),
+    Uri.encodeFull(
+        'http://hndsolution.iptime.org:8086/usermngr/shopTmplatView.do'),
 
     headers: {"Accept": "application/json"},
     body: bodyParam,

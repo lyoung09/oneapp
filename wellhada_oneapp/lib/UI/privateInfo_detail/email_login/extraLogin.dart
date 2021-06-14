@@ -1,3 +1,4 @@
+// @dart=2.9
 import 'dart:async';
 import 'dart:io';
 
@@ -560,7 +561,7 @@ class _ExtraLoginState extends State<ExtraLogin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        resizeToAvoidBottomPadding: false,
+        resizeToAvoidBottomInset: false,
         body: Stack(
           children: <Widget>[
             Container(

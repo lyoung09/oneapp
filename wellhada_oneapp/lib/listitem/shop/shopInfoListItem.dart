@@ -1,3 +1,4 @@
+// @dart=2.9
 import 'dart:convert';
 import 'dart:io';
 
@@ -794,7 +795,7 @@ class ShopListDetail {
   String addressDetail;
   String categoryGroupCode;
   String phone;
-  int regDate;
+  String regDate;
   String shopDc;
   String bsnEndTime;
   String telnoHideAt;
@@ -811,18 +812,20 @@ class ShopListDetail {
   String shopDcDispAt;
   String bsnBeginTime;
   String phoneOther;
+  String holiday;
   int userSeq;
-  int updDate;
+  String updDate;
   int fileSeq;
   double latitude;
   double longtitude;
+
   ShopListDetail(
       {this.weekBeginTime,
       this.weekEndTime,
       this.addressDetail,
       this.categoryGroupCode,
       this.phone,
-      this.regDate,
+      //  this.regDate,
       this.shopDc,
       this.bsnEndTime,
       this.telnoHideAt,
@@ -843,7 +846,8 @@ class ShopListDetail {
       this.updDate,
       this.fileSeq,
       this.latitude,
-      this.longtitude});
+      this.longtitude,
+      this.holiday});
   factory ShopListDetail.fromJson(Map<String, dynamic> json) => ShopListDetail(
         weekBeginTime:
             json["WEEK_BEGIN_TIME"] == null ? null : json["WEEK_BEGIN_TIME"],
@@ -853,7 +857,7 @@ class ShopListDetail {
             json["ADDRESS_DETAIL"] == null ? null : json["ADDRESS_DETAIL"],
         categoryGroupCode: json["CATEGORY_CODE"],
         phone: json["PHONE"] == null ? null : json["PHONE"],
-        regDate: json["REG_DATE"] == null ? null : json["REG_DATE"],
+        //  regDate: json["REG_DATE"] == null ? null : json["REG_DATE"],
         shopDc: json["SHOP_DC"] == null ? null : json["SHOP_DC"],
         bsnEndTime: json["BSN_END_TIME"] == null ? null : json["BSN_END_TIME"],
         telnoHideAt:
@@ -878,6 +882,7 @@ class ShopListDetail {
         fileSeq: json["FILE_SEQ"] == null ? null : json["FILE_SEQ"],
         latitude: json["LATITUDE"],
         longtitude: json["LONGITUDE"],
+        holiday: json["HLDY_CD"] == null ? null : json["HLDY_CD"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -886,7 +891,7 @@ class ShopListDetail {
         "ADDRESS_DETAIL": addressDetail == null ? null : addressDetail,
         "CATEGORY_CODE": categoryGroupCode,
         "PHONE": phone == null ? null : phone,
-        "REG_DATE": regDate == null ? null : regDate,
+        // "REG_DATE": regDate == null ? null : regDate,
         "SHOP_DC": shopDc == null ? null : shopDc,
         "BSN_END_TIME": bsnEndTime == null ? null : bsnEndTime,
         "TELNO_HIDE_AT": telnoHideAt == null ? null : telnoHideAt,
@@ -908,6 +913,7 @@ class ShopListDetail {
         "FILE_SEQ": fileSeq == null ? null : fileSeq,
         "LATITUDE": latitude,
         "LONGITUDE": longtitude,
+        "HLDY_CD": holiday == null ? null : holiday,
       };
 
   factory ShopListDetail.fromJsonMap(Map<String, dynamic> json) =>
@@ -927,7 +933,7 @@ ShopListDetail _$ShopListDetailFromJsonMap(Map<String, dynamic> json) {
         : json["ADDRESS_DETAIL"] as String,
     categoryGroupCode: json["CATEGORY_CODE"] as String,
     phone: json["PHONE"] == null ? null : json["PHONE"] as String,
-    regDate: json["REG_DATE"] == null ? null : json["REG_DATE"] as int,
+    //  regDate: json["REG_DATE"] == null ? null : json["REG_DATE"] as DateTime,
     shopDc: json["SHOP_DC"] == null ? null : json["SHOP_DC"] as String,
     bsnEndTime:
         json["BSN_END_TIME"] == null ? null : json["BSN_END_TIME"] as String,
@@ -956,8 +962,9 @@ ShopListDetail _$ShopListDetailFromJsonMap(Map<String, dynamic> json) {
     phoneOther:
         json["PHONE_OTHER"] == null ? null : json["PHONE_OTHER"] as String,
     userSeq: json["USER_SEQ"] == null ? null : json["USER_SEQ"] as int,
-    updDate: json["UPD_DATE"] == null ? null : json["UPD_DATE"] as int,
+    updDate: json["UPD_DATE"] == null ? null : json["UPD_DATE"] as String,
     fileSeq: json["FILE_SEQ"] == null ? null : json["FILE_SEQ"] as int,
+    holiday: json["HLDY_CD"] == null ? null : json["HLDY_CD"] as String,
     latitude: json["LATITUDE"] as double,
     longtitude: json["LONGITUDE"] as double,
   );
@@ -972,7 +979,7 @@ Map<String, dynamic> _$ShopListDetailToJsonMap(ShopListDetail instance) =>
       'ADDRESS_DETAIL': instance.addressDetail,
       'CATEGORY_CODE': instance.categoryGroupCode,
       'PHONE': instance.phone == null ? null : instance.phone,
-      'REG_DATE': instance.regDate == null ? null : instance.regDate,
+      // 'REG_DATE': instance.regDate == null ? null : instance.regDate,
       'SHOP_DC': instance.shopDc == null ? null : instance.shopDc,
       'BSN_END_TIME': instance.bsnEndTime == null ? null : instance.bsnEndTime,
       'TELNO_HIDE_AT':
@@ -995,12 +1002,14 @@ Map<String, dynamic> _$ShopListDetailToJsonMap(ShopListDetail instance) =>
       'USER_SEQ': instance.userSeq == null ? null : instance.userSeq,
       'UPD_DATE': instance.updDate == null ? null : instance.updDate,
       'FILE_SEQ': instance.fileSeq == null ? null : instance.fileSeq,
+      'HLDY_CD': instance.holiday == null ? null : instance.holiday,
       'LATITUDE': instance.latitude,
       'LONGITUDE': instance.longtitude,
     };
 
 Future<Map<String, dynamic>> getShopList() async {
-  final response = await http.get('http://192.168.0.47:8080/getShopList');
+  final response =
+      await http.get('http://hndsolution.iptime.org:8086/getShopList');
 
   if (200 == response.statusCode) {
     var datauser = json.decode(response.body);
@@ -1018,7 +1027,8 @@ Future<ShopList> getShopListEntire() async {
   //   body: {'period': 'ALL'},
   // );
 
-  final response = await http.get('http://192.168.0.47:8080/getShopList');
+  final response =
+      await http.get('http://hndsolution.iptime.org:8086/getShopList');
   // final response = await http
   //     .get('https://run.mocky.io/v3/df690ee8-61d0-4cd5-b616-304d166d5b83');
 
@@ -1131,7 +1141,8 @@ Map<String, dynamic> _$ShopCodeListToJsonMap(ShopCodeList instance) =>
     };
 
 Future<Map<String, dynamic>> getShopCodeList() async {
-  final response = await http.get('http://192.168.0.47:8080/getShopCodeList');
+  final response =
+      await http.get('http://hndsolution.iptime.org:8086/getShopCodeList');
 
   if (200 == response.statusCode) {
     var datauser = json.decode(response.body);
@@ -1147,7 +1158,8 @@ Future<ShopCode> getShopCodeEntire() async {
   //   headers: {"Accept": "application/json"},
   //   body: {'period': 'ALL'},
   // );
-  final response = await http.get('http://192.168.0.47:8080/getShopCodeList');
+  final response =
+      await http.get('http://hndsolution.iptime.org:8086/getShopCodeList');
 
   if (response.statusCode == 200) {
     return ShopCode.fromJsonMap(json.decode(response.body));
@@ -1164,7 +1176,8 @@ Future<Map<String, dynamic>> getShopDetailCodeList(String category) async {
   var bodyParam = new Map();
   bodyParam['CATEGORY_CD'] = category;
 
-  final response = await http.get('http://192.168.0.47:8080/getShopCodeList');
+  final response =
+      await http.get('http://hndsolution.iptime.org:8086/getShopCodeList');
   //.get('https://192.168.0.35:8080/getShopCodeList');
 
   if (200 == response.statusCode) {
