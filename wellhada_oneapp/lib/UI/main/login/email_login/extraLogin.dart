@@ -6,8 +6,10 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wellhada_oneapp/UI/privateInfo_detail/email_login/email.dart';
+
 import 'package:wellhada_oneapp/notification/custom_notification.dart';
+
+import 'email.dart';
 
 class ExtraLogin extends StatefulWidget {
   @override

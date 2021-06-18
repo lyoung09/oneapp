@@ -2,9 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:wellhada_oneapp/UI/privateInfo_detail/mileage_detail/coupon.dart';
-import 'package:wellhada_oneapp/UI/privateInfo_detail/mileage_detail/point.dart';
-import 'package:wellhada_oneapp/UI/privateInfo_detail/mileage_detail/stamp.dart';
+import 'package:wellhada_oneapp/UI/bottom_nav_deatail/privateInfo_detail/mileage_detail/coupon.dart';
+import 'package:wellhada_oneapp/UI/bottom_nav_deatail/privateInfo_detail/mileage_detail/point.dart';
+import 'package:wellhada_oneapp/UI/bottom_nav_deatail/privateInfo_detail/mileage_detail/stamp.dart';
 
 class Mileage extends StatefulWidget {
   final userId;

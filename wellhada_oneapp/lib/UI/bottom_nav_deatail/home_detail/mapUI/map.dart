@@ -11,7 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wellhada_oneapp/UI/main/home_detail/webview.dart';
+import 'package:wellhada_oneapp/UI/main/bottom_nav.dart';
+
 import 'dart:math' show cos, sqrt, asin;
 import 'package:wellhada_oneapp/listitem/shop/shopInfoListItem.dart'
     as shopInfoListItem;
@@ -19,8 +20,6 @@ import 'package:slide_popup_dialog/slide_popup_dialog.dart' as slideDialog;
 import 'package:wellhada_oneapp/model/map/map_model.dart';
 import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
 import 'package:wellhada_oneapp/listitem/shop/web.dart' as webLogin;
-
-import '../../bottom_nav.dart';
 
 class GoogleMapUI extends StatefulWidget {
   @override
@@ -33,8 +32,6 @@ class _Google1MapUIState extends State<GoogleMapUI>
   var lng;
   var click = false;
   _Google1MapUIState();
-
-  MapModel model = new MapModel();
 
   @override
   bool get wantKeepAlive {
@@ -71,7 +68,8 @@ class _Google1MapUIState extends State<GoogleMapUI>
       beginWeekDate,
       endWeekDate,
       beginWeekendDate,
-      endWeekendDate;
+      endWeekendDate,
+      number;
   bool opening;
   bool openingDay;
   var userChk, userKey, userId, userPassword;
@@ -179,7 +177,6 @@ class _Google1MapUIState extends State<GoogleMapUI>
 
   void _handleURLButtonPress(BuildContext context, String url, String placeName,
       int shopSeq, String userKey, String userChk) {
-    print(userKey);
     if (userKey == null || userKey == "") {
       showDialog(
           context: context,
@@ -199,13 +196,25 @@ class _Google1MapUIState extends State<GoogleMapUI>
                 ],
               ));
     } else {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => WebViewContainer(
-                  placeName, shopSeq, userKey, userPassword, userChk, "0")));
+      // Navigator.push(
+      //     context,
+      //     MaterialPageRoute(
+      //         builder: (context) => WebViewContainer(
+      //             placeName: placeName,
+      //             shopSeq: shopSeq,
+      //             userId: userKey,
+      //             userPassword: userPassword,
+      //             userChk: userChk,
+      //             number: "0")));
+      Navigator.pushReplacementNamed(context, '/webview', arguments: {
+        'placeName': placeName,
+        'shopSeq': shopSeq,
+        'userId': userKey,
+        'userPassword': userPassword,
+        'userChk': userChk,
+        'number': "0"
+      });
     }
-    // Navigator.pushNamed(context, '/webview');
   }
 
   _determinePosition() async {
@@ -476,7 +485,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
                         'http://hndsolution.iptime.org:8086${pic}',
                         width: MediaQuery.of(context).size.width * 0.8,
                         height: MediaQuery.of(context).size.height * 0.25,
-                        fit: BoxFit.fitWidth,
+                        fit: BoxFit.fitHeight,
                       ),
                     ),
                     width: double.infinity,
@@ -726,7 +735,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
                               'http://hndsolution.iptime.org:8086${pic}',
                               width: MediaQuery.of(context).size.width * 0.8,
                               height: MediaQuery.of(context).size.height * 0.3,
-                              fit: BoxFit.fitWidth,
+                              fit: BoxFit.fitHeight,
                             ),
                           )),
 
@@ -817,8 +826,6 @@ class _Google1MapUIState extends State<GoogleMapUI>
               latLngBounds.southwest.latitude < element.latitude &&
               latLngBounds.southwest.longitude < element.longtitude)
           .map((element) {
-        print(" ${shopId} :${openShopSeq[shopId]}");
-        print(" ${shopId} :${dayOpenShop[shopId]}");
         return openShopSeq[element.shopSeq] == true &&
                 dayOpenShop[element.shopSeq] == true
             ? Marker(

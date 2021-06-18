@@ -14,18 +14,22 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:kakao_flutter_sdk/all.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import 'package:wellhada_oneapp/UI/intro.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_detail/private_info.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_nav.dart';
 import 'dart:io';
 import 'package:uuid/uuid.dart';
-
+import 'package:wellhada_oneapp/listitem/shop/shopFavorite.dart' as favorite;
 import 'package:geolocator/geolocator.dart';
+import 'package:wellhada_oneapp/listitem/userFile/userList.dart';
+import 'UI/bottom_nav_deatail/home_detail/webview.dart';
+import 'UI/bottom_nav_deatail/privateInfo_detail/user/updateUser.dart';
 import 'UI/main/bottom_detail/home_screen.dart';
-import 'UI/privateInfo_detail/email_login/lastSelector.dart';
-import 'UI/privateInfo_detail/login.dart';
 
-import 'UI/privateInfo_detail/user/updateUser.dart';
+import 'UI/main/login/email_login/lastSelector.dart';
+import 'UI/main/login/login.dart';
+
 import 'notification/custom_notification.dart';
 
 void main() async {
@@ -59,6 +63,7 @@ class MyApp extends StatelessWidget {
           '/BottomNav': (context) => BottomNav(),
           '/userUpdate': (context) => UserUpdate(),
           '/Introduce': (context) => Introduce(),
+          '/webview': (context) => goToWebView(),
         },
       ),
     );
@@ -90,9 +95,8 @@ class _MyHomePageState extends State<MyHomePage> {
     _getCurrentLocation();
   }
 
+  Position geoPos;
   _getCurrentLocation() async {
-    Position geoPos;
-
     try {
       geoPos = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.bestForNavigation);
@@ -128,19 +132,6 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-  Future<Position> getPositon() async {
-    Position geoPos;
-    try {
-      geoPos = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.bestForNavigation);
-    } catch (e) {
-      geoPos = await Geolocator.getLastKnownPosition();
-      print(e.toString());
-    }
-
-    return geoPos;
-  }
-
   startTime() async {
     return new Timer(Duration(milliseconds: 200), () {
       checkFirstSeen();
@@ -152,20 +143,20 @@ class _MyHomePageState extends State<MyHomePage> {
     bool _seen = (prefs.getBool('seen') ?? false);
 
     bool _login = (prefs.getBool('login') ?? false);
-
+    var userId;
     if (_seen) {
-      if (_login)
-        Navigator.pushNamed(context, '/BottomNav');
-      else
+      if (_login) {
+        setState(() {
+          userId = prefs.getString("userKey");
+        });
+        Navigator.pushNamed(context, '/BottomNav',
+            arguments: {"userId": userId});
+      } else
         Navigator.pushNamed(context, '/login');
     } else {
       prefs.setBool('seen', true);
       Navigator.pushNamed(context, '/Introduce');
     }
-  }
-
-  void goMain() {
-    Navigator.pushNamed(context, '/Introduce');
   }
 
   _function() async {

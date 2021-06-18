@@ -148,9 +148,7 @@ class _LastSelectionState extends State<LastSelection> {
         prefs.setString("userPasswordGoweb", userPassword);
       });
       Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => new BottomNav(
-                number: 3,
-              )));
+          builder: (context) => new BottomNav(number: 3, userId: userId)));
     }
 
     // if (signUp.status == "20") {

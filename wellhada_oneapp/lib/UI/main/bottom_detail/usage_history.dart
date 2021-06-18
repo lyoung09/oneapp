@@ -7,11 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wellhada_oneapp/UI/main/home_detail/webview.dart';
-import 'package:wellhada_oneapp/UI/privateInfo_detail/login.dart';
+import 'package:wellhada_oneapp/UI/bottom_nav_deatail/usageHistory_detail/my_review.dart';
+import 'package:wellhada_oneapp/UI/bottom_nav_deatail/usageHistory_detail/review.dart';
+import 'package:wellhada_oneapp/UI/main/login/login.dart';
 
-import 'package:wellhada_oneapp/UI/usageHistory_detail/my_review.dart';
-import 'package:wellhada_oneapp/UI/usageHistory_detail/review.dart';
 import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
 import 'package:intl/intl.dart';
 import 'package:wellhada_oneapp/listitem/shop/orderList.dart' as orderList;
@@ -216,7 +215,7 @@ class _UsageHistoryState extends State<UsageHistory> {
                         File(pic),
                         width: MediaQuery.of(context).size.width * 0.8,
                         height: MediaQuery.of(context).size.height * 0.3,
-                        fit: BoxFit.fitWidth,
+                        fit: BoxFit.fitHeight,
                       ),
                     )),
                 Container(
@@ -628,7 +627,7 @@ class _UsageHistoryState extends State<UsageHistory> {
                           'http://hndsolution.iptime.org:8086${pic}',
                           width: MediaQuery.of(context).size.width * 0.13,
                           height: MediaQuery.of(context).size.height * 0.15,
-                          fit: BoxFit.fitWidth,
+                          fit: BoxFit.fitHeight,
                         ))),
                 Container(
                   padding: EdgeInsets.only(left: 20.0, bottom: 10.0),
@@ -757,7 +756,7 @@ class _UsageHistoryState extends State<UsageHistory> {
                         'http://hndsolution.iptime.org:8086${pic}',
                         width: MediaQuery.of(context).size.width * 0.8,
                         height: MediaQuery.of(context).size.height * 0.25,
-                        fit: BoxFit.fitWidth,
+                        fit: BoxFit.fitHeight,
                       ),
                     ),
                     width: double.infinity,
@@ -1433,11 +1432,24 @@ class _UsageHistoryState extends State<UsageHistory> {
   }
 
   webView(placeName, shopSeq, userId, userPassword) async {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => WebViewContainer(
-                placeName, shopSeq, userId, userPassword, userChk, "1")));
+    // Navigator.push(
+    //     context,
+    //     MaterialPageRoute(
+    //         builder: (context) => WebViewContainer(
+    //             placeName: placeName,
+    //             shopSeq: shopSeq,
+    //             userId: userId,
+    //             userPassword: userPassword,
+    //             userChk: userChk,
+    //             number: "1")));
+    Navigator.pushReplacementNamed(context, '/webview', arguments: {
+      'placeName': placeName,
+      'shopSeq': shopSeq,
+      'userId': userId,
+      'userPassword': userPassword,
+      'userChk': userChk,
+      'number': "1"
+    });
   }
 
   readingMyReview(shopId, shopName, order, userId) async {
@@ -1452,11 +1464,24 @@ class _UsageHistoryState extends State<UsageHistory> {
   var userPassword;
   void _handleURLButtonPress(BuildContext context, String url, String placeName,
       int shopSeq, String userId) {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => WebViewContainer(
-                placeName, shopSeq, userId, userPassword, userChk, "1")));
+    // Navigator.push(
+    //     context,
+    //     MaterialPageRoute(
+    //         builder: (context) => WebViewContainer(
+    //             placeName: placeName,
+    //             shopSeq: shopSeq,
+    //             userId: userId,
+    //             userPassword: userPassword,
+    //             userChk: userChk,
+    //             number: "1")));
+    Navigator.pushReplacementNamed(context, '/webview', arguments: {
+      'placeName': placeName,
+      'shopSeq': shopSeq,
+      'userId': userId,
+      'userPassword': userPassword,
+      'userChk': userChk,
+      'number': "1"
+    });
   }
 
   Widget _usageCard(reviewInfoList) {
@@ -1694,6 +1719,37 @@ class _UsageHistoryState extends State<UsageHistory> {
                                               mainAxisAlignment:
                                                   MainAxisAlignment.end,
                                               children: <Widget>[
+                                                Padding(
+                                                  padding: EdgeInsets.only(
+                                                      right: 5, top: 5),
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                      color: Colors
+                                                          .blueAccent[100],
+                                                      border: Border.all(
+                                                        color:
+                                                            Colors.transparent,
+                                                        width: 2,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  15.0) //                 <--- border radius here
+                                                              ),
+                                                    ),
+                                                    child: Text(
+                                                      '리뷰 완료',
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      style: TextStyle(
+                                                        fontFamily: "nanumR",
+                                                        fontWeight:
+                                                            FontWeight.w900,
+                                                        fontSize: 11,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
                                                 Padding(
                                                   padding: EdgeInsets.only(
                                                       right: 5, top: 5),
@@ -2291,7 +2347,7 @@ class _UsageHistoryState extends State<UsageHistory> {
 
   getOrderUsageHistory(userId) async {
     if (userId == null || userId == "") {
-      return "hoit";
+      return "nologin";
     } else {
       return orderList.getOrderHistory(userId);
     }
@@ -2314,14 +2370,13 @@ class _UsageHistoryState extends State<UsageHistory> {
             "이용내역",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
           ),
-          // actions: <Widget>[
-          //  FlatButton(
-          //           child: Text("내 리뷰",
-          //               style: TextStyle(
-          //                   color: Colors.white, fontWeight: FontWeight.w900)),
-          //           onPressed: myReview)
-
-          // ],
+          actions: <Widget>[
+            FlatButton(
+                child: Text("내 리뷰",
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.w900)),
+                onPressed: myReview)
+          ],
         ),
         body: FutureBuilder(
             future: orderFuture,
@@ -2330,7 +2385,7 @@ class _UsageHistoryState extends State<UsageHistory> {
                 return Center();
               }
 
-              if (snapshot.data == "hoit") {
+              if (snapshot.data == "nologin") {
                 return Column(
                   children: <Widget>[
                     Padding(

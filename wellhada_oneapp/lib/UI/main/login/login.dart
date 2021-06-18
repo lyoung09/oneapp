@@ -12,11 +12,12 @@ import 'package:kakao_flutter_sdk/auth.dart';
 import 'package:kakao_flutter_sdk/user.dart';
 import 'package:kakao_flutter_sdk/common.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_nav.dart';
-import 'package:wellhada_oneapp/UI/privateInfo_detail/email_login/extraLogin.dart';
 
 import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
 import 'package:wellhada_oneapp/model/login/userData.dart';
 import 'package:wellhada_oneapp/notification/custom_notification.dart';
+
+import 'email_login/extraLogin.dart';
 
 class LOGIN extends StatefulWidget {
   var number;
@@ -175,9 +176,8 @@ class _LOGINState extends State<LOGIN> {
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => BottomNav(
-                                number: number,
-                              )),
+                          builder: (context) =>
+                              BottomNav(number: number, userId: userId)),
                     ),
                   ),
                 ],
@@ -263,7 +263,8 @@ class _LOGINState extends State<LOGIN> {
           // prefs.setInt("cookie", 00);
         });
         Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => new BottomNav(number: number)));
+            builder: (context) =>
+                new BottomNav(number: number, userId: userId)));
       } else {
         prefs.setString("marketing", "N");
         prefs.setString("userProfile", userProfile);

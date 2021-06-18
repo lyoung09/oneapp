@@ -10,15 +10,15 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wellhada_oneapp/UI/banner/main_banner.dart';
-import 'package:wellhada_oneapp/UI/main/home_detail/webview.dart';
+import 'package:wellhada_oneapp/UI/bottom_nav_deatail/home_detail/webview.dart';
+import 'package:wellhada_oneapp/UI/main/bottom_nav.dart';
+
 import 'package:wellhada_oneapp/listitem/shop/web.dart' as webLogin;
 import 'package:wellhada_oneapp/listitem/shop/shopInfoListItem.dart'
     as shopInfoListItem;
 import 'package:hexcolor/hexcolor.dart';
 import 'dart:math' show cos, sqrt, asin;
 import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
-import '../bottom_nav.dart';
 
 class ListScreen extends StatefulWidget {
   @override
@@ -144,6 +144,15 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
           MaterialPageRoute(
               builder: (context) => WebViewContainer(
                   placeName, shopSeq, userKey, userPassword, userChk, "0")));
+
+      // Navigator.pushReplacementNamed(context, '/webview', arguments: {
+      //   'placeName': placeName,
+      //   'shopSeq': shopSeq,
+      //   'userId': userKey,
+      //   'userPassword': userPassword,
+      //   'userChk': userChk,
+      //   'number': "0"
+      // });
     }
 
     // Navigator.pushNamed(context, '/webview');
@@ -408,7 +417,7 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
       } else {
         //시작 안한거는 false
         print("영업 시작 안함");
-        openShopSeq[shopId] = true;
+        openShopSeq[shopId] = false;
       }
     });
   }
@@ -494,8 +503,6 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
                   //       hour: int.parse(endHour), minute: int.parse(endMin));
                   // }
                   // openingShop(startTime, endTime);
-                  print(
-                      '${menuCode[position].shopSeq}:${openShopSeq[menuCode[position].shopSeq]}');
 
                   return openShopSeq[menuCode[position].shopSeq] == true &&
                           dayOpenShop[menuCode[position].shopSeq] == true
@@ -509,7 +516,7 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
                                 Container(
                                   child: Image.network(
                                     'http://hndsolution.iptime.org:8086${menuCode[position].fileUrl}',
-                                    fit: BoxFit.fill,
+                                    fit: BoxFit.fitHeight,
                                     width: MediaQuery.of(context).size.width *
                                         0.23,
                                     height: MediaQuery.of(context).size.height *
@@ -613,7 +620,7 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
                               Container(
                                 child: Image.network(
                                     'http://hndsolution.iptime.org:8086/${menuCode[position].fileUrl}',
-                                    fit: BoxFit.fill,
+                                    fit: BoxFit.fitHeight,
                                     width: MediaQuery.of(context).size.width *
                                         0.23,
                                     height: MediaQuery.of(context).size.height *
@@ -654,16 +661,15 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
                                       verticalDirection: VerticalDirection.down,
                                       children: [
                                         Text(
-                                          menuCode[position].address.length > 17
-                                              ? '${menuCode[position].address.substring(0, 16) + '\n' + menuCode[position].address.substring(17, menuCode[position].address.length)}'
+                                          menuCode[position].address.length > 18
+                                              ? '${menuCode[position].address.substring(0, 18) + '\n' + menuCode[position].address.substring(18, menuCode[position].address.length)}'
                                               : menuCode[position].address,
                                           maxLines: 4,
-                                          style: TextStyle(fontSize: 15.0),
+                                          style: TextStyle(fontSize: 15.5),
                                         ),
 
                                         Padding(
-                                          padding: EdgeInsets.only(
-                                              left: 5, right: 5),
+                                          padding: EdgeInsets.only(left: 5),
                                         ),
                                         // ClipOval(
                                         //   child: Material(

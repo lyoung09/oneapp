@@ -380,8 +380,9 @@ Future<SaveF> saveFavoriteShop(
     headers: {"Accept": "application/json"},
     body: bodyParam,
   );
-
+  print('bodyparam ${bodyParam}');
   if (response.statusCode == 200) {
+    print("yyyy");
     return SaveF.fromJson(json.decode(response.body));
   } else {
     throw HttpException(

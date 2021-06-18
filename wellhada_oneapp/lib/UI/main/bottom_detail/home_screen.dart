@@ -11,8 +11,8 @@ import 'package:wellhada_oneapp/UI/banner/top_banner.dart';
 import 'package:provider/provider.dart';
 
 import 'package:location_permissions/location_permissions.dart';
-import 'package:wellhada_oneapp/UI/main/home_detail/list_screen.dart';
-import 'package:wellhada_oneapp/UI/main/home_detail/mapUI/map.dart';
+import 'package:wellhada_oneapp/UI/bottom_nav_deatail/home_detail/list_screen.dart';
+import 'package:wellhada_oneapp/UI/bottom_nav_deatail/home_detail/mapUI/map.dart';
 
 class HomeScreen extends StatefulWidget {
   @override

@@ -12,10 +12,10 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_detail/private_info.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_nav.dart';
-import 'package:wellhada_oneapp/UI/privateInfo_detail/email_login/mobile.dart';
+import 'package:wellhada_oneapp/UI/main/login/email_login/mobile.dart';
 
 import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
-import 'package:wellhada_oneapp/model/login/certification_data.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
@@ -32,7 +32,7 @@ class _UserUpdateState extends State<UserUpdate> {
   String userName;
   var userProfile = '';
   var nicknameController = TextEditingController(text: '');
-  var mobileController = TextEditingController(text: '');
+
   final _formKey = GlobalKey<FormState>();
   var birthday, birthdayJson, gender = '';
   bool isSelected;
@@ -57,6 +57,7 @@ class _UserUpdateState extends State<UserUpdate> {
     isSelected = false;
     sampleData.add(new RadioModel(false, '남'));
     sampleData.add(new RadioModel(false, '여'));
+    print("hoit2");
   }
 
   @override
@@ -183,7 +184,7 @@ class _UserUpdateState extends State<UserUpdate> {
   }
 
   var userToken;
-  var checkPhone;
+  var userUpdatePhone;
   userDefault() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -195,8 +196,14 @@ class _UserUpdateState extends State<UserUpdate> {
         password = prefs.getString("userPasswordGoweb");
         marketing = prefs.getString("marketing");
         userToken = prefs.getString("userToken");
-        userPhone = userData.userPhoneNumber;
-        checkPhone = userPhone;
+        userUpdatePhone = prefs.getString("userUpdatePhone");
+        if (userUpdatePhone == null) {
+          userPhone = userData.userPhoneNumber;
+        } else {
+          userPhone = userUpdatePhone;
+        }
+        print('userPhone :${userPhone} , userUpdatePhone :${userUpdatePhone}');
+        prefs.setString("userUpdatePhone", null);
       });
       userName = userData.userName;
       userEmail = userData.userEmail;
@@ -207,14 +214,12 @@ class _UserUpdateState extends State<UserUpdate> {
           : birthday =
               '${birthdayJson.substring(0, 4)}.${birthdayJson.substring(4, 6)}.${birthdayJson.substring(6, 8)}';
 
-      print('user token ${userToken}');
       genderDb = userData.gender;
 
       if (genderDb == "M") gender = "남";
       if (genderDb == "F") gender = "여";
 
       nicknameController = TextEditingController(text: '${userName}');
-      mobileController = TextEditingController(text: '${userPhone}');
     } catch (e) {
       print(e);
     }
@@ -280,9 +285,9 @@ class _UserUpdateState extends State<UserUpdate> {
       });
 
       if (authCredential?.user != null) {
+        mobileChecking = false;
         setState(() {
-          mobileChecking = false;
-          prefs.setString('userPhone', '${mobileController.text}');
+          prefs.setString('userPhone', userPhone);
 
           currentState = MobileVerificationState.SHOW_MOBILE_FORM_STATE;
         });
@@ -417,7 +422,7 @@ class _UserUpdateState extends State<UserUpdate> {
     final update = await user.updateUser(
         userKey,
         password == null ? "" : password,
-        mobileController.text == null ? "" : mobileController.text,
+        userPhone == null ? "" : userPhone,
         nicknameController.text == "" ? userName : nicknameController.text,
         genderDb == null ? "" : genderDb,
         birthdayJson == null ? "" : birthdayJson,
@@ -602,99 +607,46 @@ class _UserUpdateState extends State<UserUpdate> {
                           ),
                           Container(
                               width: MediaQuery.of(context).size.width * 0.49,
-                              child: TextFormField(
-                                keyboardType: TextInputType.number,
+                              child: Text(
+                                userPhone,
+                                // keyboardType: TextInputType.number,
                                 style: TextStyle(color: Colors.black),
-                                controller: mobileController,
-                                onChanged: (value) {
-                                  setState(() {
-                                    if (value != userPhone) {
-                                      mobileChecking = true;
-                                    }
-                                    if (value == userPhone) {
-                                      mobileChecking = false;
-                                    }
-                                  });
-                                },
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                ),
+                                // controller: mobileController,
+                                // onChanged: (value) {
+                                //   if (value != userPhone) {
+                                //     mobileChecking = true;
+                                //   }
+                                //   setState(() {
+                                //     if (value == userPhone) {
+                                //       mobileChecking = false;
+                                //     }
+                                //     print(value.runtimeType);
+                                //     print(userPhone.runtimeType);
+                                //   });
+                                // },
+                                // decoration: InputDecoration(
+                                //   border: InputBorder.none,
+                                // ),
                               )),
-                          userChk == 'E'
+                          Spacer(),
+                          userPhone == null || userPhone == ""
                               ? Align(
                                   alignment: Alignment.centerRight,
-                                  child: FlatButton(
-                                    onPressed: () async {
-                                      await _auth.verifyPhoneNumber(
-                                        phoneNumber:
-                                            '+82 ${mobileController.text}',
-                                        verificationCompleted:
-                                            (phoneAuthCredential) async {
-                                          setState(() {
-                                            showLoading = false;
-                                          });
-                                          //signInWithPhoneAuthCredential(phoneAuthCredential);
-                                        },
-                                        verificationFailed:
-                                            (verificationFailed) async {
-                                          setState(() {
-                                            showLoading = false;
-                                          });
-                                          if (Platform.isAndroid) {
-                                            print(verificationFailed.message);
-                                            switch (
-                                                verificationFailed.message) {
-                                              case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ TOO_SHORT ]':
-                                              case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ TOO_LONG ]':
-                                              case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ Invalid format. ]':
-                                                errorType = " 정확한 번호를 적어주세요";
-                                                break;
-                                              case 'We have blocked all requests from this device due to unusual activity. Try again later.':
-                                              case 'The verification ID used to create the phone auth credential is invalid.':
-                                                //errorType = "이미 있는 id 입니다.";
-                                                errorType =
-                                                    "비정상적인 활동으로 인해이 기기의 모든 요청을 차단했습니다. 나중에 다시 시도하십시오..";
-                                                break;
-                                            }
-                                          } else if (Platform.isIOS) {}
-                                          showDialog(
-                                              context: context,
-                                              builder: (_) =>
-                                                  CupertinoAlertDialog(
-                                                    content: Text(errorType),
-                                                    actions: <Widget>[
-                                                      CupertinoDialogAction(
-                                                        child: Text('확인'),
-                                                        onPressed: () =>
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop(),
-                                                      ),
-                                                    ],
-                                                  ));
-                                          // _scaffoldKey.currentState
-                                          //     .showSnackBar(SnackBar(
-                                          //         content: Text(
-                                          //             verificationFailed
-                                          //                 .message))
-                                          //   );
-                                        },
-                                        codeSent: (verificationId,
-                                            resendingToken) async {
-                                          setState(() {
-                                            showLoading = false;
-                                            currentState =
-                                                MobileVerificationState
-                                                    .SHOW_OTP_FORM_STATE;
-                                            this.verificationId =
-                                                verificationId;
-                                          });
-                                        },
-                                        codeAutoRetrievalTimeout:
-                                            (verificationId) async {},
-                                      );
+                                  child: RaisedButton.icon(
+                                    icon: SvgPicture.asset(
+                                      "assets/svg/defaultUser.svg",
+                                      fit: BoxFit.fill,
+                                      width: 20,
+                                      height: 20,
+                                    ),
+                                    onPressed: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  MobileScreen("update")));
                                     },
-                                    child: Text('변경하기'),
+                                    label: Text('본인인증'),
                                     color: Colors.white,
                                   ),
                                 )
@@ -707,83 +659,18 @@ class _UserUpdateState extends State<UserUpdate> {
                                       width: 20,
                                       height: 20,
                                     ),
-                                    onPressed: () async {
-                                      await _auth.verifyPhoneNumber(
-                                        phoneNumber:
-                                            '+82 ${mobileController.text}',
-                                        verificationCompleted:
-                                            (phoneAuthCredential) async {
-                                          setState(() {
-                                            showLoading = false;
-                                          });
-                                          //signInWithPhoneAuthCredential(phoneAuthCredential);
-                                        },
-                                        verificationFailed:
-                                            (verificationFailed) async {
-                                          setState(() {
-                                            showLoading = false;
-                                          });
-                                          if (Platform.isAndroid) {
-                                            print(verificationFailed.message);
-                                            switch (
-                                                verificationFailed.message) {
-                                              case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ TOO_SHORT ]':
-                                              case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ Invalid format. ]':
-                                              case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ TOO_LONG ]':
-                                                errorType = " 정확한 번호를 적어주세요";
-                                                break;
-
-                                              case 'We have blocked all requests from this device due to unusual activity. Try again later.':
-                                              case 'The verification ID used to create the phone auth credential is invalid.':
-                                                errorType =
-                                                    "비정상적인 활동으로 인해이 기기의 모든 요청을 차단했습니다. 나중에 다시 시도하십시오.";
-                                                break;
-                                              default:
-                                                errorType =
-                                                    verificationFailed.message;
-                                            }
-                                          } else if (Platform.isIOS) {}
-                                          showDialog(
-                                              context: context,
-                                              builder: (_) =>
-                                                  CupertinoAlertDialog(
-                                                    content: Text(errorType),
-                                                    actions: <Widget>[
-                                                      CupertinoDialogAction(
-                                                        child: Text('확인'),
-                                                        onPressed: () =>
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop(),
-                                                      ),
-                                                    ],
-                                                  ));
-
-                                          // _scaffoldKey.currentState
-                                          //     .showSnackBar(SnackBar(
-                                          //         content: Text(
-                                          //             verificationFailed
-                                          //                 .message)));
-                                        },
-                                        codeSent: (verificationId,
-                                            resendingToken) async {
-                                          setState(() {
-                                            showLoading = false;
-                                            currentState =
-                                                MobileVerificationState
-                                                    .SHOW_OTP_FORM_STATE;
-                                            this.verificationId =
-                                                verificationId;
-                                          });
-                                        },
-                                        codeAutoRetrievalTimeout:
-                                            (verificationId) async {},
-                                      );
+                                    onPressed: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  MobileScreen("update")));
                                     },
-                                    label: Text('본인인증'),
+                                    label: Text('변경하기'),
                                     color: Colors.white,
                                   ),
-                                )
+                                ),
+                          Padding(padding: EdgeInsets.only(right: 5))
                         ],
                       ),
                       Container(
@@ -896,26 +783,13 @@ class _UserUpdateState extends State<UserUpdate> {
                             // color: Color.fromRGBO(82, 110, 208, 1.0),
                             ),
                         padding: EdgeInsets.only(
-                            left: 20.0, right: 20.0, bottom: 10.0),
+                            left: 20.0, right: 20.0, bottom: 15.0),
                       ),
                       Container(
                         height: 45,
                         width: 200,
                         child: RaisedButton(
-                          onPressed: mobileChecking == true
-                              ? showDialog(
-                                  context: context,
-                                  builder: (_) => CupertinoAlertDialog(
-                                        content: Text("핸드폰 인증을 해주세요"),
-                                        actions: <Widget>[
-                                          CupertinoDialogAction(
-                                            child: Text('확인'),
-                                            onPressed: () =>
-                                                Navigator.of(context).pop(),
-                                          ),
-                                        ],
-                                      ))
-                              : checkUpdate,
+                          onPressed: checkUpdate,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(40.0),
                               side: BorderSide(color: Colors.black)),
@@ -958,6 +832,7 @@ class _UserUpdateState extends State<UserUpdate> {
   @override
   Widget build(BuildContext context) {
     final _pos = MediaQuery.of(context).size.height / 4 + 20;
+    print("hoit3");
     // check();
     return Scaffold(
         //body: userChk == 00 ? _updateWidget() : _email(),
@@ -965,9 +840,7 @@ class _UserUpdateState extends State<UserUpdate> {
             ? Center(
                 child: CircularProgressIndicator(),
               )
-            : currentState == MobileVerificationState.SHOW_MOBILE_FORM_STATE
-                ? _updateWidget()
-                : getOtpFormWidget(context));
+            : _updateWidget());
   }
 }
 

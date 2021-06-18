@@ -6,15 +6,15 @@ import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:kakao_flutter_sdk/all.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wellhada_oneapp/UI/privateInfo_detail/hndSolution.dart';
+import 'package:wellhada_oneapp/UI/bottom_nav_deatail/privateInfo_detail/hndSolution.dart';
+import 'package:wellhada_oneapp/UI/bottom_nav_deatail/privateInfo_detail/mileage_detail/point.dart';
+import 'package:wellhada_oneapp/UI/bottom_nav_deatail/privateInfo_detail/user/mileage.dart';
+import 'package:wellhada_oneapp/UI/bottom_nav_deatail/privateInfo_detail/user/notify.dart';
+import 'package:wellhada_oneapp/UI/bottom_nav_deatail/privateInfo_detail/user/proposingShop.dart';
+import 'package:wellhada_oneapp/UI/bottom_nav_deatail/privateInfo_detail/user/updateUser.dart';
 
-import 'package:wellhada_oneapp/UI/privateInfo_detail/login.dart';
-import 'package:wellhada_oneapp/UI/privateInfo_detail/mileage_detail/point.dart';
-import 'package:wellhada_oneapp/UI/privateInfo_detail/user/mileage.dart';
-import 'package:wellhada_oneapp/UI/privateInfo_detail/user/notify.dart';
+import 'package:wellhada_oneapp/UI/main/login/login.dart';
 
-import 'package:wellhada_oneapp/UI/privateInfo_detail/user/proposingShop.dart';
-import 'package:wellhada_oneapp/UI/privateInfo_detail/user/updateUser.dart';
 import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
 import 'package:wellhada_oneapp/model/menu/drawer_detail/qr_34.dart';
 
@@ -39,6 +39,7 @@ class _PriavateInfoState extends State<PriavateInfo> {
   @override
   void initState() {
     super.initState();
+    print("hoit");
     check();
     //userCheck();
     // userEmailCheck();
@@ -230,7 +231,7 @@ class _PriavateInfoState extends State<PriavateInfo> {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-
+    print("hoit1");
     return Stack(
       children: <Widget>[
         Container(
@@ -312,7 +313,7 @@ class _PriavateInfoState extends State<PriavateInfo> {
                                               radius: 35,
                                               child: SvgPicture.asset(
                                                 "assets/svg/defaultUser.svg",
-                                                fit: BoxFit.fill,
+                                                fit: BoxFit.fitHeight,
                                                 width: 20,
                                                 height: 20,
                                               ),
@@ -591,7 +592,7 @@ class _PriavateInfoState extends State<PriavateInfo> {
                                     radius: 35,
                                     child: SvgPicture.asset(
                                       "assets/svg/defaultUser.svg",
-                                      fit: BoxFit.fill,
+                                      fit: BoxFit.fitHeight,
                                       width: 20,
                                       height: 20,
                                     ),

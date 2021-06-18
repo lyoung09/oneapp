@@ -162,7 +162,7 @@ class _ReviewState extends State<Review> {
                           _image,
                           width: 120,
                           height: 120,
-                          fit: BoxFit.cover,
+                          fit: BoxFit.fitHeight,
                         )
                       : Container(
                           width: 120,

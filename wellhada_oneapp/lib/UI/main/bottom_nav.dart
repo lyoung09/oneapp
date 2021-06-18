@@ -6,7 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_detail/private_info.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_detail/usage_history.dart';
 
-import 'package:wellhada_oneapp/UI/usageHistory_detail/review.dart';
 import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
 import 'package:wellhada_oneapp/model/menu/drawer_detail/qr_34.dart';
 
@@ -15,10 +14,12 @@ import 'bottom_detail/home_screen.dart';
 
 class BottomNav extends StatefulWidget {
   var number;
+  var userId;
 
-  BottomNav({this.number});
+  BottomNav({this.number, this.userId});
   @override
-  _BottomNavState createState() => _BottomNavState(number: number);
+  _BottomNavState createState() =>
+      _BottomNavState(number: number, userId: userId);
 }
 
 class _BottomNavState extends State<BottomNav> {
@@ -27,8 +28,10 @@ class _BottomNavState extends State<BottomNav> {
   var appFontColor = '#333333';
   var menuFontColor = '#333333';
   var number;
+  var userId;
+
   int _selectedIndex = 0;
-  _BottomNavState({this.number});
+  _BottomNavState({this.number, this.userId});
 
   @override
   initState() {
@@ -37,6 +40,8 @@ class _BottomNavState extends State<BottomNav> {
   }
 
   check() {
+    print('number ${number}');
+    print('userId ${userId}');
     if (number != null) {
       _selectedIndex = number;
     }

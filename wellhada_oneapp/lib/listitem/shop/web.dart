@@ -88,7 +88,6 @@ Future<Insert> paymentStory(
   String url,
   String canceledAT,
 ) async {
-  print("start abcde");
   var bodyParam = new Map();
   bodyParam['receipt_id'] = reciptId;
   bodyParam['order_id'] = orderId;
@@ -118,9 +117,8 @@ Future<Insert> paymentStory(
     headers: {"Accept": "application/json"},
     body: bodyParam,
   );
-  print("jy Abcde");
+
   if (response.statusCode == 200) {
-    print('jy bodyParam ${bodyParam}');
     return Insert.fromJson(json.decode(response.body));
   } else {
     throw HttpException(

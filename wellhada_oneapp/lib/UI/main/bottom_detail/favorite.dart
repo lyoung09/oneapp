@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_nav.dart';
-import 'package:wellhada_oneapp/UI/main/home_detail/webview.dart';
-import 'package:wellhada_oneapp/UI/privateInfo_detail/email_login/extraLogin.dart';
-import 'package:wellhada_oneapp/UI/privateInfo_detail/login.dart';
+
+import 'package:wellhada_oneapp/UI/main/login/login.dart';
 import 'package:wellhada_oneapp/listitem/shop/shopFavorite.dart' as favorite;
 import 'package:slide_popup_dialog/slide_popup_dialog.dart' as slideDialog;
 import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
@@ -61,21 +60,33 @@ class _FavoriteState extends State<Favorite> {
 
   getFavorite(userId) async {
     if (userId == null || userId == "") {
-      return "hoit";
+      return "nologin";
     } else {
       return favorite.getFavorite(userId);
     }
   }
 
   void _handleURLButtonPress(BuildContext context, String url, String placeName,
-      int userSeq, String userId, String userChk) {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => WebViewContainer(
-                placeName, userSeq, userId, userPassword, userChk, "2")));
+      int shopSeq, String userId, String userChk) {
+    // Navigator.push(
+    //     context,
+    //     MaterialPageRoute(
+    //         builder: (context) => WebViewContainer(
+    //             placeName: placeName,
+    //             shopSeq: shopSeq,
+    //             userId: userId,
+    //             userPassword: userPassword,
+    //             userChk: userChk,
+    //             number: "2")));
 
-    // Navigator.pushNamed(context, '/webview');
+    Navigator.pushReplacementNamed(context, '/webview', arguments: {
+      'placeName': placeName,
+      'shopSeq': shopSeq,
+      'userId': userId,
+      'userPassword': userPassword,
+      'userChk': userChk,
+      'number': "2"
+    });
   }
 
   List<String> saveFav = List<String>();
@@ -121,22 +132,22 @@ class _FavoriteState extends State<Favorite> {
   }
 
   openingShop(startTime, endTime, int shopId) async {
-    setState(() {
-      DateTime now = DateTime.now();
-      var nowTimeofDay = TimeOfDay(hour: now.hour, minute: now.minute);
+    print(shopId);
 
-      double toStart = toDouble(startTime);
-      double toNow = toDouble(nowTimeofDay);
-      double toEnd = toDouble(endTime);
+    DateTime now = DateTime.now();
+    var nowTimeofDay = TimeOfDay(hour: now.hour, minute: now.minute);
 
-      if (toStart <= toNow && toNow <= toEnd) {
-        print("영업중");
-        openShopSeq[shopId] = true;
-      } else {
-        print("영업 시작 안함");
-        openShopSeq[shopId] = false;
-      }
-    });
+    double toStart = toDouble(startTime);
+    double toNow = toDouble(nowTimeofDay);
+    double toEnd = toDouble(endTime);
+
+    if (toStart <= toNow && toNow <= toEnd) {
+      print("영업중 ${openShopSeq[shopId]}");
+      openShopSeq[shopId] = true;
+    } else {
+      print("영업 시작 안함 ${openShopSeq[shopId]}");
+      openShopSeq[shopId] = false;
+    }
   }
 
   // void _showShopListDialog(
@@ -365,49 +376,6 @@ class _FavoriteState extends State<Favorite> {
         '${beginWeekend.substring(0, 2)}시 ${beginWeekend.substring(2, 4)}분 ~';
     var d = ' ${endWeekend.substring(0, 2)}시 ${endWeekend.substring(2, 4)}분';
 
-    DateTime now = DateTime.now();
-
-    String holiday = "";
-    holiday = holidayList;
-
-    List<String> restDay;
-    if (holiday != null) {
-      restDay = holiday.split(',');
-      for (int hold = 0; hold < restDay.length; hold++) {
-        if (restDay.elementAt(hold) == now.weekday.toString()) {
-          dayOpenShop[shopSeq] = false;
-        }
-        // print('out ${now.weekday}');
-        // print('out ${restDay.elementAt(hold)}');
-        else {
-          dayOpenShop[shopSeq] = true;
-        }
-      }
-    }
-
-    String startHour, startMin, endHour, endMin;
-    TimeOfDay startTime, endTime;
-    if (now.weekday == 6 || now.weekday == 7) {
-      startHour = beginWeek.substring(0, 2);
-      startMin = endWeek.substring(2, 4);
-      endHour = beginWeekend.substring(0, 2);
-      endMin = endWeekend.substring(2, 4);
-
-      startTime =
-          TimeOfDay(hour: int.parse(startHour), minute: int.parse(startMin));
-      endTime = TimeOfDay(hour: int.parse(endHour), minute: int.parse(endMin));
-    } else {
-      startHour = beginWeek.substring(0, 2);
-      startMin = endWeek.substring(2, 4);
-      endHour = beginWeekend.substring(0, 2);
-      endMin = endWeekend.substring(2, 4);
-
-      startTime =
-          TimeOfDay(hour: int.parse(startHour), minute: int.parse(startMin));
-      endTime = TimeOfDay(hour: int.parse(endHour), minute: int.parse(endMin));
-    }
-    openingShop(startTime, endTime, shopSeq);
-
     showDialog(
         context: context,
         builder: (_) => Dialog(
@@ -443,7 +411,7 @@ class _FavoriteState extends State<Favorite> {
                         'http://hndsolution.iptime.org:8086${pic}',
                         width: MediaQuery.of(context).size.width * 0.8,
                         height: MediaQuery.of(context).size.height * 0.25,
-                        fit: BoxFit.fitWidth,
+                        fit: BoxFit.fitHeight,
                       ),
                     ),
                     width: double.infinity,
@@ -546,6 +514,8 @@ class _FavoriteState extends State<Favorite> {
                             width: 0.5, //width of the border
                           ),
                           onPressed: () {
+                            print(
+                                'shopSeq :${openShopSeq[shopSeq]} : ${dayOpenShop[shopSeq]}');
                             openShopSeq[shopSeq] == true &&
                                     dayOpenShop[shopSeq] == true
                                 ? userDataCheck(placeName, shopSeq)
@@ -598,6 +568,54 @@ class _FavoriteState extends State<Favorite> {
 
         bool isSaved = saveFav.contains(list);
 
+        DateTime now = DateTime.now();
+
+        String startHour, startMin, endHour, endMin;
+        TimeOfDay startTime, endTime;
+        String holiday = "";
+        holiday = favoriteInfoList[index]['HLDY_CD'];
+
+        List<String> restDay;
+
+        if (holiday != null) {
+          restDay = holiday.split(',');
+
+          for (int hold = 0; hold < restDay.length; hold++) {
+            if (restDay.elementAt(hold) == now.weekday.toString()) {
+              dayOpenShop[favoriteInfoList[index]["SHOP_SEQ"]] = false;
+            }
+            // print('out ${now.weekday}');
+            // print('out ${restDay.elementAt(hold)}');
+            else {
+              dayOpenShop[favoriteInfoList[index]["SHOP_SEQ"]] = true;
+            }
+          }
+        }
+
+        if (now.weekday == 6 || now.weekday == 7) {
+          startHour =
+              favoriteInfoList[index]['WEEK_BEGIN_TIME'].substring(0, 2);
+          startMin = favoriteInfoList[index]['WEEK_BEGIN_TIME'].substring(2, 4);
+          endHour = favoriteInfoList[index]['WEEK_END_TIME'].substring(0, 2);
+          endMin = favoriteInfoList[index]['WEEK_END_TIME'].substring(2, 4);
+
+          startTime = TimeOfDay(
+              hour: int.parse(startHour), minute: int.parse(startMin));
+          endTime =
+              TimeOfDay(hour: int.parse(endHour), minute: int.parse(endMin));
+        } else {
+          startHour = favoriteInfoList[index]['BSN_BEGIN_TIME'].substring(0, 2);
+          startMin = favoriteInfoList[index]['BSN_BEGIN_TIME'].substring(2, 4);
+          endHour = favoriteInfoList[index]['BSN_END_TIME'].substring(0, 2);
+          endMin = favoriteInfoList[index]['BSN_END_TIME'].substring(2, 4);
+
+          startTime = TimeOfDay(
+              hour: int.parse(startHour), minute: int.parse(startMin));
+          endTime =
+              TimeOfDay(hour: int.parse(endHour), minute: int.parse(endMin));
+        }
+        openingShop(startTime, endTime, favoriteInfoList[index]['SHOP_SEQ']);
+
         return GridTile(
             child: Container(
           decoration: BoxDecoration(
@@ -632,7 +650,7 @@ class _FavoriteState extends State<Favorite> {
                       //'https://placeimg.com/500/500/any',
                       height: MediaQuery.of(context).size.height * 0.15,
                       width: MediaQuery.of(context).size.width,
-                      fit: BoxFit.fitWidth,
+                      fit: BoxFit.fitHeight,
                     ),
                     // Align(
                     //   alignment: Alignment.center,
@@ -685,6 +703,18 @@ class _FavoriteState extends State<Favorite> {
                                     .toString());
                                 deleteFavorite(userId,
                                     favoriteInfoList[index]['SHOP_SEQ']);
+                                showDialog(
+                                    context: context,
+                                    builder: (_) => CupertinoAlertDialog(
+                                          content: Text("즐겨찾기 목록에서 삭제되었습니다."),
+                                          actions: <Widget>[
+                                            CupertinoDialogAction(
+                                              child: Text('확인'),
+                                              onPressed: () =>
+                                                  Navigator.of(context).pop(),
+                                            ),
+                                          ],
+                                        ));
                               }
                             });
                           },
@@ -732,7 +762,7 @@ class _FavoriteState extends State<Favorite> {
               }
               print(categoryCd);
 
-              if (snapshot.data == "hoit") {
+              if (snapshot.data == "nologin") {
                 return Column(
                   children: <Widget>[
                     Padding(

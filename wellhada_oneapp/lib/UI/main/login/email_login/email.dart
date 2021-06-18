@@ -57,7 +57,7 @@ class _EmailState extends State<Email> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => LoginScreen(model: this.model)));
+            builder: (context) => MobileScreen("signup", model: this.model)));
 
     // Navigator.push(
     //     context,

@@ -11,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:wellhada_oneapp/UI/main/bottom_detail/home_screen.dart';
-import 'package:wellhada_oneapp/UI/privateInfo_detail/login.dart';
+import 'package:wellhada_oneapp/UI/main/login/login.dart';
 import 'package:wellhada_oneapp/model/menu/drawer_detail/account_user_info.dart';
 
 import 'drawer_detail/qr_34.dart';

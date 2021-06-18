@@ -14,16 +14,18 @@ enum MobileVerificationState {
   SHOW_OTP_FORM_STATE,
 }
 
-class LoginScreen extends StatefulWidget {
+class MobileScreen extends StatefulWidget {
   Model model;
-  LoginScreen({this.model});
+  final page;
+  MobileScreen(this.page, {this.model});
   @override
-  _LoginScreenState createState() => _LoginScreenState(this.model);
+  _MobileScreenState createState() => _MobileScreenState(this.page, this.model);
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _MobileScreenState extends State<MobileScreen> {
   Model model;
-  _LoginScreenState(this.model);
+  var page;
+  _MobileScreenState(this.page, this.model);
   MobileVerificationState currentState =
       MobileVerificationState.SHOW_MOBILE_FORM_STATE;
 
@@ -57,24 +59,36 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       if (authCredential?.user != null) {
-        setState(() {
-          prefs.setString('userPhone', '${phoneController.text}');
-          prefs.setString('userProfile', "");
-          prefs.setString('userChk', '01');
-          prefs.setString('userName', model.email);
-          prefs.setInt('cookie', 1);
-          prefs.setString('userEmail', model.email);
-          prefs.setString('userId', model.email);
-          prefs.setString('userPasswordGoweb', model.password);
-        });
-        Navigator.pushReplacementNamed(
-          context,
-          '/last_selection',
-        );
+        page == "signup"
+            ? setState(() {
+                prefs.setString('userPhone', '${phoneController.text}');
+                prefs.setString('userProfile', "");
+                prefs.setString('userChk', '01');
+                prefs.setString('userName', model.email);
+                prefs.setInt('cookie', 1);
+                prefs.setString('userEmail', model.email);
+                prefs.setString('userId', model.email);
+                prefs.setString('userPasswordGoweb', model.password);
+              })
+            : setState(() {
+                prefs.setString('userUpdatePhone', '${phoneController.text}');
+                prefs.setString('userProfile', "");
+                prefs.setString('userChk', '01');
+
+                prefs.setInt('cookie', 1);
+              });
+        page == "signup"
+            ? Navigator.pushReplacementNamed(
+                context,
+                '/last_selection',
+              )
+            : Navigator.pushNamed(
+                context,
+                '/userUpdate',
+              );
       }
     } on FirebaseAuthException catch (e) {
       setState(() {
-        print("3");
         showLoading = false;
       });
 

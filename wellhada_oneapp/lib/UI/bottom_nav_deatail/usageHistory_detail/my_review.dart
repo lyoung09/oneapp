@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wellhada_oneapp/UI/main/home_detail/webview.dart';
+
 import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
 import 'package:wellhada_oneapp/listitem/shop/orderList.dart' as orderList;
 
@@ -22,7 +22,8 @@ class _MyReviewState extends State<MyReview> {
   var userId, userChk;
 
   String date, year, month, day;
-  var myFutureReview;
+
+  var orderFuture;
   _MyReviewState(this.userId);
 
   @override
@@ -53,21 +54,26 @@ class _MyReviewState extends State<MyReview> {
         userChk = "K";
       }
     });
-    print('review :${userChk}');
+  }
+
+  getOrderUsageHistory() async {
+    return orderList.getOrderHistory(userId);
   }
 
   var userPassword;
-  Future<Map<String, dynamic>> getReview() async {
-    return orderList.getReviewList(userId);
-  }
 
   void _handleURLButtonPress(BuildContext context, String url, String placeName,
       int shopSeq, String userId) {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => WebViewContainer(
-                placeName, shopSeq, userId, userPassword, userChk, "1")));
+    // Navigator.push(
+    //     context,
+    //     MaterialPageRoute(
+    //         builder: (context) => WebViewContainer(
+    //             placeName: placeName,
+    //             shopSeq: shopSeq,
+    //             userId: userId,
+    //             userPassword: userPassword,
+    //             userChk: userChk,
+    //             number: "1")));
 
     // Navigator.pushNamed(context, '/webview');
   }
@@ -190,11 +196,10 @@ class _MyReviewState extends State<MyReview> {
                       GFCard(
                         // boxFit: BoxFit.cover,
                         titlePosition: GFPosition.start,
-                        image: Image.file(
-                          File(reviewInfoList[position]['REVIEW_IMG_URL']),
-                          height: 120,
-                          width: 400,
-                          fit: BoxFit.fitWidth,
+                        image: Image.network(
+                          'http://hndsolution.iptime.org:8086${reviewInfoList[position]['REVIEW_IMG_URL']}',
+                          width: MediaQuery.of(context).size.width * 0.8,
+                          height: MediaQuery.of(context).size.height * 0.3,
                         ),
                         title: GFListTile(
                           avatar: GFAvatar(
@@ -302,7 +307,7 @@ class _MyReviewState extends State<MyReview> {
           ),
         ),
         body: FutureBuilder(
-            future: getReview(),
+            future: getOrderUsageHistory(),
             builder: (context, AsyncSnapshot snapshot) {
               if (!snapshot.hasData) {
                 return Center(child: CupertinoActivityIndicator());
@@ -310,6 +315,27 @@ class _MyReviewState extends State<MyReview> {
 
               Map<String, dynamic> reviewInfo = snapshot.data;
               print('reviewInfo : ${reviewInfo}');
+              if (reviewInfo["LIST"].isEmpty || reviewInfo["LIST"] == "") {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Center(
+                      child: Image.asset('assets/icon/noImage.png'),
+                    ),
+                    Padding(padding: EdgeInsets.only(bottom: 10)),
+                    Text(
+                      "작성하신 리뷰가 없어요",
+                      style: TextStyle(
+                        fontFamily: "nanumB",
+                        fontWeight: FontWeight.w800,
+                        fontSize: 18.0,
+                      ),
+                    )
+                  ],
+                );
+              }
+
               List<dynamic> reviewInfoList = reviewInfo["LIST"];
               print('reviewInfoList : ${reviewInfoList}');
               reviewInfoList = reviewInfoList
