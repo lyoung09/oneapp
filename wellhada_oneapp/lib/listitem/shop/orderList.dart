@@ -231,9 +231,9 @@ import 'package:http_parser/http_parser.dart';
 //           instance.orderDtlSeq == null ? null : instance.orderDtlSeq,
 //     };
 
-Future<Map<String, dynamic>> getOrderHistory(String userChk) async {
+Future<Map<String, dynamic>> getOrderHistory(String userId) async {
   var bodyParam = new Map();
-  bodyParam['user_id'] = userChk;
+  bodyParam['user_id'] = userId;
 
   http.Response response = await http.post(
     Uri.encodeFull('http://hndsolution.iptime.org:8086/getOrderHist'),
@@ -266,9 +266,9 @@ Future<Map<String, dynamic>> getOrderHistory(String userChk) async {
 /////////////////////////////
 /////////////////////////////
 
-Future<Map<String, dynamic>> getReviewList(String userChk) async {
+Future<Map<String, dynamic>> getReviewList(String userId) async {
   var bodyParam = new Map();
-  bodyParam['user_id'] = userChk;
+  bodyParam['user_id'] = userId;
   //bodyParam['review_comment'] = reviewComment;
 
   http.Response response = await http.post(
@@ -279,7 +279,7 @@ Future<Map<String, dynamic>> getReviewList(String userChk) async {
 
   if (200 == response.statusCode) {
     var datauser = json.decode(response.body);
-    print(datauser);
+
     return datauser;
   } else {
     throw HttpException(
@@ -342,10 +342,10 @@ class SaveInsert {
 }
 
 Future<SaveInsert> noImageReview(
-    int userChk, int orderSeq, String reviewComment) async {
+    int userId, int orderSeq, String reviewComment) async {
   var bodyParam = new Map();
 
-  bodyParam['user_id'] = userChk.toString();
+  bodyParam['user_id'] = userId.toString();
   bodyParam['order_seq'] = orderSeq.toString();
   bodyParam['review_comment'] = reviewComment;
 
@@ -370,10 +370,10 @@ Future<SaveInsert> noImageReview(
 }
 
 Future<SaveInsert> insertReview(
-    int userChk, int orderSeq, String reviewComment, String image) async {
+    int userId, int orderSeq, String reviewComment, String image) async {
   var bodyParam = new Map();
 
-  bodyParam['user_id'] = userChk.toString();
+  bodyParam['user_id'] = userId.toString();
   bodyParam['order_seq'] = orderSeq.toString();
   bodyParam['review_img_url'] = image;
   bodyParam['review_comment'] = reviewComment;
@@ -398,12 +398,12 @@ Future<SaveInsert> insertReview(
   }
 }
 
-saveReview(int userChk, int orderSeq, String reviewComment, File image) async {
+saveReview(int userSeq, int orderSeq, String reviewComment, File image) async {
   var request = http.MultipartRequest(
       "POST",
       Uri.parse(
           "http://hndsolution.iptime.org:8086/usermngr/shopimg_fileupload.ajax"));
-  request.fields["user_seq"] = userChk.toString();
+  request.fields["user_seq"] = userSeq.toString();
   var pic = await http.MultipartFile.fromPath("file_upload", image.path);
   request.files.add(pic);
   var response = await request.send();
@@ -411,7 +411,6 @@ saveReview(int userChk, int orderSeq, String reviewComment, File image) async {
   var responseString = String.fromCharCodes(responseData);
 
   if (response.statusCode == 200) {
-    print(responseString);
     return SaveR.fromJson(json.decode(responseString));
   } else {
     throw HttpException(
@@ -527,9 +526,9 @@ class DeleteR {
       };
 }
 
-Future<DeleteR> deleteReview(String userChk, int orderSeq) async {
+Future<DeleteR> deleteReview(String userId, int orderSeq) async {
   var bodyParam = new Map();
-  bodyParam['user_id'] = userChk;
+  bodyParam['user_id'] = userId;
   bodyParam['order_seq'] = orderSeq.toString();
 
   http.Response response = await http.post(
@@ -561,9 +560,9 @@ Future<DeleteR> deleteReview(String userChk, int orderSeq) async {
 /////////////////////////////
 /////////////////////////////
 
-Future<Map<String, dynamic>> getPointHistory(String userChk) async {
+Future<Map<String, dynamic>> getPointHistory(String userId) async {
   var bodyParam = new Map();
-  bodyParam['user_id'] = userChk;
+  bodyParam['user_id'] = userId;
 
   http.Response response = await http.post(
     Uri.encodeFull('http://hndsolution.iptime.org:8086/getPointHist'),
@@ -596,9 +595,9 @@ Future<Map<String, dynamic>> getPointHistory(String userChk) async {
 /////////////////////////////
 /////////////////////////////
 
-Future<Map<String, dynamic>> getStampHistory(String userChk) async {
+Future<Map<String, dynamic>> getStampHistory(String userId) async {
   var bodyParam = new Map();
-  bodyParam['user_id'] = userChk;
+  bodyParam['user_id'] = userId;
 
   http.Response response = await http.post(
     Uri.encodeFull('http://hndsolution.iptime.org:8086/getStampHist'),
@@ -631,9 +630,9 @@ Future<Map<String, dynamic>> getStampHistory(String userChk) async {
 /////////////////////////////
 /////////////////////////////
 
-Future<Map<String, dynamic>> getCouponHistory(String userChk) async {
+Future<Map<String, dynamic>> getCouponHistory(String userId) async {
   var bodyParam = new Map();
-  bodyParam['user_id'] = userChk;
+  bodyParam['user_id'] = userId;
 
   http.Response response = await http.post(
     Uri.encodeFull('http://hndsolution.iptime.org:8086/getCouponHist'),

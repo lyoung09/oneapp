@@ -20,6 +20,14 @@ import 'package:hexcolor/hexcolor.dart';
 import 'dart:math' show cos, sqrt, asin;
 import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
 
+/////////////////////////////
+/////////////////////////////
+///////리스트 스크린////////
+/////////////////////////////
+/////////////////////////////
+
+//현 device의 위치로부터 3km까지만 나옴
+
 class ListScreen extends StatefulWidget {
   @override
   _ListScreenState createState() => _ListScreenState();
@@ -44,9 +52,8 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
   Map<int, bool> openShopSeq = new Map();
   Map<int, bool> dayOpenShop = new Map();
   var lat, lng;
-  String webviewDefault = 'http://hndsolution.iptime.org:8086/usermngr';
 
-  var userChk, userKey, userId;
+  var userChk, userId;
   var userPassword;
   // For storing the current position
   @override
@@ -72,26 +79,16 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       setState(() {
-        // userKey = prefs.getString("userKey") == null
-        //     ? prefs.getString("userToken")
-        //     : prefs.getString("userKey");
-        userKey = prefs.getString("userKey");
+        userId = prefs.getString("userKey");
         userPassword = prefs.getString("userPasswordGoweb");
         userChk = prefs.getString("userChk") ?? "O";
-        if (userChk == "01") {
-          userChk = "E";
-        }
-        if (userChk == "00") {
-          userChk = "K";
-        }
-
-        print('list : ${userChk}');
       });
     } catch (e) {
       print(e);
     }
   }
 
+  //home에서 위치 변화있을 시 위제 업데이트
   @override
   void didUpdateWidget(Widget oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -111,15 +108,14 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
     }
   }
 
+  //웹뷰로 가기전 체크
   userDataCheck(placeName, shopSeq) async {
-    _handleURLButtonPress(context, '${webviewDefault}/shopTmplatView.do',
-        placeName, shopSeq, userKey, userChk);
+    _handleURLButtonPress(context, placeName, shopSeq, userId, userChk);
   }
 
-  void _handleURLButtonPress(BuildContext context, String url, String placeName,
+//웹뷰로 가는 메소드
+  void _handleURLButtonPress(BuildContext context, String placeName,
       int shopSeq, String userKey, userChk) {
-    // userDataCheck();
-
     if (userKey == null || userKey == "") {
       showDialog(
           context: context,
@@ -144,20 +140,10 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
           MaterialPageRoute(
               builder: (context) => WebViewContainer(
                   placeName, shopSeq, userKey, userPassword, userChk, "0")));
-
-      // Navigator.pushReplacementNamed(context, '/webview', arguments: {
-      //   'placeName': placeName,
-      //   'shopSeq': shopSeq,
-      //   'userId': userKey,
-      //   'userPassword': userPassword,
-      //   'userChk': userChk,
-      //   'number': "0"
-      // });
     }
-
-    // Navigator.pushNamed(context, '/webview');
   }
 
+  //현재 위치와 가게 위치 거리 구하는메소드
   String _coordinateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
     var c = cos;
@@ -168,6 +154,7 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
     return ((12742 * asin(sqrt(a)) * 1000)).toStringAsFixed(0);
   }
 
+//열었는지 안열었는지 , 3km이내인지 판단 후 list를 자름
   var shopId;
   void getShopCategory() async {
     final shopCategoryList = await shopInfoListItem.getShopListEntire();
@@ -225,6 +212,7 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
 
         openingShop(startTime, endTime, shopId);
       }
+
       shopCategory = shopCategoryList.list
           .where((el) => 3000 > int.parse(initDistance[el.shopSeq]))
           .toList();
@@ -245,6 +233,7 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  //shopList api 호출하는 메소드
   Future<Map<String, dynamic>> getShops() async {
     return shopInfoListItem.getShopCodeList();
   }
@@ -392,6 +381,7 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
   //     return Center(child: CupertinoActivityIndicator());
   //   }
   // }
+
   Widget noData() {
     return Center(
       child: Image.asset('assets/icon/noImage.png'),
@@ -412,16 +402,17 @@ class _ListScreenState extends State<ListScreen> with TickerProviderStateMixin {
       double toEnd = toDouble(endTime);
 
       if (toStart <= toNow && toNow <= toEnd) {
-        print("영업중");
+        //print("영업중");
         openShopSeq[shopId] = true;
       } else {
         //시작 안한거는 false
-        print("영업 시작 안함");
+        //print("영업 시작 안함");
         openShopSeq[shopId] = false;
       }
     });
   }
 
+  //영업중인지 아닌지 구분
   Widget _wellhadaView(String code) {
     List menuCode;
 

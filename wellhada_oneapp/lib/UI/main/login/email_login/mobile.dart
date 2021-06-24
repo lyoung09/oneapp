@@ -9,6 +9,12 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/model/login/userData.dart';
 
+/////////////////////////////
+/////////////////////////////
+///////핸드폰 인증////////
+///////////////////////////
+////////////////////////////
+
 enum MobileVerificationState {
   SHOW_MOBILE_FORM_STATE,
   SHOW_OTP_FORM_STATE,
@@ -50,7 +56,6 @@ class _MobileScreenState extends State<MobileScreen> {
     });
 
     try {
-      print("1");
       final authCredential =
           await _auth.signInWithCredential(phoneAuthCredential);
 
@@ -63,19 +68,17 @@ class _MobileScreenState extends State<MobileScreen> {
             ? setState(() {
                 prefs.setString('userPhone', '${phoneController.text}');
                 prefs.setString('userProfile', "");
-                prefs.setString('userChk', '01');
+
                 prefs.setString('userName', model.email);
-                prefs.setInt('cookie', 1);
+
                 prefs.setString('userEmail', model.email);
+                prefs.setString('userChk', "E");
                 prefs.setString('userId', model.email);
                 prefs.setString('userPasswordGoweb', model.password);
               })
             : setState(() {
                 prefs.setString('userUpdatePhone', '${phoneController.text}');
                 prefs.setString('userProfile', "");
-                prefs.setString('userChk', '01');
-
-                prefs.setInt('cookie', 1);
               });
         page == "signup"
             ? Navigator.pushReplacementNamed(
@@ -92,7 +95,6 @@ class _MobileScreenState extends State<MobileScreen> {
         showLoading = false;
       });
 
-      print(e.message);
       if (Platform.isAndroid) {
         switch (e.message) {
           case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ TOO_SHORT ]':
@@ -173,7 +175,6 @@ class _MobileScreenState extends State<MobileScreen> {
                       showLoading = false;
                     });
 
-                    print(verificationFailed.message);
                     if (Platform.isAndroid) {
                       switch (verificationFailed.message) {
                         case 'The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ TOO_LONG ]':

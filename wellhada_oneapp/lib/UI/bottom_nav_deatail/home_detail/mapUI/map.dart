@@ -21,6 +21,12 @@ import 'package:wellhada_oneapp/model/map/map_model.dart';
 import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
 import 'package:wellhada_oneapp/listitem/shop/web.dart' as webLogin;
 
+/////////////////////////////
+/////////////////////////////
+///////지도 클래스 ////////
+/////////////////////////////
+/////////////////////////////
+
 class GoogleMapUI extends StatefulWidget {
   @override
   _Google1MapUIState createState() => _Google1MapUIState();
@@ -43,7 +49,6 @@ class _Google1MapUIState extends State<GoogleMapUI>
   Map<int, Uint8List> wellhadaIconSet = new Map();
   // button click
   String category;
-  String webviewDefault = 'http://hndsolution.iptime.org:8086/usermngr';
   // contanier boolean
   bool itemSelected;
   Future _categoryFuture;
@@ -72,7 +77,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
       number;
   bool opening;
   bool openingDay;
-  var userChk, userKey, userId, userPassword;
+  var userChk, userId, userPassword;
   @override
   void initState() {
     super.initState();
@@ -89,18 +94,10 @@ class _Google1MapUIState extends State<GoogleMapUI>
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       setState(() {
-        userKey = prefs.getString("userKey");
+        userId = prefs.getString("userKey");
         userPassword = prefs.getString("userPasswordGoweb");
         userChk = prefs.getString("userChk") ?? "O";
-
-        if (userChk == "01") {
-          userChk = "E";
-        }
-        if (userChk == "00") {
-          userChk = "K";
-        }
       });
-      print('list : ${userChk}');
     } catch (e) {
       print(e);
     }
@@ -161,21 +158,20 @@ class _Google1MapUIState extends State<GoogleMapUI>
       double toEnd = toDouble(endTime);
 
       if (toStart <= toNow && toNow <= toEnd) {
-        print("영업중");
+        // print("영업중");
         openShopSeq[shopId] = true;
       } else {
-        print("영업 시작 안함");
+        //print("영업 시작 안함");
         openShopSeq[shopId] = false;
       }
     });
   }
 
   userDataCheck(category, shopSeq) async {
-    _handleURLButtonPress(context, '${webviewDefault}/shopTmplatView.do',
-        category, shopSeq, userKey, userChk);
+    _handleURLButtonPress(context, category, shopSeq, userId, userChk);
   }
 
-  void _handleURLButtonPress(BuildContext context, String url, String placeName,
+  void _handleURLButtonPress(BuildContext context, String placeName,
       int shopSeq, String userKey, String userChk) {
     if (userKey == null || userKey == "") {
       showDialog(
@@ -217,6 +213,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
     }
   }
 
+  //현재 위치로 가게 해주는 메소드(((지도 내의 icon 클릭시)))
   _determinePosition() async {
     bool serviceEnabled;
 
@@ -241,6 +238,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
   }
 
   var shopId;
+  //영업 중인지 아닌지 , 디바이스 내 지도 안에 있는지 확인하고 나타내는 메소드
   void getShop() async {
     final entireShopList = await shopInfoListItem.getShopListEntire();
 
@@ -301,6 +299,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
     });
   }
 
+  //지도의 marker 변경(한글로 가게명)
   Future<Uint8List> getBytesFromCanvas(
       int width, int height, String title) async {
     final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
@@ -354,6 +353,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
     return imageInfo.image;
   }
 
+  //카테고리와 shop 연결시켜주는 위젯
   Widget _list(List<dynamic> shopCategoryList) {
     return ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -419,6 +419,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
         });
   }
 
+//마커 클릭시 나타나는 dialog
   void _shopDetail(
       String distance,
       String pic,
@@ -581,6 +582,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
             )));
   }
 
+  //안 쓰는 dialog ( 느리게 내릴떄 overflow) <- 버전 업데이트 되서 에러 안나면 이거 쓰는거 추천(ui가 훨 이쁨)
   void _showShopListDialog(
       String distance,
       String pic,
@@ -798,6 +800,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
     );
   }
 
+  //디바이스 위치에서 shop 간의 거리
   String _coordinateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
     var c = cos;
@@ -808,6 +811,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
     return ((12742 * asin(sqrt(a)) * 1000)).toStringAsFixed(0);
   }
 
+  //device 안의 지도 안에 나타나는지 판단하고 보여주는 widget
   List<Marker> selectWellhadaMarker() {
     try {
       getCenter().then((result) {
@@ -855,6 +859,7 @@ class _Google1MapUIState extends State<GoogleMapUI>
                     //   element.weekEndTime,
                     //   element.shopSeq,
                     // );
+
                     _shopDetail(
                       distance,
                       element.fileUrl,

@@ -16,13 +16,18 @@ import 'package:intl/intl.dart';
 import 'package:wellhada_oneapp/listitem/shop/orderList.dart' as orderList;
 import 'package:slide_popup_dialog/slide_popup_dialog.dart' as slideDialog;
 
+/////////////////////////////
+/////////////////////////////
+///////이용내역 ////////
+/////////////////////////////
+/////////////////////////////
+
 class UsageHistory extends StatefulWidget {
   @override
   _UsageHistoryState createState() => _UsageHistoryState();
 }
 
 class _UsageHistoryState extends State<UsageHistory> {
-  String webviewDefault = 'http://hndsolution.iptime.org:8086/usermngr';
   String userId, userChk;
   String date, year, month, day;
   int _value = 1;
@@ -41,6 +46,7 @@ class _UsageHistoryState extends State<UsageHistory> {
     super.dispose();
   }
 
+//로그인 되어있는지 확인 후 ,있을 경우 api연결
   void check() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -49,14 +55,7 @@ class _UsageHistoryState extends State<UsageHistory> {
           userId = prefs.getString("userKey");
           userPassword = prefs.getString("userPasswordGoweb");
           userChk = prefs.getString("userChk");
-          if (userChk == "01") {
-            userChk = "E";
-          }
-          if (userChk == "00") {
-            userChk = "K";
-          }
         });
-
         orderFuture = getOrderUsageHistory(userId);
       }
     } catch (e) {
@@ -71,6 +70,7 @@ class _UsageHistoryState extends State<UsageHistory> {
     }
   }
 
+  //리뷰삭제
   delete(userId, orderSeq) async {
     final deleteReview = await orderList.deleteReview(userId, orderSeq);
     if (this.mounted) {
@@ -85,6 +85,7 @@ class _UsageHistoryState extends State<UsageHistory> {
     return myTime.hour + myTime.minute / 60.0;
   }
 
+  //영업시간인지 아닌지(시간만 따짐(요일 x))
   openingShop(startTime, endTime, int shopId) async {
     DateTime now = DateTime.now();
     var nowTimeofDay = TimeOfDay(hour: now.hour, minute: now.minute);
@@ -94,21 +95,20 @@ class _UsageHistoryState extends State<UsageHistory> {
     double toEnd = toDouble(endTime);
 
     if (toStart <= toNow && toNow <= toEnd) {
-      print("영업중");
+      //print("영업중");
       openShopSeq[shopId] = true;
     } else {
-      print("영업 시작 안함");
+      //print("영업 시작 안함");
       openShopSeq[shopId] = false;
     }
   }
 
+  //중요하진않지만 일관성 주려고 한거 -- > 이거가 웹뷰호출함
   userDataCheck(placeName, shopSeq) async {
-    // final webLoginData =
-    //     await webLogin.loginWebUser(userKey, userPassword, userChk);
-
-    _handleURLButtonPress(context, '${webviewDefault}/shopTmplatView.do',
-        placeName, shopSeq, userId);
+    _handleURLButtonPress(context, placeName, shopSeq, userId);
   }
+
+  //popup dialog <-- 버전 업데이트 되면 이거 ui 괜찮음(overflow 문제 해결되면 사용 추천) 현재 사용안함
 
   void _showIncludePicutreDialog(
       String date, String pic, String placeName, String order, String story) {
@@ -281,6 +281,7 @@ class _UsageHistoryState extends State<UsageHistory> {
             )));
   }
 
+//popup dialog <-- 버전 업데이트 되면 이거 ui 괜찮음(overflow 문제 해결되면 사용 추천) 현재 사용안함
   void _showOnlyReviewDialog(
       String date,
       // String pic,
@@ -462,6 +463,7 @@ class _UsageHistoryState extends State<UsageHistory> {
     );
   }
 
+  //주문 취소했을때 상세 내역
   void _showCancelDialog(
     String date,
     String reason,
@@ -692,6 +694,7 @@ class _UsageHistoryState extends State<UsageHistory> {
     );
   }
 
+//주문 끝나고 이용 내역
   void _usageDetail(
     String date,
     int price,
@@ -853,6 +856,7 @@ class _UsageHistoryState extends State<UsageHistory> {
             )));
   }
 
+  //리뷰 내역(사진 있을때)
   void _reviewPicStory(String date, String shopName, String menuName,
       String review, String pic) {
     showDialog(
@@ -973,6 +977,7 @@ class _UsageHistoryState extends State<UsageHistory> {
             )));
   }
 
+//리뷰 내역(사진 없을때)
   void _reviewStory(
       String date, String shopName, String menuName, String review) {
     showDialog(
@@ -1432,16 +1437,6 @@ class _UsageHistoryState extends State<UsageHistory> {
   }
 
   webView(placeName, shopSeq, userId, userPassword) async {
-    // Navigator.push(
-    //     context,
-    //     MaterialPageRoute(
-    //         builder: (context) => WebViewContainer(
-    //             placeName: placeName,
-    //             shopSeq: shopSeq,
-    //             userId: userId,
-    //             userPassword: userPassword,
-    //             userChk: userChk,
-    //             number: "1")));
     Navigator.pushReplacementNamed(context, '/webview', arguments: {
       'placeName': placeName,
       'shopSeq': shopSeq,
@@ -1452,28 +1447,14 @@ class _UsageHistoryState extends State<UsageHistory> {
     });
   }
 
-  readingMyReview(shopId, shopName, order, userId) async {
-    print("myReview");
-  }
-
   myReview() async {
     Navigator.of(context)
         .push(MaterialPageRoute(builder: (context) => new MyReview(userId)));
   }
 
   var userPassword;
-  void _handleURLButtonPress(BuildContext context, String url, String placeName,
-      int shopSeq, String userId) {
-    // Navigator.push(
-    //     context,
-    //     MaterialPageRoute(
-    //         builder: (context) => WebViewContainer(
-    //             placeName: placeName,
-    //             shopSeq: shopSeq,
-    //             userId: userId,
-    //             userPassword: userPassword,
-    //             userChk: userChk,
-    //             number: "1")));
+  void _handleURLButtonPress(
+      BuildContext context, String placeName, int shopSeq, String userId) {
     Navigator.pushReplacementNamed(context, '/webview', arguments: {
       'placeName': placeName,
       'shopSeq': shopSeq,

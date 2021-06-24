@@ -19,6 +19,12 @@ import 'package:wellhada_oneapp/notification/custom_notification.dart';
 
 import 'email_login/extraLogin.dart';
 
+/////////////////////////////
+/////////////////////////////
+///////로그인 페이지 ////////
+///////카카오로그인할지 회원가입할지 로그인할지//////////
+/////////////////////////////
+
 class LOGIN extends StatefulWidget {
   var number;
 
@@ -59,7 +65,7 @@ class _LOGINState extends State<LOGIN> {
   @override
   void initState() {
     super.initState();
-    firebaseCloudMessagingListener();
+    //firebaseCloudMessagingListener();
     _initKakaoTalkInstalled();
 
     number == null ? number = 0 : number = number;
@@ -70,6 +76,7 @@ class _LOGINState extends State<LOGIN> {
     super.dispose();
   }
 
+  //카카오 설치되있는지
   _initKakaoTalkInstalled() async {
     final installed = await isKakaoTalkInstalled();
     setState(() {
@@ -77,80 +84,84 @@ class _LOGINState extends State<LOGIN> {
     });
   }
 
-  firebaseCloudMessagingListener() async {
-    if (Platform.isIOS) {
-      _firebaseMessaging.requestNotificationPermissions(
-          const IosNotificationSettings(
-              sound: true, badge: true, alert: true, provisional: true));
+  // firebaseCloudMessagingListener() async {
+  //   if (Platform.isIOS) {
+  //     _firebaseMessaging.requestNotificationPermissions(
+  //         const IosNotificationSettings(
+  //             sound: true, badge: true, alert: true, provisional: true));
 
-      iosSubscription =
-          _firebaseMessaging.onIosSettingsRegistered.listen((data) {
-        //_saveDeviceToken();
-      });
-      _firebaseMessaging
-          .requestNotificationPermissions(IosNotificationSettings());
-    } else {
-      // _firebaseMessaging.getToken().then((token) {
-      //   print('token:' + token);
-      // });
-      //_saveDeviceToken();
-    }
+  //     iosSubscription =
+  //         _firebaseMessaging.onIosSettingsRegistered.listen((data) {
+  //       //_saveDeviceToken();
+  //     });
+  //     _firebaseMessaging
+  //         .requestNotificationPermissions(IosNotificationSettings());
+  //   } else {
+  //     // _firebaseMessaging.getToken().then((token) {
+  //     //   print('token:' + token);
+  //     // });
+  //     //_saveDeviceToken();
+  //   }
 
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        _messagingTitle = message['notification']['title'].toString();
-        if (_messagingTitle.endsWith("null")) {
-          _messagingTitle = "";
-        }
-        showOverlayNotification((context) {
-          return MessageNotification(
-            title: _messagingTitle,
-            message: message['notification']['body'],
-            onReply: () {
-              OverlaySupportEntry.of(context).dismiss();
-              //toast('you checked this message');
-            },
-          );
-        }, duration: Duration(milliseconds: 4000));
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        print("onLaunch: $message");
-      },
-      onResume: (Map<String, dynamic> message) async {
-        print("onResume: $message");
-      },
-    );
-    _firebaseMessaging.requestNotificationPermissions(
-        const IosNotificationSettings(sound: true, badge: true, alert: true));
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
-    });
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
-    });
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    _firebaseMessaging.getToken().then((String token) {
-      assert(token != null);
-      print("Push Messaging token: $token");
-      setState(() {
-        prefs.setString("userToken", "$token");
-        userToken = token;
-        //_homeScreenText = "Push Messaging token: $token";
-      });
-    });
-  }
+  //   _firebaseMessaging.configure(
+  //     onMessage: (Map<String, dynamic> message) async {
+  //       _messagingTitle = message['notification']['title'].toString();
+  //       if (_messagingTitle.endsWith("null")) {
+  //         _messagingTitle = "";
+  //       }
+  //       showOverlayNotification((context) {
+  //         return MessageNotification(
+  //           title: _messagingTitle,
+  //           message: message['notification']['body'],
+  //           onReply: () {
+  //             OverlaySupportEntry.of(context).dismiss();
+  //             //toast('you checked this message');
+  //           },
+  //         );
+  //       }, duration: Duration(milliseconds: 4000));
+  //     },
+  //     onLaunch: (Map<String, dynamic> message) async {
+  //       print("onLaunch: $message");
+  //     },
+  //     onResume: (Map<String, dynamic> message) async {
+  //       print("onResume: $message");
+  //     },
+  //   );
+  //   _firebaseMessaging.requestNotificationPermissions(
+  //       const IosNotificationSettings(sound: true, badge: true, alert: true));
+  //   _firebaseMessaging.onIosSettingsRegistered
+  //       .listen((IosNotificationSettings settings) {
+  //     print("Settings registered: $settings");
+  //   });
+  //   _firebaseMessaging.onIosSettingsRegistered
+  //       .listen((IosNotificationSettings settings) {
+  //     print("Settings registered: $settings");
+  //   });
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   _firebaseMessaging.getToken().then((String token) {
+  //     assert(token != null);
+  //     print("Push Messaging token: $token");
+  //     setState(() {
+  //       prefs.setString("userToken", "$token");
+  //       userToken = token;
+  //       //_homeScreenText = "Push Messaging token: $token";
+  //     });
+  //   });
+  // }
 
+  //로그인 체크
   var userToken;
   checkEmail() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userToken = prefs.getString("userToken");
+    });
     final loginData = await user.loginUser(
         userId.text, userPassword.text, "Y", "E", userToken);
 
     if (loginData.status == "00") {
       final userData = await user.getUserInfomation(userId.text);
-      print(userData.userId);
+
       setState(() {
         prefs.setBool('login', true);
         prefs.setString("userKey", userId.text);
@@ -209,6 +220,7 @@ class _LOGINState extends State<LOGIN> {
     }
   }
 
+  //카카오 설치요청
   _loginWithKakao() async {
     try {
       var code = await AuthCodeClient.instance.request();
@@ -218,6 +230,7 @@ class _LOGINState extends State<LOGIN> {
     }
   }
 
+//카카오 로그인
   _loginWithTalk() async {
     try {
       var code = await AuthCodeClient.instance.requestWithTalk();
@@ -235,7 +248,7 @@ class _LOGINState extends State<LOGIN> {
       String kakaoAccessToken = token.accessToken;
       AccessTokenStore.instance.toStore(token);
       final User userKakao = await UserApi.instance.me();
-      print(kakaoAccessToken);
+
       setState(() {
         _kakaoEmail = userKakao.kakaoAccount.email;
         uriUserProfile = userKakao.kakaoAccount.profile.profileImageUrl;
@@ -258,7 +271,7 @@ class _LOGINState extends State<LOGIN> {
           prefs.setString("userName", userData.userName);
           prefs.setString("userChk", userData.userCheck);
           prefs.setString("userPhone", userData.userPhoneNumber);
-          prefs.setString("userPhone", userData.userToken);
+          prefs.setString("userToken", userData.userToken);
 
           // prefs.setInt("cookie", 00);
         });
@@ -276,27 +289,14 @@ class _LOGINState extends State<LOGIN> {
             userKakao.kakaoAccount.profile.nickname == null
                 ? _kakaoEmail
                 : userKakao.kakaoAccount.profile.nickname);
-        prefs.setString("userChk", '00');
+        prefs.setString("userChk", 'K');
         prefs.setString("userPhone", '');
 
-        prefs.setInt("cookie", 00);
         Navigator.pushNamed(context, '/last_selection');
       } //userInfo(kakaoAccessToken);
     } catch (e) {
       print("error on issuing access token: $e");
     }
-  }
-
-  Future<void> _insertData() async {
-    prefs = await SharedPreferences.getInstance();
-    setState(() {
-      if (checkId == true) {
-        limitYn = 'Y';
-        prefs.setString("userId", userId.text);
-      } else {
-        limitYn = 'N';
-      }
-    });
   }
 
   @override

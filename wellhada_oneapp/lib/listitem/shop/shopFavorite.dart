@@ -277,9 +277,9 @@ import 'package:http/http.dart' as http;
 //       'FAVORITE_YN': instance.favoriteSeq == null ? null : instance.favoriteSeq,
 //     };
 
-Future<Map<String, dynamic>> getFavorite(String userChk) async {
+Future<Map<String, dynamic>> getFavorite(String userId) async {
   var bodyParam = new Map();
-  bodyParam['user_id'] = userChk;
+  bodyParam['user_id'] = userId;
 
   http.Response response = await http.post(
     //Uri.encodeFull('http://hndsolution.iptime.org:8080/getUserInfo'),
@@ -368,11 +368,11 @@ class SaveF {
 }
 
 Future<SaveF> saveFavoriteShop(
-  String userChk,
+  String userId,
   int shopId,
 ) async {
   var bodyParam = new Map();
-  bodyParam['user_id'] = userChk;
+  bodyParam['user_id'] = userId;
   bodyParam['shop_seq'] = shopId.toString();
 
   http.Response response = await http.post(
@@ -380,9 +380,8 @@ Future<SaveF> saveFavoriteShop(
     headers: {"Accept": "application/json"},
     body: bodyParam,
   );
-  print('bodyparam ${bodyParam}');
+
   if (response.statusCode == 200) {
-    print("yyyy");
     return SaveF.fromJson(json.decode(response.body));
   } else {
     throw HttpException(
@@ -426,11 +425,11 @@ class DeleteF {
 }
 
 Future<DeleteF> deleteFavoriteShop(
-  String userChk,
+  String userId,
   int shopId,
 ) async {
   var bodyParam = new Map();
-  bodyParam['user_id'] = userChk;
+  bodyParam['user_id'] = userId;
   bodyParam['shop_seq'] = shopId.toString();
 
   http.Response response = await http.post(

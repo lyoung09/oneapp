@@ -128,3 +128,43 @@ Future<Insert> paymentStory(
     );
   }
 }
+
+/////////////////////////////
+/////////////////////////////
+/////////////////////////////
+/////////////////////////////
+/////////////////////////////
+/////////push message////////
+/////////////////////////////
+/////////////////////////////
+/////////////////////////////
+/////////////////////////////
+/////////////////////////////
+
+pushMessageUser(
+  String userId,
+  String userPassword,
+) async {
+  var bodyParam = new Map();
+  bodyParam['user_id'] = userId;
+  bodyParam['user_password'] = userPassword;
+
+  http.Response response = await http.post(
+    Uri.encodeFull(
+        'http://hndsolution.iptime.org:8086/usermngr/shopTmplatView.do'),
+    headers: {"Accept": "application/json"},
+    body: bodyParam,
+  );
+
+  if (response.statusCode == 200) {
+    var datauser = json.decode(response.body);
+
+    return datauser;
+  } else {
+    throw HttpException(
+      'Unexpected status code ${response.statusCode}:'
+      ' ${response.reasonPhrase}',
+      //uri: Uri.parse(query)
+    );
+  }
+}

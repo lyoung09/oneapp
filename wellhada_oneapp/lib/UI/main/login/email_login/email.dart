@@ -11,6 +11,12 @@ import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
 
 import 'mobile.dart';
 
+/////////////////////////////
+/////////////////////////////
+///////회원가입페이지////////
+///////아이디->pw->pw check까지 이 클래스에서함////////
+/////////////////////////////
+
 class Email extends StatefulWidget {
   @override
   _EmailState createState() => _EmailState();
@@ -25,6 +31,7 @@ class _EmailState extends State<Email> {
   var passwordFirst;
   var passwordCheck;
 
+  // 이메일 중복검사
   void checkEmail(String value) async {
     final userData = await user.getUserInfomation(value);
     if (userData.userId != null) {
@@ -46,6 +53,7 @@ class _EmailState extends State<Email> {
     }
   }
 
+  //비번 저장
   void checkPassword(String value) async {
     setState(() {
       passwordFirst = value;
@@ -53,6 +61,7 @@ class _EmailState extends State<Email> {
     });
   }
 
+  //저장된값이랑 같은지확인
   verificationPassword(String value) async {
     Navigator.push(
         context,

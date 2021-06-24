@@ -14,6 +14,12 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:validators/validators.dart' as validator;
 
+/////////////////////////////
+/////////////////////////////
+///////리뷰 작성 페이지 ////////
+/////////////////////////////
+/////////////////////////////
+
 class Review extends StatefulWidget {
   var orderSeq;
   var shopName;
@@ -39,11 +45,10 @@ class _ReviewState extends State<Review> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    print(userSeq);
-    print(userSeq.runtimeType);
   }
 
   final _formKey = GlobalKey<FormState>();
+  //사진 찍은 후 저장
   _imgFromCamera() async {
     File image = await ImagePicker.pickImage(
         source: ImageSource.camera, imageQuality: 50);
@@ -54,6 +59,7 @@ class _ReviewState extends State<Review> {
     });
   }
 
+//앨범에서 가지고 온 후 저장
   _imgFromGallery() async {
     File image = await ImagePicker.pickImage(
         source: ImageSource.gallery, imageQuality: 50);
@@ -64,6 +70,7 @@ class _ReviewState extends State<Review> {
     });
   }
 
+//리뷰 저장
   checkReview() async {
     final saveReview = await orderList.saveReview(
         userSeq, orderSeq, story, _image == null ? "" : _image);
@@ -87,6 +94,7 @@ class _ReviewState extends State<Review> {
     );
   }
 
+//이미지없는 리뷰 저장
   noImageReview() async {
     final saveReview = await orderList.noImageReview(userSeq, orderSeq, story);
 
@@ -228,7 +236,7 @@ class _ReviewState extends State<Review> {
                   onPressed: () {
                     if (_formKey.currentState.validate()) {
                       _formKey.currentState.save();
-                      print(_image);
+
                       _image == null ? noImageReview() : checkReview();
                     }
                   },
@@ -264,6 +272,7 @@ class _ReviewState extends State<Review> {
     );
   }
 
+  //이미지 가져오는 위젯
   void _showPicker(context) {
     showModalBottomSheet(
         context: context,

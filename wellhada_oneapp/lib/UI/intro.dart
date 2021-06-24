@@ -9,6 +9,12 @@ import 'package:overlay_support/overlay_support.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/notification/custom_notification.dart';
 
+/////////////////////////////
+/////////////////////////////
+///////처음 들어왔을때 설명page////////
+/////////////////////////////
+/////////////////////////////
+
 class Introduce extends StatefulWidget {
   @override
   _IntroduceState createState() => _IntroduceState();
@@ -32,7 +38,6 @@ class _IntroduceState extends State<Introduce> {
     setState(() {
       index++;
     });
-    print(index);
   }
 
   goStart() {
@@ -53,15 +58,6 @@ class _IntroduceState extends State<Introduce> {
           body: Stack(
         children: <Widget>[
           index == 0 ? _firstIntroduce() : _secondIntroduce(),
-
-          // Align(
-          //   alignment: Alignment.bottomCenter,
-          //   child: FloatingActionButton(
-          //     onPressed: () {},
-          //     heroTag: "btn2",
-          //     child: Text(''),
-          //   ),
-          // ),
         ],
       )),
     );

@@ -39,7 +39,7 @@ class _UserUpdateState extends State<UserUpdate> {
   List<RadioModel> sampleData = new List<RadioModel>();
   File _image;
   String errorType;
-  var cookie;
+
   FirebaseAuth _auth = FirebaseAuth.instance;
   bool showLoading = false;
   final otpController = TextEditingController();
@@ -57,7 +57,6 @@ class _UserUpdateState extends State<UserUpdate> {
     isSelected = false;
     sampleData.add(new RadioModel(false, '남'));
     sampleData.add(new RadioModel(false, '여'));
-    print("hoit2");
   }
 
   @override
@@ -100,7 +99,6 @@ class _UserUpdateState extends State<UserUpdate> {
                           await SharedPreferences.getInstance();
 
                       setState(() {
-                        cookie = prefs.setInt("cookie", 1);
                         _image = image;
                         userProfile = _image.path;
                         prefs.setString("userProfile", userProfile);
@@ -132,7 +130,6 @@ class _UserUpdateState extends State<UserUpdate> {
                           await SharedPreferences.getInstance();
 
                       setState(() {
-                        cookie = prefs.setInt("cookie", 1);
                         _image = image;
                         userProfile = _image.path;
                         prefs.setString("userProfile", userProfile);
@@ -192,7 +189,6 @@ class _UserUpdateState extends State<UserUpdate> {
       final userData = await user.getUserInfomation(userKey);
 
       setState(() {
-        cookie = prefs.getInt("cookie");
         password = prefs.getString("userPasswordGoweb");
         marketing = prefs.getString("marketing");
         userToken = prefs.getString("userToken");
@@ -202,7 +198,7 @@ class _UserUpdateState extends State<UserUpdate> {
         } else {
           userPhone = userUpdatePhone;
         }
-        print('userPhone :${userPhone} , userUpdatePhone :${userUpdatePhone}');
+
         prefs.setString("userUpdatePhone", null);
       });
       userName = userData.userName;
@@ -510,27 +506,29 @@ class _UserUpdateState extends State<UserUpdate> {
                             onPressed: profileUpdate,
                             color: Color.fromRGBO(82, 110, 208, 1.0),
                           )
-                        : cookie == 00
-                            ? InkWell(
-                                onTap: profileUpdate,
-                                child: CircleAvatar(
-                                  radius: 50,
-                                  backgroundImage: NetworkImage(userProfile),
-                                  backgroundColor: Colors.white,
-                                ),
-                              )
-                            : InkWell(
-                                onTap: profileUpdate,
-                                child: Container(
-                                    decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(12.0)),
-                                    child: CircleAvatar(
-                                      backgroundImage:
-                                          Image.file(File(userProfile)).image,
-                                      radius: 100.0,
-                                    )),
-                              ),
+                        :
+                        // userChk == "E"
+                        //     ?
+                        InkWell(
+                            onTap: profileUpdate,
+                            child: CircleAvatar(
+                              radius: 50,
+                              backgroundImage: NetworkImage(userProfile),
+                              backgroundColor: Colors.white,
+                            ),
+                          ),
+                    // : InkWell(
+                    //     onTap: profileUpdate,
+                    //     child: Container(
+                    //         decoration: BoxDecoration(
+                    //             borderRadius:
+                    //                 BorderRadius.circular(12.0)),
+                    //         child: CircleAvatar(
+                    //           backgroundImage:
+                    //               Image.file(File(userProfile)).image,
+                    //           radius: 100.0,
+                    //         )),
+                    //   ),
                     decoration: BoxDecoration(
                       border: Border.all(
                           width: 3,
@@ -832,7 +830,7 @@ class _UserUpdateState extends State<UserUpdate> {
   @override
   Widget build(BuildContext context) {
     final _pos = MediaQuery.of(context).size.height / 4 + 20;
-    print("hoit3");
+
     // check();
     return Scaffold(
         //body: userChk == 00 ? _updateWidget() : _email(),

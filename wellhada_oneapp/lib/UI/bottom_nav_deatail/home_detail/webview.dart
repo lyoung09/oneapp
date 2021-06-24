@@ -14,6 +14,7 @@ import 'package:bootpay_api/model/user.dart';
 import 'package:bootpay_api/model/item.dart';
 import 'package:webview_flutter/platform_interface.dart';
 import 'package:wellhada_oneapp/UI/main/bottom_detail/usage_history.dart';
+import 'package:wellhada_oneapp/UI/main/bottom_nav.dart';
 import 'package:wellhada_oneapp/listitem/shop/shopFavorite.dart' as favorite;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -103,8 +104,6 @@ class _WebViewContainerState extends State<WebViewContainer> {
   var userEmail, phone, birthday, birthdayJson;
 
   checkFavorite() async {
-    print(favorite.getFavorite(userId));
-
     return favorite.getFavorite(userId);
   }
 
@@ -120,7 +119,6 @@ class _WebViewContainerState extends State<WebViewContainer> {
         ? birthday = ""
         : birthday = '${birthdayJson.substring(2, 8)}';
 
-    print(birthday);
     userData.userPhoneNumber == null
         ? phone = ""
         : phone = userData.userPhoneNumber;
@@ -174,326 +172,11 @@ class _WebViewContainerState extends State<WebViewContainer> {
     }
   }
 
-  payment(context, payData) async {
-    // Map<dynamic, dynamic> mapJson = new Map();
-    // mapJson = json.decode(payData);
-    // print('mapJson ${mapJson}');
-    var data = payData.split(',');
-    var price, name, pg, quantity, appId, orderId, wantedParts;
-
-    // price = mapJson['price'];
-
-    // name = mapJson['name'];
-    // itemName = mapJson['item_name'];
-    // pg = mapJson['pg'];
-    // quantity = mapJson['qty'];
-    // uniqueId = mapJson['unique'];
-    // appId = mapJson['app_id'];
-    // orderId = mapJson['order_id'];
-    // pgUserName = mapJson['username'];
-    // pgUserEmail = mapJson['email'];
-    // pgUserPhone = mapJson['phone'];
-
-    wantedParts = data[0].split(':');
-    price = [wantedParts.removeAt(0), wantedParts.join(":")];
-    wantedParts = data[1].split(':');
-    name = [wantedParts.removeAt(0), wantedParts.join(":")];
-    wantedParts = data[2].split(':');
-    itemName = [wantedParts.removeAt(0), wantedParts.join(":")];
-    wantedParts = data[3].split(':');
-    pg = [wantedParts.removeAt(0), wantedParts.join(":")];
-    wantedParts = data[4].split(':');
-    quantity = [wantedParts.removeAt(0), wantedParts.join(":")];
-    wantedParts = data[5].split(':');
-    uniqueId = [wantedParts.removeAt(0), wantedParts.join(":")];
-    wantedParts = data[6].split(':');
-    appId = [wantedParts.removeAt(0), wantedParts.join(":")];
-    wantedParts = data[7].split(':');
-    orderId = [wantedParts.removeAt(0), wantedParts.join(":")];
-    wantedParts = data[8].split(':');
-    pgUserName = [wantedParts.removeAt(0), wantedParts.join(":")];
-    wantedParts = data[9].split(':');
-    pgUserEmail = [wantedParts.removeAt(0), wantedParts.join(":")];
-    wantedParts = data[10].split(':');
-    pgUserPhone = [wantedParts.removeAt(0), wantedParts.join(":")];
-
-    goBootpayRequest(
-        context,
-        price[1],
-        name[1],
-        itemName[1],
-        pg[1],
-        quantity[1],
-        uniqueId[1],
-        orderId[1],
-        appId[1],
-        pgUserName[1],
-        pgUserEmail[1],
-        pgUserPhone[1]);
-    // goBootpayRequestBio(
-    //     price[1],
-    //     name[1],
-    //     itemName[1],
-    //     pg[1],
-    //     quantity[1],
-    //     uniqueId[1],
-    //     orderId[1],
-    //     appId[1],
-    //     pgUserName[1],
-    //     pgUserEmail[1],
-    //     pgUserPhone[1]);
-  }
-
-  goBootpayRequest(BuildContext context, price, name, itemName, pg, quantity,
-      uniqueId, orderId, appId, pgUserName, pgUserEmail, pgUserPhone) async {
-    //context = context.findAncestorWidgetOfExactType<Scaffold>();
-
-    Item paymentItem = Item();
-    paymentItem.itemName = itemName; // 주문정보에 담길 상품명
-    paymentItem.qty = int.parse(quantity); // 해당 상품의 주문 수량
-    paymentItem.unique = uniqueId; // 해당 상품의 고유 키
-    paymentItem.price = double.parse(price); // 상품의 가격
-
-    List<Item> paymentItemList = [paymentItem];
-
-    Payload payload = Payload();
-    payload.name = name;
-    //payload.applicationId = androidAppid;
-    var android = "608a4a845b2948002107c213";
-    var ios = "608a4a845b2948002107c214";
-    payload.applicationId = android;
-
-    payload.androidApplicationId = android;
-    payload.iosApplicationId = ios;
-
-    payload.pg = pg;
-    //payload.method = 'card';
-    // payload.methods = ['card', 'phone', 'vbank', 'bank'];
-    payload.name = name;
-    payload.price = double.parse(price); //정기결제시 0 혹은 주석
-    payload.orderId = orderId;
-    // payload.params = {
-    //   "callbackParam1": "value12",
-    //   "callbackParam2": "value34",
-    //   "callbackParam3": "value56",
-    //   "callbackParam4": "value78",
-    // };
-//    payload.us
-
-    User paymentUser = User();
-    paymentUser.username = pgUserName;
-    paymentUser.email = pgUserEmail;
-    paymentUser.phone = pgUserPhone;
-    // paymentUser.username = pgUserName;
-    // paymentUser.email = pgUserEmail;
-    // paymentUser.phone = pgUserPhone;
-
-    // Extra extra = Extra();
-    // extra.appScheme = 'bootpayFlutterSample';
-    // extra.quotas = [0, 2, 3];
-    // extra.popup = 1;
-    // extra.quick_popup = 1;
-
-    BootpayApi.request(
-      context,
-      payload,
-
-      //extra: extra,
-      user: paymentUser,
-      items: paymentItemList,
-
-      onDone: (json) {
-        goToPayment(json);
-        print('--- onDone: $json');
-
-        //getUserToken(appId);
-      },
-
-      onCancel: (json) {
-        print('--- onCancel: $json');
-      },
-
-      onError: (json) {
-        print(' --- onError: $json');
-      },
-    );
-  }
-
-  goToPayment(jsonData) async {
-    Map<String, dynamic> mapJson = new Map();
-    mapJson = json.decode(jsonData);
-
-    var data = jsonData.split(',');
-
-    var action = mapJson["action"];
-    var receipt_id = mapJson['receipt_id'];
-    var price = mapJson['price'];
-    var card_code = mapJson['card_code'];
-    var card_no = mapJson['card_no'];
-    var card_name = mapJson['card_name'];
-    var card_quota = mapJson['card_quota'];
-    var receipt_url = mapJson['receipt_url'];
-    var item_name = mapJson['item_name'];
-    var order_id = mapJson['order_id'];
-    var url = mapJson['url'];
-    var tax_free = mapJson['tax_free'];
-    var payment_name = mapJson['payment_name'];
-    var pg_name = mapJson['pg_name'];
-    var pg = mapJson['pg'];
-    var method = mapJson['method'];
-    var method_name = mapJson['method_name'];
-    var payment_group = mapJson['payment_group'];
-    var payment_group_name = mapJson['payment_group_name'];
-    var requested_at = mapJson['requested_at'];
-    var purchased_at = mapJson['purchased_at'];
-
-    var status = mapJson['status'];
-
-    // wantedParts = data[0].split(':');
-    // action = [wantedParts.removeAt(0), wantedParts.join(":")];
-
-    // wantedParts = data[1].split(':');
-    // receipt_id = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // receipt_id = receipt_id[1];
-    // receipt_id = receipt_id.substring(1, receipt_id.length - 1);
-
-    // wantedParts = data[2].split(':');
-    // price = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // price = price[1];
-
-    // wantedParts = data[3].split(':');
-    // card_no = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // card_no = card_no[1];
-    // card_no = card_no.substring(1, card_no.length - 1);
-
-    // wantedParts = data[4].split(':');
-    // card_code = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // card_code = card_code[1];
-    // card_code = card_code.substring(1, card_code.length - 1);
-    // card_code = mapJson['card_code'];
-    // wantedParts = data[5].split(':');
-    // card_name = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // card_name = card_name[1];
-    // card_name = card_name.substring(1, card_name.length - 1);
-    // wantedParts = data[6].split(':');
-    // card_quota = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // card_quota = card_quota[1];
-    // card_quota = card_quota.substring(1, card_quota.length - 1);
-
-    // wantedParts = data[7].split(':');
-    // receipt_url = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // receipt_url = receipt_url[1];
-    // receipt_url = receipt_url.substring(1, receipt_url.length - 1);
-
-    // wantedParts = data[8].split(':');
-    // item_name = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // item_name = item_name[1];
-    // item_name = item_name.substring(1, item_name.length - 1);
-
-    // wantedParts = data[9].split(':');
-    // order_id = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // order_id = order_id[1];
-    // order_id = order_id.substring(1, order_id.length - 1);
-
-    // wantedParts = data[10].split(':');
-    // url = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // url = url[1];
-    // url = url.substring(1, url.length - 1);
-
-    // wantedParts = data[11].split(':');
-    // tax_free = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // tax_free = tax_free[1];
-
-    // wantedParts = data[12].split(':');
-    // payment_name = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // payment_name = payment_name[1];
-    // payment_name = payment_name.substring(1, payment_name.length - 1);
-
-    // wantedParts = data[13].split(':');
-    // pg_name = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // pg_name = pg_name[1];
-    // pg_name = pg_name.substring(1, pg_name.length - 1);
-
-    // wantedParts = data[14].split(':');
-    // pg = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // pg = pg[1];
-    // pg = pg.substring(1, pg.length - 1);
-
-    // wantedParts = data[15].split(':');
-    // method = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // method = method[1];
-    // method = method.substring(1, method.length - 1);
-
-    // wantedParts = data[16].split(':');
-    // method_name = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // method_name = method_name[1];
-    // method_name = method_name.substring(1, method_name.length - 1);
-
-    // wantedParts = data[17].split(':');
-    // payment_group = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // payment_group = payment_group[1];
-    // payment_group = payment_group.substring(1, payment_group.length - 1);
-
-    // wantedParts = data[18].split(':');
-    // payment_group_name = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // payment_group_name = payment_group_name[1];
-    // payment_group_name =
-    //     payment_group_name.substring(1, payment_group_name.length - 1);
-
-    // wantedParts = data[19].split(':');
-    // requested_at = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // requested_at = requested_at[1];
-    // requested_at = requested_at.substring(1, requested_at.length - 1);
-
-    // wantedParts = data[20].split(':');
-    // purchased_at = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // purchased_at = purchased_at[1];
-    // purchased_at = purchased_at.substring(1, purchased_at.length - 1);
-
-    // wantedParts = data[21].split(':');
-    // status = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // status = status[1];
-
-    // status = status.substring(0, status.length - 1);
-
-    final paymentResult = await webItemList.paymentStory(
-        receipt_id,
-        order_id,
-        card_code,
-        card_name,
-        card_no,
-        card_quota,
-        item_name,
-        method,
-        method_name,
-        payment_group,
-        payment_group_name,
-        payment_name,
-        pg,
-        pg_name,
-        price.toString(),
-        purchased_at,
-        receipt_url,
-        requested_at,
-        status.toString(),
-        tax_free.toString(),
-        url,
-        //cancelAT[1],
-        "");
-
-    setState(() {
-      print(
-          'payment=====================================${paymentResult.cnt} , ${paymentResult.status}');
-    });
-  }
-
   bool ordering;
   var pgUserName, pgUserEmail, pgUserPhone, itemName, uniqueId;
   sendDataToPay(payData) {
-    print('payData ${payData}');
     if (payData.isEmpty || payData == null) {
     } else {
-      print('exist ${payData}');
       var action = "loading";
       // Here you can write your code for open new view
       Navigator.of(context).push(MaterialPageRoute(
@@ -504,119 +187,6 @@ class _WebViewContainerState extends State<WebViewContainer> {
 
   double opacity = 0.0;
   WebViewController _webViewController;
-
-  void goBootpayRequestBio(price, name, itemName, pg, quantity, uniqueId,
-      orderId, appId, pgUserName, pgUserEmail, pgUserPhone) async {
-    Item item1 = Item();
-    item1.itemName = itemName; // 주문정보에 담길 상품명
-    item1.qty = int.parse(quantity); // 해당 상품의 주문 수량
-    item1.unique = uniqueId; // 해당 상품의 고유 키
-    item1.price = double.parse(price); // 상품의 가격
-
-    List<Item> itemList = [item1];
-
-    BioPayload payload = BioPayload();
-    //payload.applicationId = androidAppid;
-    var android = "608a4a845b2948002107c213";
-    var ios = "608a4a845b2948002107c214";
-    payload.applicationId = android;
-
-    payload.androidApplicationId = android;
-    payload.iosApplicationId = ios;
-    //payload.userToken = token;
-
-    payload.pg = pg;
-    //payload.method = 'card';
-    // payload.methods = ['card', 'phone', 'vbank', 'bank'];
-    payload.name = name;
-    payload.price = double.parse(price); //정기결제시 0 혹은 주석
-    payload.orderId = orderId;
-
-    BioPrice price1 = BioPrice();
-    price1.name = itemName;
-    price1.price = double.parse(price);
-
-    payload.prices = [price1];
-
-    payload.names = [name];
-//    payload.us
-
-    User users = User();
-    users.username = pgUserName;
-    users.email = pgUserEmail;
-
-    users.phone = pgUserPhone;
-
-    BootpayApi.requestBio(
-      context,
-      payload,
-      //extra: extra,
-      user: users,
-      items: itemList,
-      onDone: (json) {
-        print('--- onDone: $json');
-      },
-      onCancel: (json) {
-        print('--- onCancel: $json');
-      },
-      onError: (json) {
-        print(' --- onError: $json');
-      },
-    );
-  }
-
-  //(이것은 단순히 예제입니다.) 클라이언트 <-> 부트페이와 통신해서는 안됩니다.
-  //서버 <-> 부트페이 서버와 통신 후, 받아온 userToken 값을
-  //클라이언트 <-> 서버와 통신하셔서 받아오셔야 합니다.
-  @deprecated
-  void getRestToken(BuildContext context) async {
-    String rest_applicationId = "5b8f6a4d396fa665fdc2b5ea";
-    String rest_pk = "n9jO7MxVFor3o//c9X5tdep95ZjdaiDvVB4h1B5cMHQ=";
-
-    Map<String, dynamic> params = {
-      "application_id": rest_applicationId,
-      "private_key": rest_pk
-    };
-
-    var url = Uri.parse('https://api.bootpay.co.kr/request/token');
-    final response = await http.post(url, body: params);
-    if (response.statusCode == 200) {
-      var res = json.decode(response.body);
-      String token = res['data']['token'];
-      print('res ${res}');
-      getUserToken(token);
-    } else {
-      print(response.body);
-    }
-  }
-
-  void getUserToken(String restToken) async {
-    Map<String, dynamic> body = {
-      "user_id": userId,
-//      "user_id": Uuid().v1(),
-      "email": userEmail,
-      "name": userName,
-      "gender": "0",
-      "birth": birthdayJson,
-      "phone": phone
-    };
-
-    var url = Uri.parse('https://api.bootpay.co.kr/request/user/token');
-    final response = await http.post(url,
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/x-www-form-urlencoded",
-          "Authorization": restToken
-        },
-        body: body);
-    if (response.statusCode == 200) {
-      var res = json.decode(response.body);
-      print(res);
-      String token = res['data']['user_token'];
-    } else {
-      print(response.body);
-    }
-  }
 
   final Completer<WebViewController> _controller =
       Completer<WebViewController>();
@@ -645,7 +215,6 @@ class _WebViewContainerState extends State<WebViewContainer> {
               Map<String, dynamic> favoriteInfo = snapshot.data;
               List<dynamic> favoriteInfoList = favoriteInfo["LIST"];
 
-              print('favoriteInfoList ${favoriteInfoList}');
               bool checkShopFav;
               var x = favoriteInfoList
                   .where((element) =>
@@ -703,7 +272,7 @@ class _WebViewContainerState extends State<WebViewContainer> {
                             onMessageReceived: (message) {
                               sendDataToPay(message.message);
                               message = null;
-                            })
+                            }),
                       ].toSet(),
                     ))),
       ]),
@@ -769,6 +338,7 @@ class _BillState extends State<Bill> {
     });
   }
 
+  //3초 뒤부터 cancel <- 유저가 뒤로넘겨버리면 취소화면띄움
   tt() async {
     setState(() {
       action = "cancel";
@@ -777,80 +347,67 @@ class _BillState extends State<Bill> {
 
   var itemName, uniqueId, pgUserName, pgUserEmail, pgUserPhone;
   payment(context, payData) async {
-    // Map<dynamic, dynamic> mapJson = new Map();
-    // mapJson = json.decode(payData);
-    // print('mapJson ${mapJson}');
-
+    // print('payData ${payData}');
     var data = payData.split(',');
-    var price, name, pg, quantity, appId, orderId, wantedParts;
+    var t;
+    Map<dynamic, dynamic> mapPayData = new Map();
+    for (int i = 0; i < data.length; i++) {
+      t = data[i].split(":");
+      mapPayData[t[0]] = t[1];
+    }
 
-    // price = mapJson['price'];
+    // wantedParts = data[0].split(':');
+    // price = [wantedParts.removeAt(0), wantedParts.join(":")];
+    // wantedParts = data[1].split(':');
+    // name = [wantedParts.removeAt(0), wantedParts.join(":")];
+    // wantedParts = data[2].split(':');
+    // itemName = [wantedParts.removeAt(0), wantedParts.join(":")];
+    // wantedParts = data[3].split(':');
+    // pg = [wantedParts.removeAt(0), wantedParts.join(":")];
+    // wantedParts = data[4].split(':');
+    // quantity = [wantedParts.removeAt(0), wantedParts.join(":")];
+    // wantedParts = data[5].split(':');
+    // uniqueId = [wantedParts.removeAt(0), wantedParts.join(":")];
+    // wantedParts = data[6].split(':');
+    // appId = [wantedParts.removeAt(0), wantedParts.join(":")];
+    // wantedParts = data[7].split(':');
+    // orderId = [wantedParts.removeAt(0), wantedParts.join(":")];
+    // wantedParts = data[8].split(':');
+    // pgUserName = [wantedParts.removeAt(0), wantedParts.join(":")];
+    // wantedParts = data[9].split(':');
+    // pgUserEmail = [wantedParts.removeAt(0), wantedParts.join(":")];
+    // wantedParts = data[10].split(':');
+    // pgUserPhone = [wantedParts.removeAt(0), wantedParts.join(":")];
 
-    // name = mapJson['name'];
-    // itemName = mapJson['item_name'];
-    // pg = mapJson['pg'];
-    // quantity = mapJson['qty'];
-    // uniqueId = mapJson['unique'];
-    // appId = mapJson['app_id'];
-    // orderId = mapJson['order_id'];
-    // pgUserName = mapJson['username'];
-    // pgUserEmail = mapJson['email'];
-    // pgUserPhone = mapJson['phone'];
-
-    wantedParts = data[0].split(':');
-    price = [wantedParts.removeAt(0), wantedParts.join(":")];
-    wantedParts = data[1].split(':');
-    name = [wantedParts.removeAt(0), wantedParts.join(":")];
-    wantedParts = data[2].split(':');
-    itemName = [wantedParts.removeAt(0), wantedParts.join(":")];
-    wantedParts = data[3].split(':');
-    pg = [wantedParts.removeAt(0), wantedParts.join(":")];
-    wantedParts = data[4].split(':');
-    quantity = [wantedParts.removeAt(0), wantedParts.join(":")];
-    wantedParts = data[5].split(':');
-    uniqueId = [wantedParts.removeAt(0), wantedParts.join(":")];
-    wantedParts = data[6].split(':');
-    appId = [wantedParts.removeAt(0), wantedParts.join(":")];
-    wantedParts = data[7].split(':');
-    orderId = [wantedParts.removeAt(0), wantedParts.join(":")];
-    wantedParts = data[8].split(':');
-    pgUserName = [wantedParts.removeAt(0), wantedParts.join(":")];
-    wantedParts = data[9].split(':');
-    pgUserEmail = [wantedParts.removeAt(0), wantedParts.join(":")];
-    wantedParts = data[10].split(':');
-    pgUserPhone = [wantedParts.removeAt(0), wantedParts.join(":")];
+    // print(mapPayData['price']);
+    // print(mapPayData['name']);
+    // print(mapPayData['item_name']);
+    // print(mapPayData['pg']);
+    // print(mapPayData['qty']);
+    // print(mapPayData['unique']);
+    // print(mapPayData['app_id']);
+    // print(mapPayData['order_id']);
+    // print(mapPayData['username']);
+    // print(mapPayData['email']);
+    // print(mapPayData['phone']);
 
     goBootpayRequest(
         context,
-        price[1],
-        name[1],
-        itemName[1],
-        pg[1],
-        quantity[1],
-        uniqueId[1],
-        orderId[1],
-        appId[1],
-        pgUserName[1],
-        pgUserEmail[1],
-        pgUserPhone[1]);
-    // goBootpayRequestBio(
-    //     price[1],
-    //     name[1],
-    //     itemName[1],
-    //     pg[1],
-    //     quantity[1],
-    //     uniqueId[1],
-    //     orderId[1],
-    //     appId[1],
-    //     pgUserName[1],
-    //     pgUserEmail[1],
-    //     pgUserPhone[1]);
+        mapPayData['price'],
+        mapPayData['name'],
+        mapPayData['item_name'],
+        mapPayData['pg'],
+        mapPayData['qty'],
+        mapPayData['unique'],
+        mapPayData['order_id'],
+        mapPayData['app_id'],
+        mapPayData['username'],
+        mapPayData['email'],
+        mapPayData['phone']);
   }
 
   goBootpayRequest(BuildContext context, price, name, itemName, pg, quantity,
       uniqueId, orderId, appId, pgUserName, pgUserEmail, pgUserPhone) async {
-    //context = context.findAncestorWidgetOfExactType<Scaffold>();
-
     Item paymentItem = Item();
     paymentItem.itemName = itemName; // 주문정보에 담길 상품명
     paymentItem.qty = int.parse(quantity); // 해당 상품의 주문 수량
@@ -862,6 +419,7 @@ class _BillState extends State<Bill> {
     Payload payload = Payload();
     payload.name = name;
     //payload.applicationId = androidAppid;
+    //android 아이디는 13 ios 아이디는 14로 끝남
     var android = "608a4a845b2948002107c213";
     var ios = "608a4a845b2948002107c214";
     payload.applicationId = android;
@@ -907,7 +465,7 @@ class _BillState extends State<Bill> {
 
       onDone: (json) {
         goToPayment(json);
-        print('--- onDone: $json');
+
         action = "finish";
         //getUserToken(appId);
       },
@@ -926,165 +484,100 @@ class _BillState extends State<Bill> {
 
   goToPayment(jsonData) async {
     Map<String, dynamic> mapJson = new Map();
+
     mapJson = json.decode(jsonData);
 
-    var data = jsonData.split(',');
+    // var action = mapJson["action"];
+    // var receipt_id = mapJson['receipt_id'];
 
-    var action = mapJson["action"];
-    var receipt_id = mapJson['receipt_id'];
-    var price = mapJson['price'];
-    var card_code = mapJson['card_code'];
-    var card_no = mapJson['card_no'];
-    var card_name = mapJson['card_name'];
-    var card_quota = mapJson['card_quota'];
-    var receipt_url = mapJson['receipt_url'];
-    var item_name = mapJson['item_name'];
-    var order_id = mapJson['order_id'];
-    var url = mapJson['url'];
-    var tax_free = mapJson['tax_free'];
-    var payment_name = mapJson['payment_name'];
-    var pg_name = mapJson['pg_name'];
-    var pg = mapJson['pg'];
-    var method = mapJson['method'];
-    var method_name = mapJson['method_name'];
-    var payment_group = mapJson['payment_group'];
-    var payment_group_name = mapJson['payment_group_name'];
-    var requested_at = mapJson['requested_at'];
-    var purchased_at = mapJson['purchased_at'];
+    // var price = mapJson['price'];
 
-    var status = mapJson['status'];
+    // var card_code = mapJson['card_code'];
 
-    // wantedParts = data[0].split(':');
-    // action = [wantedParts.removeAt(0), wantedParts.join(":")];
+    // var card_no = mapJson['card_no'];
 
-    // wantedParts = data[1].split(':');
-    // receipt_id = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // receipt_id = receipt_id[1];
-    // receipt_id = receipt_id.substring(1, receipt_id.length - 1);
+    // var card_name = mapJson['card_name'];
 
-    // wantedParts = data[2].split(':');
-    // price = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // price = price[1];
+    // var card_quota = mapJson['card_quota'];
 
-    // wantedParts = data[3].split(':');
-    // card_no = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // card_no = card_no[1];
-    // card_no = card_no.substring(1, card_no.length - 1);
+    // var receipt_url = mapJson['receipt_url'];
 
-    // wantedParts = data[4].split(':');
-    // card_code = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // card_code = card_code[1];
-    // card_code = card_code.substring(1, card_code.length - 1);
-    // card_code = mapJson['card_code'];
-    // wantedParts = data[5].split(':');
-    // card_name = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // card_name = card_name[1];
-    // card_name = card_name.substring(1, card_name.length - 1);
-    // wantedParts = data[6].split(':');
-    // card_quota = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // card_quota = card_quota[1];
-    // card_quota = card_quota.substring(1, card_quota.length - 1);
+    // var item_name = mapJson['item_name'];
 
-    // wantedParts = data[7].split(':');
-    // receipt_url = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // receipt_url = receipt_url[1];
-    // receipt_url = receipt_url.substring(1, receipt_url.length - 1);
+    // var order_id = mapJson['order_id'];
 
-    // wantedParts = data[8].split(':');
-    // item_name = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // item_name = item_name[1];
-    // item_name = item_name.substring(1, item_name.length - 1);
+    // var url = mapJson['url'];
 
-    // wantedParts = data[9].split(':');
-    // order_id = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // order_id = order_id[1];
-    // order_id = order_id.substring(1, order_id.length - 1);
+    // var tax_free = mapJson['tax_free'];
 
-    // wantedParts = data[10].split(':');
-    // url = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // url = url[1];
-    // url = url.substring(1, url.length - 1);
+    // var payment_name = mapJson['payment_name'];
 
-    // wantedParts = data[11].split(':');
-    // tax_free = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // tax_free = tax_free[1];
+    // var pg_name = mapJson['pg_name'];
 
-    // wantedParts = data[12].split(':');
-    // payment_name = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // payment_name = payment_name[1];
-    // payment_name = payment_name.substring(1, payment_name.length - 1);
+    // var pg = mapJson['pg'];
 
-    // wantedParts = data[13].split(':');
-    // pg_name = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // pg_name = pg_name[1];
-    // pg_name = pg_name.substring(1, pg_name.length - 1);
+    // var method = mapJson['method'];
 
-    // wantedParts = data[14].split(':');
-    // pg = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // pg = pg[1];
-    // pg = pg.substring(1, pg.length - 1);
+    // var method_name = mapJson['method_name'];
 
-    // wantedParts = data[15].split(':');
-    // method = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // method = method[1];
-    // method = method.substring(1, method.length - 1);
+    // var payment_group = mapJson['payment_group'];
 
-    // wantedParts = data[16].split(':');
-    // method_name = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // method_name = method_name[1];
-    // method_name = method_name.substring(1, method_name.length - 1);
+    // var payment_group_name = mapJson['payment_group_name'];
 
-    // wantedParts = data[17].split(':');
-    // payment_group = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // payment_group = payment_group[1];
-    // payment_group = payment_group.substring(1, payment_group.length - 1);
+    // var requested_at = mapJson['requested_at'];
 
-    // wantedParts = data[18].split(':');
-    // payment_group_name = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // payment_group_name = payment_group_name[1];
-    // payment_group_name =
-    //     payment_group_name.substring(1, payment_group_name.length - 1);
+    // var purchased_at = mapJson['purchased_at'];
 
-    // wantedParts = data[19].split(':');
-    // requested_at = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // requested_at = requested_at[1];
-    // requested_at = requested_at.substring(1, requested_at.length - 1);
-
-    // wantedParts = data[20].split(':');
-    // purchased_at = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // purchased_at = purchased_at[1];
-    // purchased_at = purchased_at.substring(1, purchased_at.length - 1);
-
-    // wantedParts = data[21].split(':');
-    // status = [wantedParts.removeAt(0), wantedParts.join(":")];
-    // status = status[1];
-
-    // status = status.substring(0, status.length - 1);
+    // var status = mapJson['status'];
 
     final paymentResult = await webItemList.paymentStory(
-        receipt_id,
-        order_id,
-        card_code,
-        card_name,
-        card_no,
-        card_quota,
-        item_name,
-        method,
-        method_name,
-        payment_group,
-        payment_group_name,
-        payment_name,
-        pg,
-        pg_name,
-        price.toString(),
-        purchased_at,
-        receipt_url,
-        requested_at,
-        status.toString(),
-        tax_free.toString(),
-        url,
+        mapJson['receipt_id'],
+        mapJson['order_id'],
+        mapJson['card_code'],
+        mapJson['card_name'],
+        mapJson['card_no'],
+        mapJson['card_quota'],
+        mapJson['item_name'],
+        mapJson['method'],
+        mapJson['method_name'],
+        mapJson['payment_group'],
+        mapJson['payment_group_name'],
+        mapJson['payment_name'],
+        mapJson['pg'],
+        mapJson['pg_name'],
+        mapJson['price'].toString(),
+        mapJson['purchased_at'],
+        mapJson['receipt_url'],
+        mapJson['requested_at'],
+        mapJson['status'].toString(),
+        mapJson['tax_free'].toString(),
+        mapJson['url'],
         //cancelAT[1],
         "");
+    // final paymentResult = await webItemList.paymentStory(
+    //     receipt_id,
+    //     order_id,
+    //     card_code,
+    //     card_name,
+    //     card_no,
+    //     card_quota,
+    //     item_name,
+    //     method,
+    //     method_name,
+    //     payment_group,
+    //     payment_group_name,
+    //     payment_name,
+    //     pg,
+    //     pg_name,
+    //     price.toString(),
+    //     purchased_at,
+    //     receipt_url,
+    //     requested_at,
+    //     status.toString(),
+    //     tax_free.toString(),
+    //     url,
+    //     //cancelAT[1],
+    //     "");
 
     setState(() {
       print(
@@ -1097,6 +590,10 @@ class _BillState extends State<Bill> {
     if (mounted) {
       super.setState(fn);
     }
+  }
+
+  goHome() {
+    Navigator.pushNamed(context, '/BottomNav', arguments: {number: number});
   }
 
   @override
@@ -1230,9 +727,7 @@ class _BillState extends State<Bill> {
                                             ),
                                       ),
                                       child: FlatButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
+                                        onPressed: goHome,
                                         child: Text(
                                           "확인",
                                           style: TextStyle(

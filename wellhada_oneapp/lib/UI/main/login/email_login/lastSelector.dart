@@ -9,6 +9,12 @@ import 'package:wellhada_oneapp/UI/main/bottom_nav.dart';
 import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
 import 'package:wellhada_oneapp/model/login/userData.dart';
 
+/////////////////////////////
+/////////////////////////////
+///////성별,나이 체크////////
+////////없으면 없고 있으면 저장/////////////
+/////여기서 db에 저장함/////////////
+
 class LastSelection extends StatefulWidget {
   @override
   _LastSelectionState createState() => _LastSelectionState();
@@ -27,7 +33,7 @@ class _LastSelectionState extends State<LastSelection> {
       userId,
       appAgreePush;
   var userChk;
-  var userProfile, cookie, userGenderDB, userCheckDB;
+  var userProfile, userGenderDB, userCheckDB;
   bool isSelected;
   String deviceToken;
   final _formKey = GlobalKey<FormState>();
@@ -51,7 +57,7 @@ class _LastSelectionState extends State<LastSelection> {
         userProfile = prefs.getString("userProfile");
         userPhone = prefs.getString("userPhone");
         userChk = prefs.getString("userChk");
-        cookie = prefs.getInt("cookie");
+
         userPassword = prefs.getString("userPasswordGoweb");
         marketing = prefs.getString("marketing");
         userToken = prefs.getString("userToken");
@@ -65,13 +71,6 @@ class _LastSelectionState extends State<LastSelection> {
 
         //userProfile = uriUserProfile.toString();
       });
-
-      if (userChk == "01") {
-        userCheckDB = "E";
-      }
-      if (userChk == "00") {
-        userCheckDB = "K";
-      }
     } catch (e) {
       print(e);
     }
@@ -119,10 +118,16 @@ class _LastSelectionState extends State<LastSelection> {
     });
   }
 
+  // db에 저장 (listItem/user/ insertuser()메소드)
   insertUser() async {
-    print("insert ${deviceToken}");
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      deviceToken = prefs.getString("userToken");
+    });
+
     final signUp = await user.insertUser(
-      userCheckDB,
+      userChk,
       userId,
       userPassword == null ? "" : userPassword,
       userEmail,
@@ -131,11 +136,11 @@ class _LastSelectionState extends State<LastSelection> {
       userGenderDB == null ? "" : userGenderDB,
       birthdayJson == null ? "" : birthdayJson,
       marketing,
-      appPushToken == null ? "N" : appPushToken,
+      deviceToken,
       appAgreeService == null ? "N" : appAgreeService,
       appAgreePrivacy == null ? "N" : appAgreePrivacy,
       appAgreePush == null ? "N" : appAgreePush,
-      deviceToken == null ? "" : deviceToken,
+      deviceToken,
     );
 
     if (signUp.status == "00") {
@@ -370,6 +375,7 @@ class _LastSelectionState extends State<LastSelection> {
   }
 }
 
+// radio button 위젯 클래스
 class RadioItem extends StatelessWidget {
   final RadioModel _item;
   RadioItem(this._item);

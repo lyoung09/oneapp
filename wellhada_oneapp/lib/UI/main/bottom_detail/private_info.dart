@@ -7,8 +7,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:kakao_flutter_sdk/all.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/UI/bottom_nav_deatail/privateInfo_detail/hndSolution.dart';
-import 'package:wellhada_oneapp/UI/bottom_nav_deatail/privateInfo_detail/mileage_detail/point.dart';
 import 'package:wellhada_oneapp/UI/bottom_nav_deatail/privateInfo_detail/user/mileage.dart';
+import 'package:wellhada_oneapp/UI/bottom_nav_deatail/privateInfo_detail/user/mileage_detail/point.dart';
 import 'package:wellhada_oneapp/UI/bottom_nav_deatail/privateInfo_detail/user/notify.dart';
 import 'package:wellhada_oneapp/UI/bottom_nav_deatail/privateInfo_detail/user/proposingShop.dart';
 import 'package:wellhada_oneapp/UI/bottom_nav_deatail/privateInfo_detail/user/updateUser.dart';
@@ -17,6 +17,7 @@ import 'package:wellhada_oneapp/UI/main/login/login.dart';
 
 import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
 import 'package:wellhada_oneapp/model/menu/drawer_detail/qr_34.dart';
+import 'package:wellhada_oneapp/notification/push_message.dart';
 
 import 'home_screen.dart';
 
@@ -33,16 +34,14 @@ class _PriavateInfoState extends State<PriavateInfo> {
   String userName;
   var userEmail, userPhone;
   var userChk;
-  var userProfile, cookie;
+  var userProfile;
   var userId;
 
   @override
   void initState() {
     super.initState();
-    print("hoit");
+
     check();
-    //userCheck();
-    // userEmailCheck();
   }
 
   @override
@@ -58,6 +57,7 @@ class _PriavateInfoState extends State<PriavateInfo> {
     check();
   }
 
+  //유저 로그인 체크
   void check() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -70,10 +70,6 @@ class _PriavateInfoState extends State<PriavateInfo> {
       } else {
         notLoginUser();
       }
-      // if (userChk == '02' || userChk == null)
-      //   notLoginUser();
-      // else
-      //   userCheck();
     } catch (e) {
       userChk = 'O';
       print(e);
@@ -87,10 +83,10 @@ class _PriavateInfoState extends State<PriavateInfo> {
       userName = '';
       userProfile = "";
       userPhone = '';
-      cookie = '';
     });
   }
 
+  //유저 로그인 되있으면 데이터 호출
   void userCheck() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -98,7 +94,6 @@ class _PriavateInfoState extends State<PriavateInfo> {
       final userData = await user.getUserInfomation(userId);
 
       setState(() {
-        cookie = prefs.getInt("cookie");
         print('userData.status==================${userData.status}');
 
         userName = userData.userName;
@@ -135,12 +130,13 @@ class _PriavateInfoState extends State<PriavateInfo> {
         .push(MaterialPageRoute(builder: (context) => new QR_34(1)));
   }
 
+  //회원탈퇴
   delete() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     setState(() {
       prefs.setString("userKey", null);
-      prefs.setInt("cookie", null);
+
       prefs.setString("userPasswordGoweb", null);
       prefs.setString("userChk", null);
       prefs.setString("userName", null);
@@ -149,12 +145,12 @@ class _PriavateInfoState extends State<PriavateInfo> {
     });
   }
 
+//이메일로그아웃
   logOutEmail() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       setState(() {
         prefs.setString("userKey", null);
-        prefs.setInt("cookie", null);
         prefs.setString("userPasswordGoweb", null);
         prefs.setString("userChk", null);
         prefs.setString("userName", null);
@@ -167,13 +163,14 @@ class _PriavateInfoState extends State<PriavateInfo> {
     }
   }
 
+//카카오 로그아웃
   logOutTalk() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
 
       setState(() {
         prefs.setString("userKey", null);
-        prefs.setInt("cookie", null);
+
         prefs.setString("userPasswordGoweb", null);
         prefs.setString("userChk", null);
         prefs.setString("userName", null);
@@ -182,8 +179,6 @@ class _PriavateInfoState extends State<PriavateInfo> {
         userChk = 'O';
       });
       var code = await UserApi.instance.logout();
-
-      print(code.toString());
     } catch (e) {
       print(e);
     }
@@ -192,7 +187,6 @@ class _PriavateInfoState extends State<PriavateInfo> {
   unlinkTalk() async {
     try {
       var code = await UserApi.instance.unlink();
-      print(code.toString());
     } catch (e) {
       print(e);
     }
@@ -218,6 +212,11 @@ class _PriavateInfoState extends State<PriavateInfo> {
         .push(MaterialPageRoute(builder: (context) => new HndSolution()));
   }
 
+  pushmessage() {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => new PushMessage()));
+  }
+
   mileage() async {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => Mileage(userId, userName)));
@@ -231,7 +230,7 @@ class _PriavateInfoState extends State<PriavateInfo> {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    print("hoit1");
+
     return Stack(
       children: <Widget>[
         Container(
@@ -350,31 +349,32 @@ class _PriavateInfoState extends State<PriavateInfo> {
                                         Align(
                                           alignment: Alignment.topLeft,
                                           child: Container(
-                                            height: 90,
-                                            width: 90,
-                                            decoration: new BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              border: new Border.all(
-                                                color: Colors.black,
-                                                width: 0.5,
+                                              height: 90,
+                                              width: 90,
+                                              decoration: new BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                border: new Border.all(
+                                                  color: Colors.black,
+                                                  width: 0.5,
+                                                ),
                                               ),
-                                            ),
-                                            child: cookie == 00
-                                                ? CircleAvatar(
-                                                    radius: 50,
-                                                    backgroundImage:
-                                                        NetworkImage(
-                                                            userProfile),
-                                                    backgroundColor:
-                                                        Colors.white,
-                                                  )
-                                                : CircleAvatar(
-                                                    backgroundImage: Image.file(
-                                                            File(userProfile))
-                                                        .image,
-                                                    radius: 50.0,
-                                                  ),
-                                          ),
+                                              child:
+                                                  // userChk == "E"
+                                                  //     ?
+                                                  CircleAvatar(
+                                                radius: 50,
+                                                backgroundImage:
+                                                    NetworkImage(userProfile),
+                                                backgroundColor: Colors.white,
+                                              )
+                                              // :
+                                              // CircleAvatar(
+                                              //     backgroundImage: Image.file(
+                                              //             File(userProfile))
+                                              //         .image,
+                                              //     radius: 50.0,
+                                              //   ),
+                                              ),
                                         ),
                                       ],
                                     ),
@@ -443,6 +443,7 @@ class _PriavateInfoState extends State<PriavateInfo> {
                               ),
                             ),
                             onPressed: updateUser,
+                            //onPressed: pushmessage,
                           ),
                           Container(
                             child: Divider(

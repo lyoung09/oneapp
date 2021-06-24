@@ -2,9 +2,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:wellhada_oneapp/UI/bottom_nav_deatail/privateInfo_detail/mileage_detail/coupon.dart';
-import 'package:wellhada_oneapp/UI/bottom_nav_deatail/privateInfo_detail/mileage_detail/point.dart';
-import 'package:wellhada_oneapp/UI/bottom_nav_deatail/privateInfo_detail/mileage_detail/stamp.dart';
+
+import 'mileage_detail/coupon.dart';
+import 'mileage_detail/point.dart';
+import 'mileage_detail/stamp.dart';
+
+/////////////////////////////
+/////////////////////////////
+///////이 위젯은 사용안합니다////////
+///////혹시나 포인트,쿠폰,스탬프 따로 사용하기 싫으면,private_info에 마일리지 만들고 이 클래스로 navigator.push하면 쿠폰/포인트/스탬프 나오게하는 ui입니다//////////
+/////////////////////////////
 
 class Mileage extends StatefulWidget {
   final userId;
@@ -22,8 +29,6 @@ class _MileageState extends State<Mileage> {
 
   initState() {
     super.initState();
-    print(userId);
-    print(userName);
   }
 
   pointCheck() async {

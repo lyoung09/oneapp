@@ -13,6 +13,12 @@ import 'package:overlay_container/overlay_container.dart';
 import 'package:wellhada_oneapp/listitem/shop/shopInfoListItem.dart'
     as shopInfoListItem;
 
+/////////////////////////////
+/////////////////////////////
+///////즐겨찾기 페이지 ////////
+/////////////////////////////
+/////////////////////////////
+
 class Favorite extends StatefulWidget {
   @override
   _FavoriteState createState() => _FavoriteState();
@@ -21,7 +27,7 @@ class Favorite extends StatefulWidget {
 class _FavoriteState extends State<Favorite> {
   List favoriteList;
   var allFavorite;
-  String webviewDefault = 'http://hndsolution.iptime.org:8086/usermngr';
+
   var userId, userPassword, userChk;
   var userName;
   bool opening;
@@ -34,6 +40,7 @@ class _FavoriteState extends State<Favorite> {
     check();
   }
 
+//유저 로그인 체크
   void check() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -42,15 +49,8 @@ class _FavoriteState extends State<Favorite> {
         userName = prefs.getString("userName");
         userPassword = prefs.getString("userPasswordGoweb");
         userChk = prefs.getString("userChk");
-
-        if (userChk == "01") {
-          userChk = "E";
-        }
-        if (userChk == "00") {
-          userChk = "K";
-        }
       });
-      print('favorite ${userChk}');
+
       favoriteFuture = getFavorite(userId);
     } catch (e) {
       noData();
@@ -58,6 +58,7 @@ class _FavoriteState extends State<Favorite> {
     }
   }
 
+//로그인 되있을경우 api호출
   getFavorite(userId) async {
     if (userId == null || userId == "") {
       return "nologin";
@@ -66,7 +67,8 @@ class _FavoriteState extends State<Favorite> {
     }
   }
 
-  void _handleURLButtonPress(BuildContext context, String url, String placeName,
+//웹뷰로 이동
+  void _handleURLButtonPress(BuildContext context, String placeName,
       int shopSeq, String userId, String userChk) {
     // Navigator.push(
     //     context,
@@ -91,6 +93,7 @@ class _FavoriteState extends State<Favorite> {
 
   List<String> saveFav = List<String>();
 
+//즐겨찾기 추가
   insertFavorite(userId, shopSeq) async {
     final saveFavorite = await favorite.saveFavoriteShop(userId, shopSeq);
     if (this.mounted) {
@@ -100,6 +103,7 @@ class _FavoriteState extends State<Favorite> {
     }
   }
 
+//즐겨찾기 삭제
   deleteFavorite(userId, shopSeq) async {
     final deleteFavorite = await favorite.deleteFavoriteShop(userId, shopSeq);
 
@@ -110,15 +114,13 @@ class _FavoriteState extends State<Favorite> {
     }
   }
 
+  //웹뷰로!
   userDataCheck(placeName, shopSeq) async {
-    // final webLoginData =
-    //     await webLogin.loginWebUser(userKey, userPassword, userChk);
-
-    _handleURLButtonPress(context, '${webviewDefault}/shopTmplatView.do',
-        placeName, shopSeq, userId, userChk);
+    _handleURLButtonPress(context, placeName, shopSeq, userId, userChk);
   }
 
   var categoryCd;
+  //api 호출
   Future<Map<String, dynamic>> getShopCategory() async {
     setState(() {
       categoryCd = shopInfoListItem.getShopCodeList();
@@ -131,9 +133,8 @@ class _FavoriteState extends State<Favorite> {
     return myTime.hour + myTime.minute / 60.0;
   }
 
+  //영업시간인지 아닌지
   openingShop(startTime, endTime, int shopId) async {
-    print(shopId);
-
     DateTime now = DateTime.now();
     var nowTimeofDay = TimeOfDay(hour: now.hour, minute: now.minute);
 
@@ -142,10 +143,10 @@ class _FavoriteState extends State<Favorite> {
     double toEnd = toDouble(endTime);
 
     if (toStart <= toNow && toNow <= toEnd) {
-      print("영업중 ${openShopSeq[shopId]}");
+      // print("영업중 ");
       openShopSeq[shopId] = true;
     } else {
-      print("영업 시작 안함 ${openShopSeq[shopId]}");
+      // print("영업 시작 안함 ");
       openShopSeq[shopId] = false;
     }
   }
@@ -359,6 +360,7 @@ class _FavoriteState extends State<Favorite> {
             )));
   }
 
+  //즐겨찾기 매장 클릭시 나오는 dialog
   void _favoriteDetail(
       String address,
       String pic,
@@ -691,14 +693,12 @@ class _FavoriteState extends State<Favorite> {
                           onPressed: () {
                             setState(() {
                               if (isSaved == true) {
-                                print('여기가 "Y');
                                 saveFav.remove(favoriteInfoList[index]
                                         ['SHOP_SEQ']
                                     .toString());
                                 insertFavorite(userId,
                                     favoriteInfoList[index]['SHOP_SEQ']);
                               } else {
-                                print('여기가 "N');
                                 saveFav.add(favoriteInfoList[index]['SHOP_SEQ']
                                     .toString());
                                 deleteFavorite(userId,

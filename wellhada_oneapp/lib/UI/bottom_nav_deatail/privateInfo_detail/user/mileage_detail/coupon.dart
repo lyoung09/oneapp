@@ -6,6 +6,12 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/listitem/shop/orderList.dart' as orderList;
 
+/////////////////////////////
+/////////////////////////////
+///////쿠폰 스크린////////
+/////////////////////////////
+/////////////////////////////
+
 class Coupon extends StatefulWidget {
   final userId;
   final userName;
@@ -28,7 +34,6 @@ class _CouponState extends State<Coupon> {
 
   initState() {
     super.initState();
-    print(userId);
 
     futurePoint = getPoint(userId);
   }

@@ -6,6 +6,12 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/listitem/shop/orderList.dart' as orderList;
 
+/////////////////////////////
+/////////////////////////////
+///////포인트 스크린////////
+/////////////////////////////
+/////////////////////////////
+
 class UsagePoint extends StatefulWidget {
   final userId;
   final userName;
@@ -29,7 +35,6 @@ class _UsagePointState extends State<UsagePoint> {
 
   initState() {
     super.initState();
-    print(userId);
 
     futurePoint = getPoint(userId);
   }
@@ -66,7 +71,7 @@ class _UsagePointState extends State<UsagePoint> {
           pointInfoList[index]['REG_DATE'] != null
               ? date = pointInfoList[index]['REG_DATE'].substring(0, 11)
               : date = "";
-          print(pointInfoList[index]['REG_DATE']);
+
           return Padding(
             padding: const EdgeInsets.all(3.0),
             child: Container(
@@ -315,6 +320,97 @@ class _UsagePointState extends State<UsagePoint> {
 
               Map<String, dynamic> pointInfo = snapshot.data;
 
+              if (pointInfo["LIST"].toString() == "" ||
+                  pointInfo["LIST"].toString() == null) {
+                return Stack(
+                  children: <Widget>[
+                    Positioned(
+                      top: 10.0,
+                      left: -40.0,
+                      child: Container(
+                        height: 150,
+                        width: 150,
+                        decoration: BoxDecoration(
+                            color: Colors.amberAccent, shape: BoxShape.circle),
+                      ),
+                    ),
+                    Container(
+                      child: Column(children: [
+                        Padding(
+                          padding: EdgeInsets.only(
+                              top: MediaQuery.of(context).size.height * 0.1,
+                              left: 45),
+                        ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                                left: MediaQuery.of(context).size.width * 0.06,
+                                top: 15),
+                            child: Text(
+                              "포인트 내역",
+                              textAlign: TextAlign.end,
+                              style: TextStyle(
+                                fontFamily: "nanumB",
+                                fontWeight: FontWeight.w900,
+                                fontSize: 28.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(
+                              bottom:
+                                  MediaQuery.of(context).size.height * 0.04),
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Spacer(),
+                            Padding(
+                                padding: const EdgeInsets.only(left: 15.0),
+                                child: Text("${userName}님 포인트:",
+                                    style: TextStyle(
+                                        fontSize: 18.0,
+                                        fontWeight: FontWeight.w900))),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text("0p",
+                                      style: TextStyle(
+                                          fontSize: 22.0,
+                                          fontWeight: FontWeight.w900)),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(
+                              top: MediaQuery.of(context).size.height * 0.25),
+                        ),
+                        Align(
+                          alignment: Alignment.center,
+                          child: Image.asset('assets/icon/noImage.png'),
+                        )
+                        // Padding(
+                        //   padding: const EdgeInsets.only(right: 10.0),
+                        //   child: Align(
+                        //     alignment: Alignment.centerRight,
+                        //     child: Text("${pointInfo["SUM"]}p",
+                        //         style: TextStyle(
+                        //             fontSize: 30.0, fontWeight: FontWeight.w900)),
+                        //   ),
+                        // ),
+                      ]),
+                    ),
+                  ],
+                );
+              }
               List<dynamic> pointInfoList = pointInfo["LIST"];
 
               return Stack(

@@ -40,7 +40,6 @@ class _MainBannerState extends State<MainBanner> {
     final bannerList = await TopBanner.getAppbarList();
     setState(() {
       banner = bannerList.list;
-      print(banner);
     });
   }
 

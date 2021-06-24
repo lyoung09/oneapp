@@ -12,6 +12,14 @@ import 'package:wellhada_oneapp/model/menu/drawer_detail/qr_34.dart';
 import 'bottom_detail/favorite.dart';
 import 'bottom_detail/home_screen.dart';
 
+/////////////////////////////
+/////////////////////////////
+///////bottom tab 관리////////
+/////////////////////////////
+/////////////////////////////
+///number없으면 0으로옴
+//0 홈화면(지도,리스트),1(이용내역),2(즐겨찾기),3(내정보)
+
 class BottomNav extends StatefulWidget {
   var number;
   var userId;
@@ -40,13 +48,12 @@ class _BottomNavState extends State<BottomNav> {
   }
 
   check() {
-    print('number ${number}');
-    print('userId ${userId}');
     if (number != null) {
       _selectedIndex = number;
     }
   }
 
+  //tabbar에 따라 움직이는 screen list
   List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
     UsageHistory(),

@@ -87,14 +87,22 @@ class _MyHomePageState extends State<MyHomePage> {
   var userDevice;
   var appStatus;
   LatLng _currentLocation;
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  String _messagingTitle = "";
+  StreamSubscription iosSubscription;
 
   @override
   void initState() {
     super.initState();
-
+    firebaseCloudMessagingListener();
     _getCurrentLocation();
   }
 
+/////////////////////////////
+/////////////////////////////
+///////위치 허용여부 및 저장(없으면 hnd위치로)////////
+/////////////////////////////
+/////////////////////////////
   Position geoPos;
   _getCurrentLocation() async {
     try {
@@ -112,6 +120,11 @@ class _MyHomePageState extends State<MyHomePage> {
     _checkForCameraPermission();
   }
 
+/////////////////////////////
+/////////////////////////////
+///////카메라 허용여부////////
+/////////////////////////////
+/////////////////////////////
   _checkForCameraPermission() async {
     var cameraPermission = await Permission.camera.status;
     print("camera permissions is $cameraPermission");
@@ -122,6 +135,76 @@ class _MyHomePageState extends State<MyHomePage> {
     } else {
       startTime();
     }
+  }
+
+  /////////////////////////////
+/////////////////////////////
+///////get deviceToken////////
+/////////////////////////////
+/////////////////////////////
+  firebaseCloudMessagingListener() async {
+    if (Platform.isIOS) {
+      _firebaseMessaging.requestNotificationPermissions(
+          const IosNotificationSettings(
+              sound: true, badge: true, alert: true, provisional: true));
+
+      iosSubscription =
+          _firebaseMessaging.onIosSettingsRegistered.listen((data) {
+        //_saveDeviceToken();
+      });
+      _firebaseMessaging
+          .requestNotificationPermissions(IosNotificationSettings());
+    } else {
+      _firebaseMessaging.getToken().then((token) {
+        //print('token:' + token);
+      });
+      //_saveDeviceToken();
+    }
+
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        _messagingTitle = message['notification']['title'].toString();
+        if (_messagingTitle.endsWith("null")) {
+          _messagingTitle = "";
+        }
+        showOverlayNotification((context) {
+          return MessageNotification(
+            title: _messagingTitle,
+            message: message['notification']['body'],
+            onReply: () {
+              OverlaySupportEntry.of(context).dismiss();
+              //toast('you checked this message');
+            },
+          );
+        }, duration: Duration(milliseconds: 4000));
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print("onLaunch: $message");
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print("onResume: $message");
+      },
+    );
+    _firebaseMessaging.requestNotificationPermissions(
+        const IosNotificationSettings(sound: true, badge: true, alert: true));
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+    });
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+    });
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    _firebaseMessaging.getToken().then((String token) {
+      assert(token != null);
+
+      setState(() {
+        prefs.setString("userToken", "$token");
+
+        //_homeScreenText = "Push Messaging token: $token";
+      });
+    });
   }
 
 //37.49152820899407, 127.07285755753348 대모산
@@ -138,6 +221,11 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+/////////////////////////////
+/////////////////////////////
+///////첫 화면 어디로 갈지////////
+//자동로그인 및 앱 처음 설치했는지 여부/////
+/////////////////////////////
   Future checkFirstSeen() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool _seen = (prefs.getBool('seen') ?? false);

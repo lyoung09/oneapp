@@ -2,7 +2,9 @@
   "project_info": {
     "project_number": "802325324626",
     "project_id": "wellhadaoneapp",
+    "firebase_url": "https://wellhadaoneapp.firebaseio.com",
     "storage_bucket": "wellhadaoneapp.appspot.com"
+    
   },
   "client": [
     {
@@ -14,7 +16,7 @@
       },
       "oauth_client": [
         {
-          "client_id": "802325324626-8kujbdt420i99b1n35a0sqb8s5vtjq46.apps.googleusercontent.com",
+          "client_id": "802325324626-vodncvqeen4cffm1282qnpqcs2mt739i.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.wellhada_oneapp",
@@ -37,6 +39,13 @@
             {
               "client_id": "802325324626-p9nmml482mippe5uvq0r475l0p89s2bf.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "802325324626-724dgpd2abq4vu75khbp5cm2p3mq5b6u.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.wellhadaOneapp"
+              }
             }
           ]
         }

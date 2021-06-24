@@ -541,9 +541,9 @@ Future<Insert> insertUser(
   bodyParam['birthday'] = birthdayJson == null ? "" : birthdayJson;
   bodyParam['marketing'] = marketing;
   bodyParam['appPushToken'] = appPushToken;
-  bodyParam['appAgreeService'] = appAgreeService;
-  bodyParam['appAgreePrivacy'] = appAgreePrivacy;
-  bodyParam['appAgreePush'] = appAgreePush;
+  // bodyParam['appAgreeService'] = appAgreeService;
+  // bodyParam['appAgreePrivacy'] = appAgreePrivacy;
+  // bodyParam['appAgreePush'] = appAgreePush;
   bodyParam['userDevice'] = usertoken;
 
   http.Response response = await http.post(
@@ -821,6 +821,7 @@ class UserInfomation {
 
   String kakaoProfil;
   String userToken;
+  String userUuid;
   UserInfomation({
     this.userEmail,
     this.userId,
@@ -834,6 +835,7 @@ class UserInfomation {
     this.gender,
     this.kakaoProfil,
     this.userToken,
+    this.userUuid,
   });
 
   factory UserInfomation.fromJson(Map<String, dynamic> json) => UserInfomation(
@@ -849,6 +851,7 @@ class UserInfomation {
         gender: json["GENDER"],
         kakaoProfil: json["KAKAO_PROFILE"],
         userToken: json["USER_DEVICE"],
+        userUuid: json["USER_UUID"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -863,7 +866,8 @@ class UserInfomation {
         "BIRTHDAY": birthday,
         "GENDER": gender,
         "KAKAO_PROFILE": kakaoProfil,
-        "USER_DEVICE": userToken
+        "USER_DEVICE": userToken,
+        "USER_UUID": userUuid
       };
   factory UserInfomation.fromJsonMap(Map<String, dynamic> json) =>
       _$UserInfomationFromJsonMap(json);
@@ -884,6 +888,7 @@ UserInfomation _$UserInfomationFromJsonMap(Map<String, dynamic> json) {
     gender: json['GENDER'] as String,
     kakaoProfil: json['KAKAO_PROFILE'] as String,
     userToken: json['USER_DEVICE'] as String,
+    userUuid: json['USER_UUID'] as String,
   );
 }
 
@@ -901,6 +906,7 @@ Map<String, dynamic> _$UserInfomationToJsonMap(UserInfomation instance) =>
       'GENDER': instance.gender,
       'KAKAO_PROFILE': instance.kakaoProfil,
       'USER_DEVICE': instance.userToken,
+      'USER_UUID': instance.userUuid,
     };
 
 Future<UserInfomation> getUserInfomation(String userId) async {
@@ -915,7 +921,6 @@ Future<UserInfomation> getUserInfomation(String userId) async {
   );
 
   if (200 == response.statusCode) {
-    print(bodyParam);
     return UserInfomation.fromJsonMap(json.decode(response.body));
   } else {
     return json.decode(response.body);

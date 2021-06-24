@@ -14,6 +14,13 @@ import 'package:location_permissions/location_permissions.dart';
 import 'package:wellhada_oneapp/UI/bottom_nav_deatail/home_detail/list_screen.dart';
 import 'package:wellhada_oneapp/UI/bottom_nav_deatail/home_detail/mapUI/map.dart';
 
+/////////////////////////////
+/////////////////////////////
+///////홈 스크린 ////////
+/////////////////////////////
+/////////////////////////////
+///앱바에 현재위치 클릭하면 --> provider 에 의해서 home/detail/ list클래스와 map 클래스에 위치 변화를줌
+
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -42,6 +49,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
   }
 
+//tap 클릭시 디자인
   _getTab(index, child) {
     return Tab(
       child: SizedBox.expand(
@@ -62,6 +70,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
+//tap 클릭시 디자인
   _generateBorderRadius(index) {
     if ((index + 1) == _selectedTab)
       return BorderRadius.only(
@@ -76,6 +85,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       return BorderRadius.zero;
   }
 
+  //현재 위치 묻는 메소드 (((위치 허락하면 그 사람의 위치 , 없으면 hndsolution위치로 해둠(default))))
   _getCurrentLocation() async {
     Position geoPos;
 
@@ -92,30 +102,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       setState(() {
         provideLocation = !provideLocation;
       });
-      // geoPos = await Geolocator.getLastKnownPosition();
-      // if (geoPos == null) {
+
       _currentLocation = LatLng(37.49152820899407, 127.07285755753348);
-      // }
-      // _currentLocation = LatLng(geoPos.latitude, geoPos.longitude);
-      // } catch (e) {
-      //   _currentLocation = LatLng(37.49152820899407, 127.07285755753348);
-      //   setState(() {
-      //     provideLocation = !provideLocation;
-      //   });
-      //}
     }
-    // build(this.context);
-
-    //Navigator.of(this.context, rootNavigator: true).pop(this.context);
-    // Navigator.of(context)
-    //     .pushNamedAndRemoveUntil('', ModalRoute.withName('/'));
-
-    //Navigator.of(context).pushReplacementNamed('/BottomNav');
-
-    // Navigator.popAndPushNamed(context, '/BottomNav');
-    //
   }
 
+  // 앱 들어올시 위치( 위치 허용시= 그 사람의 위치 , 불허용 = hndsolution)
   _initLocation() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 

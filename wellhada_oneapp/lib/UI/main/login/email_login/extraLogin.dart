@@ -11,6 +11,12 @@ import 'package:wellhada_oneapp/notification/custom_notification.dart';
 
 import 'email.dart';
 
+/////////////////////////////
+/////////////////////////////
+///////약관동의 (api나오면 해야함)////////
+/////////////////////////////
+/////////////////////////////
+
 class ExtraLogin extends StatefulWidget {
   @override
   _ExtraLoginState createState() => _ExtraLoginState();
@@ -36,6 +42,7 @@ class _ExtraLoginState extends State<ExtraLogin> {
     checkBool();
   }
 
+// default 메소드 일단은 다 true로
   checkBool() async {
     setState(() {
       allAgree = true;
@@ -47,11 +54,11 @@ class _ExtraLoginState extends State<ExtraLogin> {
     });
   }
 
+// 전체 동의시 모든 약관 동의로 나타나게해주는 메소드  / 반대는 다 비동의로하게끔
   selectAll() async {
     setState(() {
       allAgree = !allAgree;
-      print(allAgree);
-      print(service);
+
       if (allAgree == true) {
         private = true;
         service = true;
@@ -103,71 +110,71 @@ class _ExtraLoginState extends State<ExtraLogin> {
     });
   }
 
-  firebaseCloudMessagingListener() async {
-    if (Platform.isIOS) {
-      _firebaseMessaging.requestNotificationPermissions(
-          const IosNotificationSettings(
-              sound: true, badge: true, alert: true, provisional: true));
+  // firebaseCloudMessagingListener() async {
+  //   if (Platform.isIOS) {
+  //     _firebaseMessaging.requestNotificationPermissions(
+  //         const IosNotificationSettings(
+  //             sound: true, badge: true, alert: true, provisional: true));
 
-      iosSubscription =
-          _firebaseMessaging.onIosSettingsRegistered.listen((data) {
-        //_saveDeviceToken();
-      });
-      _firebaseMessaging
-          .requestNotificationPermissions(IosNotificationSettings());
-    } else {
-      // _firebaseMessaging.getToken().then((token) {
-      //   print('token:' + token);
-      // });
-      //_saveDeviceToken();
-    }
+  //     iosSubscription =
+  //         _firebaseMessaging.onIosSettingsRegistered.listen((data) {
+  //       //_saveDeviceToken();
+  //     });
+  //     _firebaseMessaging
+  //         .requestNotificationPermissions(IosNotificationSettings());
+  //   } else {
+  //     // _firebaseMessaging.getToken().then((token) {
+  //     //   print('token:' + token);
+  //     // });
+  //     //_saveDeviceToken();
+  //   }
 
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        _messagingTitle = message['notification']['title'].toString();
-        if (_messagingTitle.endsWith("null")) {
-          _messagingTitle = "";
-        }
-        showOverlayNotification((context) {
-          return MessageNotification(
-            title: _messagingTitle,
-            message: message['notification']['body'],
-            onReply: () {
-              OverlaySupportEntry.of(context).dismiss();
-              //toast('you checked this message');
-            },
-          );
-        }, duration: Duration(milliseconds: 4000));
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        print("onLaunch: $message");
-      },
-      onResume: (Map<String, dynamic> message) async {
-        print("onResume: $message");
-      },
-    );
-    _firebaseMessaging.requestNotificationPermissions(
-        const IosNotificationSettings(sound: true, badge: true, alert: true));
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
-    });
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
-    });
-    SharedPreferences prefs;
-    prefs = await SharedPreferences.getInstance();
-    _firebaseMessaging.getToken().then((String token) {
-      assert(token != null);
-      print("Push Messaging token: $token");
-      setState(() {
-        prefs.setString("userToken", "$token");
+  //   _firebaseMessaging.configure(
+  //     onMessage: (Map<String, dynamic> message) async {
+  //       _messagingTitle = message['notification']['title'].toString();
+  //       if (_messagingTitle.endsWith("null")) {
+  //         _messagingTitle = "";
+  //       }
+  //       showOverlayNotification((context) {
+  //         return MessageNotification(
+  //           title: _messagingTitle,
+  //           message: message['notification']['body'],
+  //           onReply: () {
+  //             OverlaySupportEntry.of(context).dismiss();
+  //             //toast('you checked this message');
+  //           },
+  //         );
+  //       }, duration: Duration(milliseconds: 4000));
+  //     },
+  //     onLaunch: (Map<String, dynamic> message) async {
+  //       print("onLaunch: $message");
+  //     },
+  //     onResume: (Map<String, dynamic> message) async {
+  //       print("onResume: $message");
+  //     },
+  //   );
+  //   _firebaseMessaging.requestNotificationPermissions(
+  //       const IosNotificationSettings(sound: true, badge: true, alert: true));
+  //   _firebaseMessaging.onIosSettingsRegistered
+  //       .listen((IosNotificationSettings settings) {
+  //     print("Settings registered: $settings");
+  //   });
+  //   _firebaseMessaging.onIosSettingsRegistered
+  //       .listen((IosNotificationSettings settings) {
+  //     print("Settings registered: $settings");
+  //   });
+  //   SharedPreferences prefs;
+  //   prefs = await SharedPreferences.getInstance();
+  //   _firebaseMessaging.getToken().then((String token) {
+  //     assert(token != null);
+  //     print("Push Messaging token: $token");
+  //     setState(() {
+  //       prefs.setString("userToken", "$token");
 
-        //_homeScreenText = "Push Messaging token: $token";
-      });
-    });
-  }
+  //       //_homeScreenText = "Push Messaging token: $token";
+  //     });
+  //   });
+  // }
 
   check() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -180,7 +187,7 @@ class _ExtraLoginState extends State<ExtraLogin> {
         prefs.setString("appPushToken", "Y");
         prefs.setString("appAgreePush", "Y");
 
-        firebaseCloudMessagingListener();
+        //firebaseCloudMessagingListener();
       } else {
         prefs.setString("marketing", "N");
 

@@ -9,6 +9,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellhada_oneapp/listitem/userFile/userList.dart' as user;
 import 'package:wellhada_oneapp/listitem/shop/orderList.dart' as orderList;
 
+/////////////////////////////
+/////////////////////////////
+////////////내 리뷰//////////
+/////////////////////////////
+/////////////////////////////
+
 class MyReview extends StatefulWidget {
   var userId;
 
@@ -47,12 +53,6 @@ class _MyReviewState extends State<MyReview> {
     setState(() {
       userPassword = prefs.getString("userPasswordGoweb");
       userChk = prefs.getString("userChk") ?? "O";
-      if (userChk == "01") {
-        userChk = "E";
-      }
-      if (userChk == "00") {
-        userChk = "K";
-      }
     });
   }
 
@@ -63,20 +63,7 @@ class _MyReviewState extends State<MyReview> {
   var userPassword;
 
   void _handleURLButtonPress(BuildContext context, String url, String placeName,
-      int shopSeq, String userId) {
-    // Navigator.push(
-    //     context,
-    //     MaterialPageRoute(
-    //         builder: (context) => WebViewContainer(
-    //             placeName: placeName,
-    //             shopSeq: shopSeq,
-    //             userId: userId,
-    //             userPassword: userPassword,
-    //             userChk: userChk,
-    //             number: "1")));
-
-    // Navigator.pushNamed(context, '/webview');
-  }
+      int shopSeq, String userId) {}
 
   Widget _practice(reviewInfoList) {
     reviewInfoList.sort((a, b) =>
@@ -314,7 +301,7 @@ class _MyReviewState extends State<MyReview> {
               }
 
               Map<String, dynamic> reviewInfo = snapshot.data;
-              print('reviewInfo : ${reviewInfo}');
+
               if (reviewInfo["LIST"].isEmpty || reviewInfo["LIST"] == "") {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -337,7 +324,7 @@ class _MyReviewState extends State<MyReview> {
               }
 
               List<dynamic> reviewInfoList = reviewInfo["LIST"];
-              print('reviewInfoList : ${reviewInfoList}');
+
               reviewInfoList = reviewInfoList
                   .where((element) => element['REVIEW_YN'] == "Y")
                   .toList();
